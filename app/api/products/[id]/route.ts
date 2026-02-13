@@ -16,6 +16,11 @@ function normKey(v: any) {
   return String(v ?? "").trim().toLowerCase();
 }
 
+function toNum(v: any) {
+  const n = Number(String(v ?? "").replace(",", "."));
+  return Number.isFinite(n) ? n : 0;
+}
+
 async function getSheetRows(sheetName: string) {
   const sheetId = process.env.GOOGLE_SHEETS_SHEET_ID!;
   const auth = new google.auth.GoogleAuth({
@@ -23,6 +28,7 @@ async function getSheetRows(sheetName: string) {
     scopes: ["https://www.googleapis.com/auth/spreadsheets.readonly"],
   });
   const sheets = google.sheets({ version: "v4", auth });
+
   const res = await sheets.spreadsheets.values.get({
     spreadsheetId: sheetId,
     range: `${sheetName}!A:Z`,
@@ -33,7 +39,7 @@ async function getSheetRows(sheetName: string) {
 
   const [headersRaw, ...rows] = values;
 
-  // ✅ normaliza headers (clave del bug)
+  // normaliza headers => todo lowercase
   const headers = headersRaw.map((h: any) => normKey(h));
 
   return rows.map((row) =>
@@ -47,41 +53,42 @@ async function getSheetRows(sheetName: string) {
 export async function GET(_req: Request, { params }: { params: { id: string } }) {
   const productId = normKey(params.id);
 
-  const products = await getSheetRows("products");
-  const variants = await getSheetRows("variants");
-
-  // ✅ DEBUG: si querés, dejalo 1 minuto para ver keys reales
-  // return NextResponse.json(
-  //   { received: productId, sampleKeys: Object.keys(products[0] ?? {}), sampleRow: products[0] ?? null },
-  //   { status: 200 }
-  // );
+  const [products, variants] = await Promise.all([
+    getSheetRows("products"),
+    getSheetRows("variants"),
+  ]);
 
   const product = products.find((p: any) => normKey(p.id) === productId);
   if (!product) {
     return NextResponse.json(
-      { error: "Producto no encontrado", received: productId, sampleKeys: Object.keys(products[0] ?? {}) },
+      { error: "Producto no encontrado", received: productId },
       { status: 404 }
     );
   }
 
   const productVariants = variants
-    .filter((v: any) => normKey(v.product_id) === productId && normKey(v.status) === "active")
-    .map((v: any) => ({
-      size: v.size,
-      sku: v.sku,
-      // OJO: si en Sheets tus headers son "priceRetail" y los normalizamos, pasa a "priceretail"
-      // Por eso leo ambas variantes:
-      priceRetail:
-        parseFloat(String(v.priceretail ?? v.priceretail ?? v.priceretail ?? v.priceretail ?? v.priceretail ?? v.priceretail)) ||
-        parseFloat(String(v.priceretail ?? v.priceretail).replace(",", ".")) ||
-        parseFloat(String(v.priceretail ?? v.priceretail).replace(",", ".")) ||
-        0,
-      priceWholesale:
-        parseFloat(String(v.pricewholesale ?? v.pricewholesale).replace(",", ".")) || 0,
-      stock: Number(v.stock) || 0,
-    }));
+    .filter((v: any) => {
+      if (normKey(v.product_id) !== productId) return false;
 
-  const response = {
+      // ✅ si no hay status, lo tomamos como active
+      const st = normKey(v.status || "active");
+
+      // ✅ solo excluimos paused (y opcionalmente otros)
+      if (st === "paused") return false;
+
+      return true;
+    })
+    .map((v: any) => ({
+      size: String(v.size ?? ""),
+      sku: String(v.sku ?? ""),
+      priceRetail: toNum(v.priceretail ?? v.priceretail), // header normalizado => priceretail
+      priceWholesale: toNum(v.pricewholesale),
+      stock: toNum(v.stock),
+      status: String(v.status || "active"),
+    }))
+    .filter((v: any) => v.sku); // defensivo
+
+  return NextResponse.json({
     ...product,
     variants: productVariants,
     images: product.image ? [product.image] : [],
@@ -89,7 +96,5 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
       .split(",")
       .map((t: string) => t.trim())
       .filter(Boolean),
-  };
-
-  return NextResponse.json(response);
+  });
 }
