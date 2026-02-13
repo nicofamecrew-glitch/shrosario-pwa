@@ -180,3 +180,46 @@ export const useFavoritesStore = create<FavoritesState>()(
     }
   )
 );
+// -----------------------------
+// WHOLESALE STORE (alta mayorista)
+// -----------------------------
+export type WholesaleRequest = {
+  cuit: string;
+  razonSocial: string;
+  condicionFiscal: string;
+  ciudad: string;
+  telefono: string;
+};
+
+type WholesaleState = {
+  status: "none" | "pending" | "approved" | "error";
+  request: WholesaleRequest | null;
+
+  // set manual (por si algún día lo aprobás desde admin)
+  setStatus: (s: WholesaleState["status"]) => void;
+
+  submit: (payload: WholesaleRequest) => void;
+  reset: () => void;
+};
+
+export const useWholesaleStore = create<WholesaleState>()(
+  persist(
+    (set) => ({
+      status: "none",
+      request: null,
+
+      setStatus: (s) => set({ status: s }),
+
+      submit: (payload) => {
+        // Persistimos solicitud en local y queda "pending"
+        set({ request: payload, status: "pending" });
+      },
+
+      reset: () => set({ status: "none", request: null }),
+    }),
+    {
+      name: "shrosario_wholesale",
+      storage: createJSONStorage(() => localStorage),
+    }
+  )
+);
