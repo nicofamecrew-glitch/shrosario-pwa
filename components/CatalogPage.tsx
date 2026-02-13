@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState,  useEffect } from "react";
 import type { Product } from "@/lib/types";
 import { useCartStore } from "@/lib/store";
 import Link from "next/link";
@@ -76,6 +76,8 @@ function mergeImagesFast(
 
 export default function CatalogPage({ products }: { products: Product[] }) {
   const sp = useSearchParams();
+  const brandFromUrl = sp.get("brand") || "all";
+
   const qRaw = sp.get("q") || "";
 
   const norm = (s: string) =>
@@ -88,12 +90,17 @@ export default function CatalogPage({ products }: { products: Product[] }) {
   const q = norm(qRaw);
 
   const [search, setSearch] = useState("");
-  const [brand, setBrand] = useState("all");
+  const [brand, setBrand] = useState("brandFromUrl");
   const [category, setCategory] = useState("all");
   const [size, setSize] = useState("all");
   const [type, setType] = useState("all");
 
   const { isWholesale } = useCartStore();
+
+useEffect(() => {
+  setBrand(brandFromUrl);
+}, [brandFromUrl]);
+
 
   // Render parcial (evita stutter en móvil)
   const PAGE_SIZE = 20;
@@ -111,7 +118,8 @@ export default function CatalogPage({ products }: { products: Product[] }) {
         norm((product as any).line).includes(s) ||
         norm((product as any).brand).includes(s);
 
-      const matchesBrand = brand === "all" || (product as any).brand === brand;
+      const matchesBrand = brand === "all" || norm((product as any).brand) === norm(brand);
+
       const matchesCategory =
         category === "all" || (product as any).category === category;
 
