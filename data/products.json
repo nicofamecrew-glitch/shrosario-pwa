@@ -263,16 +263,92 @@
     "name": "Coloracion",
     "category": "Coloracion",
     "variants": [
-      {
-        "size": "60gr",
-        "sku": "OSS-OSSONO-COLORACION-60GR-60GR",
-        "priceRetail": 0,
-        "priceWholesale": 0,
-        "images": [
-          "/product/coloracion-ossono-x60gr.png"
-        ]
-      }
-    ],
+  { "size": "1", "sku": "OSS-OSSONO-COLORACION-60GR-1", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+  { "size": "3", "sku": "OSS-OSSONO-COLORACION-60GR-3", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+  { "size": "4", "sku": "OSS-OSSONO-COLORACION-60GR-4", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+  { "size": "5", "sku": "OSS-OSSONO-COLORACION-60GR-5", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+  { "size": "6", "sku": "OSS-OSSONO-COLORACION-60GR-6", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+  { "size": "7", "sku": "OSS-OSSONO-COLORACION-60GR-7", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+  { "size": "8", "sku": "OSS-OSSONO-COLORACION-60GR-8", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+  { "size": "9", "sku": "OSS-OSSONO-COLORACION-60GR-9", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+  { "size": "10", "sku": "OSS-OSSONO-COLORACION-60GR-10", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+
+  { "size": "6nc", "sku": "OSS-OSSONO-COLORACION-60GR-6NC", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+  { "size": "7nc", "sku": "OSS-OSSONO-COLORACION-60GR-7NC", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+  { "size": "8nc", "sku": "OSS-OSSONO-COLORACION-60GR-8NC", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+  { "size": "9nc", "sku": "OSS-OSSONO-COLORACION-60GR-9NC", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+
+  { "size": "6.1", "sku": "OSS-OSSONO-COLORACION-60GR-6-1", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+  { "size": "7.1", "sku": "OSS-OSSONO-COLORACION-60GR-7-1", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+  { "size": "8.1", "sku": "OSS-OSSONO-COLORACION-60GR-8-1", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+  { "size": "9.1", "sku": "OSS-OSSONO-COLORACION-60GR-9-1", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+  { "size": "10.1", "sku": "OSS-OSSONO-COLORACION-60GR-10-1", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+
+  { "size": "6.11", "sku": "OSS-OSSONO-COLORACION-60GR-6-11", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+  { "size": "7.11", "sku": "OSS-OSSONO-COLORACION-60GR-7-11", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+  { "size": "8.11", "sku": "OSS-OSSONO-COLORACION-60GR-8-11", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+
+  { "size": "8.12", "sku": "OSS-OSSONO-COLORACION-60GR-8-12", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+  { "size": "9.21", "sku": "OSS-OSSONO-COLORACION-60GR-9-21", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+  { "size": "9.2", "sku": "OSS-OSSONO-COLORACION-60GR-9-2", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+  { "size": "10.21", "sku": "OSS-OSSONO-COLORACION-60GR-10-21", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+
+  { "size": "5.3", "sku": "OSS-OSSONO-COLORACION-60GR-5-3", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+  { "size": "6.3", "sku": "OSS-OSSONO-COLORACION-60GR-6-3", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+  { "size": "7.3", "sku": "OSS-OSSONO-COLORACION-60GR-7-3", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+  { "size": "8.3", "sku": "OSS-OSSONO-COLORACION-60GR-8-3", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+  { "size": "9.3", "sku": "OSS-OSSONO-COLORACION-60GR-9-3", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+
+  { "size": "6.34", "sku": "OSS-OSSONO-COLORACION-60GR-6-34", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+  { "size": "8.34", "sku": "OSS-OSSONO-COLORACION-60GR-8-34", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+  { "size": "7.32", "sku": "OSS-OSSONO-COLORACION-60GR-7-32", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+  { "size": "8.32", "sku": "OSS-OSSONO-COLORACION-60GR-8-32", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+  { "size": "8.30", "sku": "OSS-OSSONO-COLORACION-60GR-8-30", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+
+  { "size": "7.31", "sku": "OSS-OSSONO-COLORACION-60GR-7-31", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+  { "size": "8.13", "sku": "OSS-OSSONO-COLORACION-60GR-8-13", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+  { "size": "9.13", "sku": "OSS-OSSONO-COLORACION-60GR-9-13", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+
+  { "size": "6.4", "sku": "OSS-OSSONO-COLORACION-60GR-6-4", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+  { "size": "7.44", "sku": "OSS-OSSONO-COLORACION-60GR-7-44", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+
+  { "size": "5.74", "sku": "OSS-OSSONO-COLORACION-60GR-5-74", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+  { "size": "7.74", "sku": "OSS-OSSONO-COLORACION-60GR-7-74", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+
+  { "size": "6.5", "sku": "OSS-OSSONO-COLORACION-60GR-6-5", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+
+  { "size": "4.26", "sku": "OSS-OSSONO-COLORACION-60GR-4-26", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+  { "size": "5.62", "sku": "OSS-OSSONO-COLORACION-60GR-5-62", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+
+  { "size": "5.7", "sku": "OSS-OSSONO-COLORACION-60GR-5-7", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+  { "size": "6.77", "sku": "OSS-OSSONO-COLORACION-60GR-6-77", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+  { "size": "7.77", "sku": "OSS-OSSONO-COLORACION-60GR-7-77", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+  { "size": "6.23", "sku": "OSS-OSSONO-COLORACION-60GR-6-23", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+  { "size": "8.23", "sku": "OSS-OSSONO-COLORACION-60GR-8-23", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+
+  { "size": "5.35", "sku": "OSS-OSSONO-COLORACION-60GR-5-35", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+  { "size": "6.35", "sku": "OSS-OSSONO-COLORACION-60GR-6-35", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+  { "size": "7.53", "sku": "OSS-OSSONO-COLORACION-60GR-7-53", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+  { "size": "6.41", "sku": "OSS-OSSONO-COLORACION-60GR-6-41", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+  { "size": "7.14", "sku": "OSS-OSSONO-COLORACION-60GR-7-14", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+
+  { "size": "6.66", "sku": "OSS-OSSONO-COLORACION-60GR-6-66", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+  { "size": "7.60", "sku": "OSS-OSSONO-COLORACION-60GR-7-60", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+
+  { "size": "11.0", "sku": "OSS-OSSONO-COLORACION-60GR-11-0", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+  { "size": "11.1", "sku": "OSS-OSSONO-COLORACION-60GR-11-1", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+  { "size": "11.2", "sku": "OSS-OSSONO-COLORACION-60GR-11-2", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+  { "size": "11rn", "sku": "OSS-OSSONO-COLORACION-60GR-11RN", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+
+  { "size": "rojo", "sku": "OSS-OSSONO-COLORACION-60GR-ROJO", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+  { "size": "amarillo", "sku": "OSS-OSSONO-COLORACION-60GR-AMARILLO", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+  { "size": "azul", "sku": "OSS-OSSONO-COLORACION-60GR-AZUL", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+
+  { "size": ".12", "sku": "OSS-OSSONO-COLORACION-60GR-12", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+  { "size": ".22", "sku": "OSS-OSSONO-COLORACION-60GR-22", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] },
+  { "size": ".24", "sku": "OSS-OSSONO-COLORACION-60GR-24", "priceRetail": 0, "priceWholesale": 0, "images": ["/product/coloracion-ossono-x60gr.png"] }
+],
+
     "tags": [
       "coloracion",
       "bestseller"
