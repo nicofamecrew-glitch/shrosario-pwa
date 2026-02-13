@@ -96,7 +96,7 @@ export default function CatalogPage({ products }: { products: Product[] }) {
   const { isWholesale } = useCartStore();
 
   // Render parcial (evita stutter en móvil)
-  const PAGE_SIZE = 24;
+  const PAGE_SIZE = 20;
   const [visible, setVisible] = useState(PAGE_SIZE);
 
   const filteredProducts = useMemo(() => {
