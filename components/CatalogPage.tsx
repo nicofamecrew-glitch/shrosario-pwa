@@ -10,27 +10,50 @@ import Filters from "@/components/Filters";
 import ProductCard from "@/components/ProductCard";
 import WholesaleGate from "@/components/WholesaleGate";
 
-function withVariantImages(fromSheets: Product[]): Product[] {
+function buildJsonIndex() {
   const jsonList = productsJson as any[];
 
-  // index por product.id
-  const jsonById = new Map<string, any>();
+  const byId = new Map<string, any>();
+  const byIdSku = new Map<string, Map<string, any>>();
+  const byIdSize = new Map<string, Map<string, any>>();
+
   for (const p of jsonList) {
-    if (p?.id) jsonById.set(String(p.id), p);
+    const pid = String(p?.id ?? "");
+    if (!pid) continue;
+
+    byId.set(pid, p);
+
+    const skuMap = new Map<string, any>();
+    const sizeMap = new Map<string, any>();
+
+    for (const v of p?.variants ?? []) {
+      if (v?.sku) skuMap.set(String(v.sku), v);
+      if (v?.size) sizeMap.set(String(v.size), v);
+    }
+
+    byIdSku.set(pid, skuMap);
+    byIdSize.set(pid, sizeMap);
   }
 
+  return { byId, byIdSku, byIdSize };
+}
+
+function mergeImagesFast(
+  fromSheets: Product[],
+  idx: ReturnType<typeof buildJsonIndex>
+): Product[] {
   return fromSheets.map((p) => {
-    const jp = jsonById.get(String((p as any).id));
+    const pid = String((p as any)?.id ?? "");
+    const jp = idx.byId.get(pid);
     if (!jp) return p;
+
+    const skuMap = idx.byIdSku.get(pid);
+    const sizeMap = idx.byIdSize.get(pid);
 
     const mergedVariants = (p as any).variants?.map((v: any) => {
       const jv =
-        jp?.variants?.find(
-          (x: any) => x?.sku && v?.sku && String(x.sku) === String(v.sku)
-        ) ??
-        jp?.variants?.find(
-          (x: any) => x?.size && v?.size && String(x.size) === String(v.size)
-        ) ??
+        (v?.sku && skuMap?.get(String(v.sku))) ||
+        (v?.size && sizeMap?.get(String(v.size))) ||
         null;
 
       return {
@@ -72,41 +95,46 @@ export default function CatalogPage({ products }: { products: Product[] }) {
 
   const { isWholesale } = useCartStore();
 
-  const filteredProducts = useMemo(() => {
-    return products.filter((product) => {
-      if (!isWholesale && norm(product.category) === "mayoristas") return false;
+  // Render parcial (evita stutter en móvil)
+  const PAGE_SIZE = 24;
+  const [visible, setVisible] = useState(PAGE_SIZE);
 
-      const s = norm(search);
+  const filteredProducts = useMemo(() => {
+    const s = norm(search);
+
+    return products.filter((product) => {
+      if (!isWholesale && norm((product as any).category) === "mayoristas") return false;
 
       const matchesSearch =
         !s ||
-        norm(product.name).includes(s) ||
-        norm(product.line).includes(s) ||
-        norm(product.brand).includes(s);
+        norm((product as any).name).includes(s) ||
+        norm((product as any).line).includes(s) ||
+        norm((product as any).brand).includes(s);
 
-      const matchesBrand = brand === "all" || product.brand === brand;
-      const matchesCategory = category === "all" || product.category === category;
+      const matchesBrand = brand === "all" || (product as any).brand === brand;
+      const matchesCategory =
+        category === "all" || (product as any).category === category;
 
       const matchesSize =
-        size === "all" || product.variants?.some((variant) => variant.size === size);
+        size === "all" ||
+        (product as any).variants?.some((variant: any) => variant.size === size);
 
+      const tags = Array.isArray((product as any).tags) ? (product as any).tags : [];
       const matchesType =
         type === "all" ||
-        (Array.isArray(product.tags) ? product.tags : [])
-          .map((t) => norm(String(t)))
-          .includes(norm(type));
+        tags.map((t: any) => norm(String(t))).includes(norm(type));
 
       const matchesQ = !q
         ? true
         : [
-            product.name,
-            product.brand,
-            product.line,
-            product.category,
-            ...(Array.isArray(product.tags) ? product.tags : []),
+            (product as any).name,
+            (product as any).brand,
+            (product as any).line,
+            (product as any).category,
+            ...tags,
           ]
             .filter(Boolean)
-            .map((x) => norm(String(x)))
+            .map((x: any) => norm(String(x)))
             .join(" ")
             .includes(q);
 
@@ -121,19 +149,23 @@ export default function CatalogPage({ products }: { products: Product[] }) {
     });
   }, [products, search, brand, category, size, type, isWholesale, q]);
 
+  // Index JSON una sola vez
+  const jsonIndex = useMemo(() => buildJsonIndex(), []);
+
+  // Merge imágenes rápido (O(1))
   const filteredWithImages = useMemo(
-    () => withVariantImages(filteredProducts),
-    [filteredProducts]
+    () => mergeImagesFast(filteredProducts, jsonIndex),
+    [filteredProducts, jsonIndex]
   );
 
-  // dedupe defensivo para evitar "children with same key" por data sucia
+  // Dedupe defensivo
   const deduped = useMemo(() => {
     const seen = new Set<string>();
     const out: Product[] = [];
 
     for (const p of filteredWithImages) {
       const sku0 = (p as any)?.variants?.[0]?.sku ?? "";
-      const key = `${p.id}::${sku0}`;
+      const key = `${(p as any)?.id ?? ""}::${sku0}`;
       if (seen.has(key)) continue;
       seen.add(key);
       out.push(p);
@@ -141,6 +173,10 @@ export default function CatalogPage({ products }: { products: Product[] }) {
 
     return out;
   }, [filteredWithImages]);
+
+  // Slice visible
+  const shown = useMemo(() => deduped.slice(0, visible), [deduped, visible]);
+  const canLoadMore = deduped.length > visible;
 
   return (
     <div className="min-h-screen bg-ink text-white">
@@ -169,7 +205,9 @@ export default function CatalogPage({ products }: { products: Product[] }) {
         <section className="mt-8">
           {deduped.length === 0 ? (
             <div className="py-20 text-center">
-              <p className="text-sm text-muted">No encontramos productos con esos filtros.</p>
+              <p className="text-sm text-muted">
+                No encontramos productos con esos filtros.
+              </p>
 
               <button
                 type="button"
@@ -179,6 +217,7 @@ export default function CatalogPage({ products }: { products: Product[] }) {
                   setCategory("all");
                   setSize("all");
                   setType("all");
+                  setVisible(PAGE_SIZE);
                 }}
                 className="mt-4 inline-flex items-center justify-center rounded-full border border-panel px-4 py-2 text-sm"
               >
@@ -186,25 +225,41 @@ export default function CatalogPage({ products }: { products: Product[] }) {
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 auto-rows-fr">
-              {deduped.map((product) => {
-                const sku0 = (product as any)?.variants?.[0]?.sku ?? "nosku";
-                return (
-                  <Link
-                    key={`${product.id}::${sku0}`}
-                    href={`/p/${product.id}`}
-                    className="block"
-                    onClickCapture={(e) => {
-                      const el = e.target as HTMLElement | null;
-                      if (!el) return;
-                      if (el.closest("[data-no-nav]")) e.preventDefault();
-                    }}
+            <>
+              <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 auto-rows-fr">
+                {shown.map((product) => {
+                  const sku0 = (product as any)?.variants?.[0]?.sku ?? "nosku";
+
+                  return (
+                    <Link
+                      key={`${(product as any).id}::${sku0}`}
+                      href={`/p/${(product as any).id}`}
+                      className="block"
+                      onClickCapture={(e) => {
+                        const el = e.target as HTMLElement | null;
+                        if (!el) return;
+                        if (el.closest("[data-no-nav]")) e.preventDefault();
+                      }}
+                    >
+                      <ProductCard product={product} />
+                    </Link>
+                  );
+                })}
+              </div>
+
+              {canLoadMore ? (
+                <div className="mt-6 flex justify-center">
+                  <button
+                    type="button"
+                    onClick={() => setVisible((v) => v + PAGE_SIZE)}
+                    className="rounded-full border border-panel px-5 py-2 text-sm font-semibold"
                   >
-                    <ProductCard product={product} />
-                  </Link>
-                );
-              })}
-            </div>
+                    Ver más ({Math.min(visible + PAGE_SIZE, deduped.length)}/
+                    {deduped.length})
+                  </button>
+                </div>
+              ) : null}
+            </>
           )}
         </section>
       </main>
