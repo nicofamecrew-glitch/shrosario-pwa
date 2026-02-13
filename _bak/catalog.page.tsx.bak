@@ -1,0 +1,23 @@
+import dynamic from "next/dynamic";
+import { Suspense } from "react";
+import { headers } from "next/headers";
+
+const CatalogPage = dynamic(() => import("@/components/CatalogPage"), {
+  suspense: true,
+});
+
+export default async function Page() {
+  const h = await headers();
+  const host = h.get("host"); // ej: localhost:3001
+  const proto = process.env.NODE_ENV === "development" ? "http" : "https";
+
+ const res = await fetch(`${proto}://${host}/api/catalog-flat`, { cache: "no-store" });
+
+  const products = await res.json();
+
+  return (
+    <Suspense fallback={null}>
+      <CatalogPage products={products} />
+    </Suspense>
+  );
+}

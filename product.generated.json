@@ -1,0 +1,3272 @@
+[
+  {
+    "id": "coalix-coalix-aceite-para-barba-30ml",
+    "brand": "Coalix",
+    "name": "Aceite Para Barba 30ml",
+    "category": "Otros",
+    "variants": [
+      {
+        "size": "std",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/coalix-aceite-para-barba-30ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "coalix-coalix-acondiccionador-balance",
+    "brand": "Coalix",
+    "name": "Acondiccionador Balance",
+    "category": "Otros",
+    "variants": [
+      {
+        "size": "180ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/coalix-acondiccionador-balance-180ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "coalix-coalix-acondiccionador-color-therapy",
+    "brand": "Coalix",
+    "name": "Acondiccionador Color Therapy",
+    "category": "Otros",
+    "variants": [
+      {
+        "size": "1000ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/coalix-acondiccionador-color-therapy-1000ml.png"
+        ]
+      },
+      {
+        "size": "180ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/coalix-acondiccionador-color-therapy-180ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "coalix-coalix-acondiccionador-hidratacion",
+    "brand": "Coalix",
+    "name": "Acondiccionador Hidratacion",
+    "category": "Otros",
+    "variants": [
+      {
+        "size": "180gr",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/coalix-acondiccionador-hidratacion-180gr.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "coalix-coalix-acondiccionador-resistence",
+    "brand": "Coalix",
+    "name": "Acondiccionador Resistence",
+    "category": "Otros",
+    "variants": [
+      {
+        "size": "1000ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/coalix-acondiccionador-resistence-1000ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "coalix-coalix-activador",
+    "brand": "Coalix",
+    "name": "Activador",
+    "category": "Oxidante/Activador",
+    "variants": [
+      {
+        "size": "10v",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/coalix-activador-10v.png"
+        ]
+      },
+      {
+        "size": "20v",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/coalix-activador-20v.png"
+        ]
+      },
+      {
+        "size": "30v",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/coalix-activador-30v.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "coalix-coalix-ampollas-color-therapy-12u-15ml",
+    "brand": "Coalix",
+    "name": "Ampollas Color Therapy 12u 15ml",
+    "category": "Ampollas",
+    "variants": [
+      {
+        "size": "12u-15ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/coalix-ampollas-color-therapy-12u-15ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "coalix-coalix-brillo-intenso",
+    "brand": "Coalix",
+    "name": "Brillo Intenso",
+    "category": "Otros",
+    "variants": [
+      {
+        "size": "std",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/coalix-brillo-intenso.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "coalix-coalix-cera-texturizante",
+    "brand": "Coalix",
+    "name": "Cera Texturizante",
+    "category": "Cera",
+    "variants": [
+      {
+        "size": "100gr",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/coalix-cera-texturizante-100gr.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "coalix-coalix-cera-texturizante-for-men",
+    "brand": "Coalix",
+    "name": "Cera Texturizante For Men",
+    "category": "Cera",
+    "variants": [
+      {
+        "size": "100gr",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/coalix-cera-texturizante-for-men-100gr.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "coalix-coalix-clinical-control",
+    "brand": "Coalix",
+    "name": "Clinical Control",
+    "category": "Otros",
+    "variants": [
+      {
+        "size": "1000ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/coalix-clinical-control-1000ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "coalix-coalix-coloracion",
+    "brand": "Coalix",
+    "name": "Coloracion",
+    "category": "Coloración",
+    "variants": [
+      {
+        "size": "120gr",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/coalix-coloracion-120gr.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "coalix-coalix-coloracion-docta",
+    "brand": "Coalix",
+    "name": "Coloracion Docta",
+    "category": "Coloración",
+    "variants": [
+      {
+        "size": "std",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/coalix-coloracion-docta.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "coalix-coalix-cristal-argan-30ml",
+    "brand": "Coalix",
+    "name": "Cristal Argan 30ml",
+    "category": "Otros",
+    "variants": [
+      {
+        "size": "std",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/coalix-cristal-argan-30ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "coalix-coalix-gel-maxima-fijacion",
+    "brand": "Coalix",
+    "name": "Gel Maxima Fijacion",
+    "category": "Gel",
+    "variants": [
+      {
+        "size": "250gr",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/coalix-gel-maxima-fijacion-250gr.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "coalix-coalix-gel-para-barbear",
+    "brand": "Coalix",
+    "name": "Gel Para Barbear",
+    "category": "Gel",
+    "variants": [
+      {
+        "size": "250ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/coalix-gel-para-barbear-250ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "coalix-coalix-laca-extrema",
+    "brand": "Coalix",
+    "name": "Laca Extrema",
+    "category": "Laca",
+    "variants": [
+      {
+        "size": "std",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/coalix-laca-extrema.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "coalix-coalix-mascara-balance",
+    "brand": "Coalix",
+    "name": "Mascara Balance",
+    "category": "Máscara",
+    "variants": [
+      {
+        "size": "250ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/coalix-mascara-balance-250ml.png"
+        ]
+      },
+      {
+        "size": "500ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/coalix-mascara-balance-500ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "coalix-coalix-mascara-color-therapy",
+    "brand": "Coalix",
+    "name": "Mascara Color Therapy",
+    "category": "Máscara",
+    "variants": [
+      {
+        "size": "250ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/coalix-mascara-color-therapy-250ml.png"
+        ]
+      },
+      {
+        "size": "500ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/coalix-mascara-color-therapy-500ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "coalix-coalix-mascara-curly",
+    "brand": "Coalix",
+    "name": "Mascara Curly",
+    "category": "Máscara",
+    "variants": [
+      {
+        "size": "250ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/coalix-mascara-curly-250ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "coalix-coalix-mascarilla-docta-color",
+    "brand": "Coalix",
+    "name": "Mascarilla Docta Color",
+    "category": "Otros",
+    "variants": [
+      {
+        "size": "250gr",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/coalix-mascarilla-docta-color-250gr.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "coalix-coalix-plex",
+    "brand": "Coalix",
+    "name": "Plex",
+    "category": "Plex",
+    "variants": [
+      {
+        "size": "std",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/coalix-plex.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "coalix-coalix-protector-termico",
+    "brand": "Coalix",
+    "name": "Protector Termico",
+    "category": "Protector térmico",
+    "variants": [
+      {
+        "size": "100ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/coalix-protector-termico-100ml.png"
+        ]
+      },
+      {
+        "size": "200ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/coalix-protector-termico-200ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "coalix-coalix-serum-acido-hialuronico-30ml",
+    "brand": "Coalix",
+    "name": "Serum Acido Hialuronico 30ml",
+    "category": "Serum",
+    "variants": [
+      {
+        "size": "std",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/coalix-serum-acido-hialuronico-30ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "coalix-coalix-shampoo-balance",
+    "brand": "Coalix",
+    "name": "Shampoo Balance",
+    "category": "Shampoo",
+    "variants": [
+      {
+        "size": "1000ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/coalix-shampoo-balance-1000ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "coalix-coalix-shampoo-clinical-detox",
+    "brand": "Coalix",
+    "name": "Shampoo Clinical Detox",
+    "category": "Shampoo",
+    "variants": [
+      {
+        "size": "1000ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/coalix-shampoo-clinical-detox-1000ml.png"
+        ]
+      },
+      {
+        "size": "300ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/coalix-shampoo-clinical-detox-300ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "coalix-coalix-shampoo-color-balance",
+    "brand": "Coalix",
+    "name": "Shampoo Color Balance",
+    "category": "Shampoo",
+    "variants": [
+      {
+        "size": "300ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/coalix-shampoo-color-balance-300ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "coalix-coalix-shampoo-color-clinical-prevent",
+    "brand": "Coalix",
+    "name": "Shampoo Color Clinical Prevent",
+    "category": "Shampoo",
+    "variants": [
+      {
+        "size": "300ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/coalix-shampoo-color-clinical-prevent-300ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "coalix-coalix-shampoo-color-therapy",
+    "brand": "Coalix",
+    "name": "Shampoo Color Therapy",
+    "category": "Shampoo",
+    "variants": [
+      {
+        "size": "1000ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/coalix-shampoo-color-therapy-1000ml.png"
+        ]
+      },
+      {
+        "size": "300ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/coalix-shampoo-color-therapy-300ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "coalix-coalix-shampoo-curly",
+    "brand": "Coalix",
+    "name": "Shampoo Curly",
+    "category": "Shampoo",
+    "variants": [
+      {
+        "size": "300ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/coalix-shampoo-curly-300ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "coalix-coalix-shampoo-detox-for-men",
+    "brand": "Coalix",
+    "name": "Shampoo Detox For Men",
+    "category": "Shampoo",
+    "variants": [
+      {
+        "size": "std",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/coalix-shampoo-detox-for-men.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "coalix-coalix-shampoo-docta-color",
+    "brand": "Coalix",
+    "name": "Shampoo Docta Color",
+    "category": "Shampoo",
+    "variants": [
+      {
+        "size": "1000ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/coalix-shampoo-docta-color-1000ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "coalix-coalix-shampoo-hidratacion",
+    "brand": "Coalix",
+    "name": "Shampoo Hidratacion",
+    "category": "Shampoo",
+    "variants": [
+      {
+        "size": "300ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/coalix-shampoo-hidratacion-300ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "coalix-coalix-shampoo-prevencion-caida",
+    "brand": "Coalix",
+    "name": "Shampoo Prevencion Caida",
+    "category": "Shampoo",
+    "variants": [
+      {
+        "size": "250ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/coalix-shampoo-prevencion-caida-250ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "coalix-coalix-shampoo-resistance",
+    "brand": "Coalix",
+    "name": "Shampoo Resistance",
+    "category": "Shampoo",
+    "variants": [
+      {
+        "size": "1000ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/coalix-shampoo-resistance-1000ml.png"
+        ]
+      },
+      {
+        "size": "300ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/coalix-shampoo-resistance-300ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "coalix-coalix-spray-creacion",
+    "brand": "Coalix",
+    "name": "Spray Creacion",
+    "category": "Otros",
+    "variants": [
+      {
+        "size": "std",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/coalix-spray-creacion.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "coalix-coalix-tratamiento-hidratation",
+    "brand": "Coalix",
+    "name": "Tratamiento Hidratation",
+    "category": "Otros",
+    "variants": [
+      {
+        "size": "250ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/coalix-tratamiento-hidratation-250ml.png"
+        ]
+      },
+      {
+        "size": "500gr",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/coalix-tratamiento-hidratation-500gr.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "coalix-coalix-tratamiento-resistance",
+    "brand": "Coalix",
+    "name": "Tratamiento Resistance",
+    "category": "Otros",
+    "variants": [
+      {
+        "size": "250gr",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/coalix-tratamiento-resistance-250gr.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-acondicionador-acido",
+    "brand": "Fidelité",
+    "name": "Acondicionador Acido",
+    "category": "Acondicionador",
+    "variants": [
+      {
+        "size": "230ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-acondicionador-acido-230ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-acondicionador-argan",
+    "brand": "Fidelité",
+    "name": "Acondicionador Argan",
+    "category": "Acondicionador",
+    "variants": [
+      {
+        "size": "1000ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-acondicionador-argan-1l.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-acondicionador-cabellos-grasos",
+    "brand": "Fidelité",
+    "name": "Acondicionador Cabellos Grasos",
+    "category": "Acondicionador",
+    "variants": [
+      {
+        "size": "260ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-acondicionador-cabellos-grasos-260ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-acondicionador-corrector",
+    "brand": "Fidelité",
+    "name": "Acondicionador Corrector",
+    "category": "Acondicionador",
+    "variants": [
+      {
+        "size": "std",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-acondicionador-corrector.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-acondicionador-corrector-rubios",
+    "brand": "Fidelité",
+    "name": "Acondicionador Corrector Rubios",
+    "category": "Acondicionador",
+    "variants": [
+      {
+        "size": "std",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-acondicionador-corrector-rubios.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-acondicionador-keratin",
+    "brand": "Fidelité",
+    "name": "Acondicionador Keratin",
+    "category": "Acondicionador",
+    "variants": [
+      {
+        "size": "230ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-acondicionador-keratin-230ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-acondicionador-neutro",
+    "brand": "Fidelité",
+    "name": "Acondicionador Neutro",
+    "category": "Acondicionador",
+    "variants": [
+      {
+        "size": "1000ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-acondicionador-neutro-1l.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-acondicionador-secos-y-castigados",
+    "brand": "Fidelité",
+    "name": "Acondicionador Secos Y Castigados",
+    "category": "Acondicionador",
+    "variants": [
+      {
+        "size": "260ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-acondicionador-secos-y-castigados-260ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-acondicionador-tenidos",
+    "brand": "Fidelité",
+    "name": "Acondicionador Tenidos",
+    "category": "Acondicionador",
+    "variants": [
+      {
+        "size": "260ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-acondicionador-tenidos-260ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-acondicionaldor-keratina",
+    "brand": "Fidelité",
+    "name": "Acondicionaldor Keratina",
+    "category": "Otros",
+    "variants": [
+      {
+        "size": "1000ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-acondicionaldor-keratina-1l.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-acondicionardor-argan",
+    "brand": "Fidelité",
+    "name": "Acondicionardor Argan",
+    "category": "Otros",
+    "variants": [
+      {
+        "size": "260ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-acondicionardor-argan-260ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-ampollas-argan-12u-15ml",
+    "brand": "Fidelité",
+    "name": "Ampollas Argan 12u 15ml",
+    "category": "Ampollas",
+    "variants": [
+      {
+        "size": "12u-15ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-ampollas-argan-12u-15ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-ampollas-caviar-12u-15ml",
+    "brand": "Fidelité",
+    "name": "Ampollas Caviar 12u 15ml",
+    "category": "Ampollas",
+    "variants": [
+      {
+        "size": "12u-15ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-ampollas-caviar-12u-15ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-ampollas-complejo-nutritivo-12u-15ml",
+    "brand": "Fidelité",
+    "name": "Ampollas Complejo Nutritivo 12u 15ml",
+    "category": "Ampollas",
+    "variants": [
+      {
+        "size": "12u-15ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-ampollas-complejo-nutritivo-12u-15ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-ampollas-keratina-12u-15ml",
+    "brand": "Fidelité",
+    "name": "Ampollas Keratina 12u 15ml",
+    "category": "Ampollas",
+    "variants": [
+      {
+        "size": "12u-15ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-ampollas-keratina-12u-15ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-ampollas-lino-12u-15ml",
+    "brand": "Fidelité",
+    "name": "Ampollas Lino 12u 15ml",
+    "category": "Ampollas",
+    "variants": [
+      {
+        "size": "12u-15ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-ampollas-lino-12u-15ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-bubble-caja",
+    "brand": "Fidelité",
+    "name": "Bubble Caja",
+    "category": "Otros",
+    "variants": [
+      {
+        "size": "std",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-bubble-caja.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-carta-de-colores",
+    "brand": "Fidelité",
+    "name": "Carta De Colores",
+    "category": "Carta de colores",
+    "variants": [
+      {
+        "size": "std",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-carta-de-colores.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-caviar-cabellos-tenidos-acondicionador",
+    "brand": "Fidelité",
+    "name": "Caviar Cabellos Tenidos Acondicionador",
+    "category": "Acondicionador",
+    "variants": [
+      {
+        "size": "1000ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-caviar-cabellos-tenidos-acondicionador-1l.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-caviar-cabellos-tenidos-shampoo",
+    "brand": "Fidelité",
+    "name": "Caviar Cabellos Tenidos Shampoo",
+    "category": "Shampoo",
+    "variants": [
+      {
+        "size": "1000ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-caviar-cabellos-tenidos-shampoo-1l.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-caviar-secos-castigados-shampoo",
+    "brand": "Fidelité",
+    "name": "Caviar Secos Castigados Shampoo",
+    "category": "Shampoo",
+    "variants": [
+      {
+        "size": "1000ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-caviar-secos_castigados-shampoo-1l.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-coloracion",
+    "brand": "Fidelité",
+    "name": "Coloracion",
+    "category": "Coloración",
+    "variants": [
+      {
+        "size": "60gr",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-coloracion-60gr.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-coloracion-fantacia",
+    "brand": "Fidelité",
+    "name": "Coloracion Fantacia",
+    "category": "Coloración",
+    "variants": [
+      {
+        "size": "60gr",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-coloracion-fantacia-60gr.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-crema-acida",
+    "brand": "Fidelité",
+    "name": "Crema Acida",
+    "category": "Otros",
+    "variants": [
+      {
+        "size": "1kg",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-crema-acida-1kg.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-crema-de-peinado-argan",
+    "brand": "Fidelité",
+    "name": "Crema De Peinado Argan",
+    "category": "Otros",
+    "variants": [
+      {
+        "size": "std",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-crema-de-peinado-argan.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-crema-de-peinado-lacios",
+    "brand": "Fidelité",
+    "name": "Crema De Peinado Lacios",
+    "category": "Otros",
+    "variants": [
+      {
+        "size": "std",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-crema-de-peinado-lacios.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-crema-de-peinado-multiaccion",
+    "brand": "Fidelité",
+    "name": "Crema De Peinado Multiaccion",
+    "category": "Otros",
+    "variants": [
+      {
+        "size": "std",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-crema-de-peinado-multiaccion.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-crema-de-peinado-rizos",
+    "brand": "Fidelité",
+    "name": "Crema De Peinado Rizos",
+    "category": "Otros",
+    "variants": [
+      {
+        "size": "std",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-crema-de-peinado-rizos.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-crema-peinar-free",
+    "brand": "Fidelité",
+    "name": "Crema Peinar Free",
+    "category": "Otros",
+    "variants": [
+      {
+        "size": "230ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite_crema_peinar-free-230ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-elixir-mystical",
+    "brand": "Fidelité",
+    "name": "Elixir Mystical",
+    "category": "Otros",
+    "variants": [
+      {
+        "size": "120ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-elixir-mystical-120ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-gel-fuerte",
+    "brand": "Fidelité",
+    "name": "Gel Fuerte",
+    "category": "Gel",
+    "variants": [
+      {
+        "size": "1kg",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-gel-fuerte-1kg.png"
+        ]
+      },
+      {
+        "size": "230ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-gel-fuerte-230ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-gel-suave",
+    "brand": "Fidelité",
+    "name": "Gel Suave",
+    "category": "Gel",
+    "variants": [
+      {
+        "size": "1kg",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-gel-suave-1kg.png"
+        ]
+      },
+      {
+        "size": "230ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-gel-suave-230ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-keratin-shampoo",
+    "brand": "Fidelité",
+    "name": "Keratin Shampoo",
+    "category": "Shampoo",
+    "variants": [
+      {
+        "size": "1000ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-keratin-shampoo-1l.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-kill-frizz-shampoo",
+    "brand": "Fidelité",
+    "name": "Kill Frizz Shampoo",
+    "category": "Shampoo",
+    "variants": [
+      {
+        "size": "230ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-kill-frizz_shampoo-230ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-killfrizz-locion",
+    "brand": "Fidelité",
+    "name": "Killfrizz Locion",
+    "category": "Otros",
+    "variants": [
+      {
+        "size": "230ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-killfrizz_locion-230ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-killfrizz-shampoo",
+    "brand": "Fidelité",
+    "name": "Killfrizz Shampoo",
+    "category": "Shampoo",
+    "variants": [
+      {
+        "size": "900ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-killfrizz_shampoo-900ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-mascara-acida",
+    "brand": "Fidelité",
+    "name": "Mascara Acida",
+    "category": "Máscara",
+    "variants": [
+      {
+        "size": "270gr",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-mascara-acida-270gr.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-mascara-almendas",
+    "brand": "Fidelité",
+    "name": "Mascara Almendas",
+    "category": "Máscara",
+    "variants": [
+      {
+        "size": "270gr",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-mascara-almendas-270gr.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-mascara-almendras",
+    "brand": "Fidelité",
+    "name": "Mascara Almendras",
+    "category": "Máscara",
+    "variants": [
+      {
+        "size": "1kg",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-mascara-almendras-1kg.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-mascara-argan",
+    "brand": "Fidelité",
+    "name": "Mascara Argan",
+    "category": "Máscara",
+    "variants": [
+      {
+        "size": "1kg",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-mascara-argan-1kg.png"
+        ]
+      },
+      {
+        "size": "250gr",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-mascara-argan-250gr.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-mascara-caviar",
+    "brand": "Fidelité",
+    "name": "Mascara Caviar",
+    "category": "Máscara",
+    "variants": [
+      {
+        "size": "250gr",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-mascara-caviar-250gr.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-mascara-coco-vainilla",
+    "brand": "Fidelité",
+    "name": "Mascara Coco Vainilla",
+    "category": "Máscara",
+    "variants": [
+      {
+        "size": "1kg",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-mascara-coco-&-vainilla-1kg.png"
+        ]
+      },
+      {
+        "size": "270gr",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-mascara-coco-&-vainilla-270gr.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-mascara-correctora",
+    "brand": "Fidelité",
+    "name": "Mascara Correctora",
+    "category": "Máscara",
+    "variants": [
+      {
+        "size": "1kg",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-mascara-correctora-1kg.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-mascara-free",
+    "brand": "Fidelité",
+    "name": "Mascara Free",
+    "category": "Máscara",
+    "variants": [
+      {
+        "size": "250gr",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite_mascara-free-250gr.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-mascara-keratina",
+    "brand": "Fidelité",
+    "name": "Mascara Keratina",
+    "category": "Máscara",
+    "variants": [
+      {
+        "size": "1kg",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-mascara-keratina-1kg.png"
+        ]
+      },
+      {
+        "size": "270gr",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-mascara-keratina-270gr.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-mascara-kill-frizz",
+    "brand": "Fidelité",
+    "name": "Mascara Kill Frizz",
+    "category": "Máscara",
+    "variants": [
+      {
+        "size": "250gr",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-mascara-kill-frizz-250gr.png"
+        ]
+      },
+      {
+        "size": "500gr",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-mascara-kill-frizz-500gr.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-mascara-ultra-black",
+    "brand": "Fidelité",
+    "name": "Mascara Ultra Black",
+    "category": "Máscara",
+    "variants": [
+      {
+        "size": "270ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-mascara-ultra-black-270ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-mascara-caviar",
+    "brand": "Fidelité",
+    "name": "Mascara.caviar",
+    "category": "Máscara",
+    "variants": [
+      {
+        "size": "1kg",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-mascara.caviar-1kg.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-mate-wax",
+    "brand": "Fidelité",
+    "name": "Mate Wax",
+    "category": "Otros",
+    "variants": [
+      {
+        "size": "std",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-mate-wax.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-mystical-brillo",
+    "brand": "Fidelité",
+    "name": "Mystical Brillo",
+    "category": "Otros",
+    "variants": [
+      {
+        "size": "std",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-mystical-brillo.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-oxidante-10",
+    "brand": "Fidelité",
+    "name": "Oxidante 10",
+    "category": "Oxidante",
+    "variants": [
+      {
+        "size": "std",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-oxidante-10.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-oxidante-20",
+    "brand": "Fidelité",
+    "name": "Oxidante 20",
+    "category": "Oxidante",
+    "variants": [
+      {
+        "size": "std",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-oxidante-20.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-oxidante-30",
+    "brand": "Fidelité",
+    "name": "Oxidante 30",
+    "category": "Oxidante",
+    "variants": [
+      {
+        "size": "std",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-oxidante-30.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-oxidate",
+    "brand": "Fidelité",
+    "name": "Oxidate",
+    "category": "Otros",
+    "variants": [
+      {
+        "size": "40v",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-oxidate-40v.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-polvo-decolorante",
+    "brand": "Fidelité",
+    "name": "Polvo Decolorante",
+    "category": "Decoloración",
+    "variants": [
+      {
+        "size": "700gr",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-polvo-decolorante-700gr.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-protector-termico-argan",
+    "brand": "Fidelité",
+    "name": "Protector Termico Argan",
+    "category": "Protector térmico",
+    "variants": [
+      {
+        "size": "std",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-protector-termico-argan.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-quitamanchas",
+    "brand": "Fidelité",
+    "name": "Quitamanchas",
+    "category": "Otros",
+    "variants": [
+      {
+        "size": "std",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-quitamanchas.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-serum-caviar-30ml",
+    "brand": "Fidelité",
+    "name": "Serum Caviar 30ml",
+    "category": "Serum",
+    "variants": [
+      {
+        "size": "std",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-serum-caviar-30ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-serum-reparado-lino-30ml",
+    "brand": "Fidelité",
+    "name": "Serum Reparado Lino 30ml",
+    "category": "Serum",
+    "variants": [
+      {
+        "size": "std",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-serum-reparado-lino-30ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-serum-reparador-girasol-30ml",
+    "brand": "Fidelité",
+    "name": "Serum Reparador Girasol 30ml",
+    "category": "Serum",
+    "variants": [
+      {
+        "size": "std",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-serum-reparador-girasol-30ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-shampoo-acido",
+    "brand": "Fidelité",
+    "name": "Shampoo Acido",
+    "category": "Shampoo",
+    "variants": [
+      {
+        "size": "1000ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-shampoo-acido-1l.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-shampoo-argan",
+    "brand": "Fidelité",
+    "name": "Shampoo Argan",
+    "category": "Shampoo",
+    "variants": [
+      {
+        "size": "1000ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-shampoo-argan-1l.png"
+        ]
+      },
+      {
+        "size": "260ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-shampoo-argan-260ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-shampoo-cabellos-grasos",
+    "brand": "Fidelité",
+    "name": "Shampoo Cabellos Grasos",
+    "category": "Shampoo",
+    "variants": [
+      {
+        "size": "1000ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-shampoo-cabellos-grasos-1l.png"
+        ]
+      },
+      {
+        "size": "260ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-shampoo-cabellos-grasos-260ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-shampoo-cabellos-normales",
+    "brand": "Fidelité",
+    "name": "Shampoo Cabellos Normales",
+    "category": "Shampoo",
+    "variants": [
+      {
+        "size": "260ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-shampoo-cabellos-normales-260ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-shampoo-caviar-cabellos-normales",
+    "brand": "Fidelité",
+    "name": "Shampoo Caviar Cabellos Normales",
+    "category": "Shampoo",
+    "variants": [
+      {
+        "size": "1000ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-shampoo-caviar-cabellos-normales-1l.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-shampoo-corrector",
+    "brand": "Fidelité",
+    "name": "Shampoo Corrector",
+    "category": "Shampoo",
+    "variants": [
+      {
+        "size": "230ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-shampoo-corrector-230ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-shampoo-extra-acido",
+    "brand": "Fidelité",
+    "name": "Shampoo Extra Acido",
+    "category": "Shampoo",
+    "variants": [
+      {
+        "size": "230ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-shampoo-extra-acido-230ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-shampoo-free",
+    "brand": "Fidelité",
+    "name": "Shampoo Free",
+    "category": "Shampoo",
+    "variants": [
+      {
+        "size": "230ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite_shampoo-free-230ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-shampoo-keratin",
+    "brand": "Fidelité",
+    "name": "Shampoo Keratin",
+    "category": "Shampoo",
+    "variants": [
+      {
+        "size": "230ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-shampoo-keratin_230ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-shampoo-neutro",
+    "brand": "Fidelité",
+    "name": "Shampoo Neutro",
+    "category": "Shampoo",
+    "variants": [
+      {
+        "size": "1000ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-shampoo-neutro-1l.png"
+        ]
+      },
+      {
+        "size": "230ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-shampoo-neutro-230ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-shampoo-secos-y-castigados",
+    "brand": "Fidelité",
+    "name": "Shampoo Secos Y Castigados",
+    "category": "Shampoo",
+    "variants": [
+      {
+        "size": "260ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-shampoo-secos-y-castigados-260ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-shampoo-tenidos",
+    "brand": "Fidelité",
+    "name": "Shampoo Tenidos",
+    "category": "Shampoo",
+    "variants": [
+      {
+        "size": "260ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-shampoo-tenidos-260ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-styling-wax",
+    "brand": "Fidelité",
+    "name": "Styling Wax",
+    "category": "Otros",
+    "variants": [
+      {
+        "size": "std",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-styling-wax.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "fidelite-fidelite-urbanshield",
+    "brand": "Fidelité",
+    "name": "Urbanshield",
+    "category": "Otros",
+    "variants": [
+      {
+        "size": "std",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelite-urbanshield.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "misc-acondiccionador-density",
+    "brand": "Misc",
+    "name": "Acondiccionador Density",
+    "category": "Otros",
+    "variants": [
+      {
+        "size": "180ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/acondiccionador-density-180ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "misc-acondiccionador-resistence",
+    "brand": "Misc",
+    "name": "Acondiccionador Resistence",
+    "category": "Otros",
+    "variants": [
+      {
+        "size": "180ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/acondiccionador-resistence-180ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "misc-amino-plex-ossono",
+    "brand": "Misc",
+    "name": "Amino Plex Ossono",
+    "category": "Plex",
+    "variants": [
+      {
+        "size": "500ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/Amino-plex-ossono-500ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "misc-ampolla-recovery-argan",
+    "brand": "Misc",
+    "name": "Ampolla Recovery Argan",
+    "category": "Ampollas",
+    "variants": [
+      {
+        "size": "std",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/ampolla-recovery-argan.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "misc-ampollas-argan-ossono-12x15ml",
+    "brand": "Misc",
+    "name": "Ampollas Argan Ossono 12x15ml",
+    "category": "Ampollas",
+    "variants": [
+      {
+        "size": "std",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/ampollas-argan-ossono-12x15ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "misc-ampollas-complex-ossono-12x15ml",
+    "brand": "Misc",
+    "name": "Ampollas Complex Ossono 12x15ml",
+    "category": "Ampollas",
+    "variants": [
+      {
+        "size": "std",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/ampollas-complex-ossono-12x15ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "misc-ampollas-keratina-ossono-12x15ml",
+    "brand": "Misc",
+    "name": "Ampollas Keratina Ossono 12x15ml",
+    "category": "Ampollas",
+    "variants": [
+      {
+        "size": "std",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/ampollas-keratina-ossono-12x15ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "misc-ampollas-resistence-12u-15ml",
+    "brand": "Misc",
+    "name": "Ampollas Resistence 12u 15ml",
+    "category": "Ampollas",
+    "variants": [
+      {
+        "size": "12u-15ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/ampollas-resistence-12u-15ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "misc-ampollas-vexa-keratina-revitalize-12x15ml",
+    "brand": "Misc",
+    "name": "Ampollas Vexa Keratina Revitalize 12x15ml",
+    "category": "Ampollas",
+    "variants": [
+      {
+        "size": "std",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/ampollas-vexa-keratina-revitalize-12x15ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "misc-argan-liss-lisse-extreme",
+    "brand": "Misc",
+    "name": "Argan Liss Lisse Extreme",
+    "category": "Otros",
+    "variants": [
+      {
+        "size": "250ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/argan-liss-lisse-extreme-250ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "misc-bi-phase-ossono",
+    "brand": "Misc",
+    "name": "Bi Phase Ossono",
+    "category": "Otros",
+    "variants": [
+      {
+        "size": "135ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/bi-phase-ossono-135ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "misc-biotina-liss-lisse-extreme",
+    "brand": "Misc",
+    "name": "Biotina Liss Lisse Extreme",
+    "category": "Otros",
+    "variants": [
+      {
+        "size": "250ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/biotina-liss-lisse-extreme-250ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "misc-coloracion-ossono-x60gr",
+    "brand": "Misc",
+    "name": "Coloracion Ossono X60gr",
+    "category": "Coloración",
+    "variants": [
+      {
+        "size": "60gr",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/coloracion-ossono-x60gr.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "misc-crema-de-peinar-10en1-ossono",
+    "brand": "Misc",
+    "name": "Crema De Peinar 10en1 Ossono",
+    "category": "Crema de peinar",
+    "variants": [
+      {
+        "size": "std",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/crema-de-peinar-10en1-ossono.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "misc-crema-de-peinar-coalix",
+    "brand": "Misc",
+    "name": "Crema De Peinar Coalix",
+    "category": "Crema de peinar",
+    "variants": [
+      {
+        "size": "230gr",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/crema-de-peinar-coalix-230gr.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "misc-crema-de-peinar-ddc-ossono",
+    "brand": "Misc",
+    "name": "Crema De Peinar Ddc Ossono",
+    "category": "Crema de peinar",
+    "variants": [
+      {
+        "size": "180ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/crema-de-peinar-ddc-ossono-180ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "misc-crema-de-peinar-resistence-coalix",
+    "brand": "Misc",
+    "name": "Crema De Peinar Resistence Coalix",
+    "category": "Crema de peinar",
+    "variants": [
+      {
+        "size": "std",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/crema-de-peinar-resistence-coalix.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "misc-crema-de-rulos-coalix",
+    "brand": "Misc",
+    "name": "Crema De Rulos Coalix",
+    "category": "Crema de rulos",
+    "variants": [
+      {
+        "size": "std",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/crema-de-rulos-coalix.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "misc-crema-oxidante-coalix",
+    "brand": "Misc",
+    "name": "Crema Oxidante Coalix",
+    "category": "Oxidante",
+    "variants": [
+      {
+        "size": "1800ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/crema-oxidante-10v-1800ml-coalix.png",
+          "/product/crema-oxidante-20v-1800ml-coalix.png",
+          "/product/crema-oxidante-30v-1800ml-coalix.png",
+          "/product/crema-oxidante-40v-1800ml-coalix.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "misc-cristal-sellador-coalix-30ml",
+    "brand": "Misc",
+    "name": "Cristal Sellador Coalix 30ml",
+    "category": "Otros",
+    "variants": [
+      {
+        "size": "std",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/cristal-sellador-coalix-30ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "misc-evolution-dry-bottox-lisse-extreme",
+    "brand": "Misc",
+    "name": "Evolution Dry Bottox Lisse Extreme",
+    "category": "Otros",
+    "variants": [
+      {
+        "size": "500ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/evolution-dry-bottox-lisse-extreme-500ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "misc-fidelitee-caviar-secos-castigados-acondicionador",
+    "brand": "Misc",
+    "name": "Fidelitee Caviar Secos Castigados Acondicionador",
+    "category": "Acondicionador",
+    "variants": [
+      {
+        "size": "1000ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/fidelitee-caviar-secos_castigados-acondicionador-1l.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "misc-impulsador-de-rulos",
+    "brand": "Misc",
+    "name": "Impulsador De Rulos",
+    "category": "Otros",
+    "variants": [
+      {
+        "size": "200ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/impulsador-de-rulos-200ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "misc-mascara-argan-ossono",
+    "brand": "Misc",
+    "name": "Mascara Argan Ossono",
+    "category": "Máscara",
+    "variants": [
+      {
+        "size": "1kg",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/mascara-argan-ossono-1kg.png"
+        ]
+      },
+      {
+        "size": "250gr",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/mascara-argan-ossono-250gr.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "misc-mascara-complex-ossono",
+    "brand": "Misc",
+    "name": "Mascara Complex Ossono",
+    "category": "Máscara",
+    "variants": [
+      {
+        "size": "1kg",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/mascara-complex-1kg-ossono.png"
+        ]
+      },
+      {
+        "size": "270gr",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/mascara-complex-270gr-ossono.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "misc-mascara-intense-acida-vexa",
+    "brand": "Misc",
+    "name": "Mascara Intense Acida Vexa",
+    "category": "Máscara",
+    "variants": [
+      {
+        "size": "1kg",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/mascara-intense-acida-1kg-vexa.png"
+        ]
+      },
+      {
+        "size": "250gr",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/mascara-intense-acida-250gr-vexa.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "misc-mascara-keratina-ossono",
+    "brand": "Misc",
+    "name": "Mascara Keratina Ossono",
+    "category": "Máscara",
+    "variants": [
+      {
+        "size": "1kg",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/mascara-keratina-ossono-1kg.png"
+        ]
+      },
+      {
+        "size": "250gr",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/mascara-keratina-ossono-250gr.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "misc-mascara-mat-ossono",
+    "brand": "Misc",
+    "name": "Mascara Mat Ossono",
+    "category": "Máscara",
+    "variants": [
+      {
+        "size": "1kg",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/mascara-mat-ossono-1kg.png"
+        ]
+      },
+      {
+        "size": "250ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/mascara-mat-ossono-250ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "misc-mascara-recovery-argan-vexa",
+    "brand": "Misc",
+    "name": "Mascara Recovery Argan Vexa",
+    "category": "Máscara",
+    "variants": [
+      {
+        "size": "1kg",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/mascara-recovery-argan-1kg-vexa.png"
+        ]
+      },
+      {
+        "size": "250gr",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/mascara-recovery-argan-250gr-vexa.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "misc-mascara-revitalize-keratina-vexa",
+    "brand": "Misc",
+    "name": "Mascara Revitalize Keratina Vexa",
+    "category": "Máscara",
+    "variants": [
+      {
+        "size": "1kg",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/mascara-revitalize-keratina-1kg-vexa.png"
+        ]
+      },
+      {
+        "size": "250gr",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/mascara-revitalize-keratina-250gr-vexa.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "misc-mascara-therapy-biotina-vexa",
+    "brand": "Misc",
+    "name": "Mascara Therapy Biotina Vexa",
+    "category": "Máscara",
+    "variants": [
+      {
+        "size": "1kg",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/mascara-therapy-biotina-1kg-vexa.png"
+        ]
+      },
+      {
+        "size": "250gr",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/mascara-therapy-biotina-250gr-vexa.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "misc-pastificado-marucuya-lisse-extreme",
+    "brand": "Misc",
+    "name": "Pastificado Marucuya Lisse Extreme",
+    "category": "Otros",
+    "variants": [
+      {
+        "size": "250ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/pastificado-marucuya-lisse-extreme-250ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "misc-placeholder",
+    "brand": "Misc",
+    "name": "Placeholder",
+    "category": "Otros",
+    "variants": [
+      {
+        "size": "std",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/placeholder.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "misc-polvo-decolorante-coalix",
+    "brand": "Misc",
+    "name": "Polvo Decolorante Coalix",
+    "category": "Decoloración",
+    "variants": [
+      {
+        "size": "500ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/polvo-decolorante-coalix-500ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "misc-protector-termico-ossono",
+    "brand": "Misc",
+    "name": "Protector Termico Ossono",
+    "category": "Protector térmico",
+    "variants": [
+      {
+        "size": "135ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/protector-termico-ossono-135ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "misc-serum-sellador-30ml-coalix",
+    "brand": "Misc",
+    "name": "Serum Sellador 30ml Coalix",
+    "category": "Serum",
+    "variants": [
+      {
+        "size": "std",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/serum-sellador-30ml-coalix.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "misc-shampoo-argan-ossono",
+    "brand": "Misc",
+    "name": "Shampoo Argan Ossono",
+    "category": "Shampoo",
+    "variants": [
+      {
+        "size": "1000ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/shampoo-argan-ossono-1l.png"
+        ]
+      },
+      {
+        "size": "270ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/shampoo-argan-ossono-270ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "misc-shampoo-balance-ossono",
+    "brand": "Misc",
+    "name": "Shampoo Balance Ossono",
+    "category": "Shampoo",
+    "variants": [
+      {
+        "size": "std",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/shampoo-balance-1l-ossono.png"
+        ]
+      },
+      {
+        "size": "270ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/shampoo-balance-270ml-ossono.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "misc-shampoo-coalix-balance",
+    "brand": "Misc",
+    "name": "Shampoo Coalix Balance",
+    "category": "Shampoo",
+    "variants": [
+      {
+        "size": "300ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/shampoo-coalix-balance-300ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "misc-shampoo-coalix-resistence",
+    "brand": "Misc",
+    "name": "Shampoo Coalix Resistence",
+    "category": "Shampoo",
+    "variants": [
+      {
+        "size": "300ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/shampoo-coalix-resistence-300ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "misc-shampoo-complex-ossono",
+    "brand": "Misc",
+    "name": "Shampoo Complex Ossono",
+    "category": "Shampoo",
+    "variants": [
+      {
+        "size": "1000ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/shampoo-complex-ossono-1l.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "misc-shampoo-keratina-ossono",
+    "brand": "Misc",
+    "name": "Shampoo Keratina Ossono",
+    "category": "Shampoo",
+    "variants": [
+      {
+        "size": "1000ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/shampoo-keratina-ossono-1l.png"
+        ]
+      },
+      {
+        "size": "270ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/shampoo-keratina-ossono-270ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "misc-shampoo-matizador-ossono",
+    "brand": "Misc",
+    "name": "Shampoo Matizador Ossono",
+    "category": "Shampoo",
+    "variants": [
+      {
+        "size": "1000ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/shampoo-matizador-ossono-1l.png"
+        ]
+      },
+      {
+        "size": "270ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/shampoo-matizador-ossono-270ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "misc-shampoo-ossono-complex",
+    "brand": "Misc",
+    "name": "Shampoo Ossono Complex",
+    "category": "Shampoo",
+    "variants": [
+      {
+        "size": "270ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/shampoo-ossono-complex-270ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "misc-shampoo-revitalize-argan-vexa",
+    "brand": "Misc",
+    "name": "Shampoo Revitalize Argan Vexa",
+    "category": "Shampoo",
+    "variants": [
+      {
+        "size": "250ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/shampoo-revitalize-argan-vexa-250ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "misc-shampoo-revitalize-keratina-vexa",
+    "brand": "Misc",
+    "name": "Shampoo Revitalize Keratina Vexa",
+    "category": "Shampoo",
+    "variants": [
+      {
+        "size": "std",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/shampoo-revitalize-keratina-1l-vexa.png"
+        ]
+      },
+      {
+        "size": "250ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/shampoo-revitalize-keratina-250ml-vexa.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "misc-shampoo-therapy-biotina-vexa",
+    "brand": "Misc",
+    "name": "Shampoo Therapy Biotina Vexa",
+    "category": "Shampoo",
+    "variants": [
+      {
+        "size": "250ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/shampoo-therapy-biotina-250ml-vexa.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "misc-shampoo-vexa-argan-recovery",
+    "brand": "Misc",
+    "name": "Shampoo Vexa Argan Recovery",
+    "category": "Shampoo",
+    "variants": [
+      {
+        "size": "1000ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/shampoo-vexa-argan-recovery-1l.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "misc-shampoo-vexa-balance-neutro",
+    "brand": "Misc",
+    "name": "Shampoo Vexa Balance Neutro",
+    "category": "Shampoo",
+    "variants": [
+      {
+        "size": "1000ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/shampoo-vexa-balance-neutro-1l.png"
+        ]
+      },
+      {
+        "size": "250ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/shampoo-vexa-balance-neutro-250ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "misc-shampoo-vexa-therapy-biotina",
+    "brand": "Misc",
+    "name": "Shampoo Vexa Therapy Biotina",
+    "category": "Shampoo",
+    "variants": [
+      {
+        "size": "1000ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/shampoo-vexa-therapy-biotina-1l.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "misc-shockkeratinico-lisse-extreme",
+    "brand": "Misc",
+    "name": "Shockkeratinico Lisse Extreme",
+    "category": "Otros",
+    "variants": [
+      {
+        "size": "250ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/shock keratinico-lisse-extreme-250ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "misc-tratamiento-resistance",
+    "brand": "Misc",
+    "name": "Tratamiento Resistance",
+    "category": "Otros",
+    "variants": [
+      {
+        "size": "500gr",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/tratamiento-resistance-500gr.png"
+        ]
+      }
+    ],
+    "tags": []
+  },
+  {
+    "id": "misc-ultra-plex-lisse-extreme",
+    "brand": "Misc",
+    "name": "Ultra Plex Lisse Extreme",
+    "category": "Plex",
+    "variants": [
+      {
+        "size": "250ml",
+        "sku": "",
+        "priceRetail": 0,
+        "priceWholesale": 0,
+        "images": [
+          "/product/Ultra-plex-lisse-extreme-250ml.png"
+        ]
+      }
+    ],
+    "tags": []
+  }
+]
