@@ -12,7 +12,7 @@ export type Product = {
   name: string;
   category: string;
   variants: ProductVariant[];
-  tags: string[];
+  tags?: string[];
   imageUrl?: string;
   images?: string[];
 };
