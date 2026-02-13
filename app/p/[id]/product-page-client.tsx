@@ -250,12 +250,9 @@ useEffect(() => {
   // DERIVADOS (como ya tenías)
   // -----------------------
   const selectedVariant = useMemo(() => {
-    return (
-      (productFixed as any)?.variants?.[selectedIndex] ??
-      (productFixed as any)?.variants?.[0] ??
-      null
-    );
-  }, [productFixed, selectedIndex]);
+  return variants[selectedIndex] ?? variants[0] ?? null;
+}, [variants, selectedIndex]);
+
 
   const price = useMemo(() => {
     return selectedVariant ? getVariantPrice(selectedVariant as any, isWholesale) : 0;
@@ -542,8 +539,44 @@ useEffect(() => {
           })}
       </div>
     </div>
-  ) : null
+  ) : (
+    // ✅ PRODUCTS NORMALES (shampoo, ampolla, máscara, etc.)
+    <div className="mt-4">
+      <div className="mb-2 text-sm font-extrabold text-black/70">Tamaño</div>
+
+      <div className="flex flex-wrap gap-2">
+        {variants.map((v: any, i: number) => {
+          const active = i === selectedIndex;
+          return (
+            <button
+              key={v.sku ?? `${(productFixed as any).id}-${i}`}
+              type="button"
+              data-no-nav
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setSelectedIndex(i);
+                setActiveImage(0);
+                setZipError("");
+                setZipOptions([]);
+              }}
+              className={[
+                "rounded-full px-4 py-2 text-sm font-extrabold border",
+                active
+                  ? "text-white border-black"
+                  : "bg-white text-black/80 border-black/10",
+              ].join(" ")}
+              style={active ? { background: productColor } : undefined}
+            >
+              {v.size ?? "—"}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  )
 ) : null}
+
 
 
 {/* Marca */}
