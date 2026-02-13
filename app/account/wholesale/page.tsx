@@ -16,7 +16,8 @@ function onlyDigits(s: string) {
 
 export default function WholesalePage() {
   const { setWholesale } = useCartStore();
-  const { status, request, submit, reset } = useWholesaleStore();
+ const { status, request, submit, reset } = useWholesaleStore();
+
 
   const [cuit, setCuit] = useState(request?.cuit ?? "");
   const [razonSocial, setRazonSocial] = useState(

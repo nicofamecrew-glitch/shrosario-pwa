@@ -36,7 +36,7 @@ function basicAuthHeader(token: string, secret: string) {
 const API_BASE = "https://api.zipnova.com.ar/v2";
 
 async function zipnovaFetch(path: string, body?: any) {
-  const token = mustEnv("ZIPNOVA_API_TOKEN");
+  const token = mustEnv("ZIPNOVA_API_KEY");
   const secret = mustEnv("ZIPNOVA_API_SECRET");
 
   const url = `${API_BASE}${path}`;
@@ -99,3 +99,4 @@ export async function zipnovaQuote(input: QuoteInput) {
 export async function zipnovaCreateShipment(payload: any) {
   return zipnovaFetch("/shipments", payload);
 }
+export { zipnovaCreateShipment as createZipnovaShipment };

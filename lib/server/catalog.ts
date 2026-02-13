@@ -49,10 +49,12 @@ export async function getCatalog() {
   const sheetId = process.env.GOOGLE_SHEETS_SHEET_ID;
   if (!sheetId) throw new Error("Falta GOOGLE_SHEETS_SHEET_ID");
 
-  const PRODUCTS_SHEET_NAME = process.env.PRODUCTS_SHEET_NAME;
-  const VARIANTS_SHEET_NAME = process.env.VARIANTS_SHEET_NAME;
-  if (!PRODUCTS_SHEET_NAME) throw new Error("Falta PRODUCTS_SHEET_NAME");
-  if (!VARIANTS_SHEET_NAME) throw new Error("Falta VARIANTS_SHEET_NAME");
+const PRODUCTS_SHEET_NAME = process.env.PRODUCTS_SHEET_NAME ?? "products";
+const VARIANTS_SHEET_NAME = process.env.VARIANTS_SHEET_NAME ?? "variants";
+
+if (!PRODUCTS_SHEET_NAME.trim()) throw new Error("Falta PRODUCTS_SHEET_NAME");
+if (!VARIANTS_SHEET_NAME.trim()) throw new Error("Falta VARIANTS_SHEET_NAME");
+
 
   const auth = new google.auth.GoogleAuth({
     credentials: getCredentials(),
