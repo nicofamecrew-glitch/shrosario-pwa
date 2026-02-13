@@ -45,16 +45,25 @@ function toNum(v: any): number {
   return Number.isFinite(n) ? n : 0;
 }
 
-export async function getCatalog() {
+// ----------------------
+// CACHE EN MEMORIA (TTL)
+// ----------------------
+let _catalogCache: any[] | null = null;
+let _catalogCacheAt = 0;
+let _catalogInFlight: Promise<any[]> | null = null;
+
+// Ajustá si querés: 60s es buen balance.
+const CATALOG_TTL_MS = 60_000;
+
+async function loadCatalogFromSheets(): Promise<any[]> {
   const sheetId = process.env.GOOGLE_SHEETS_SHEET_ID;
   if (!sheetId) throw new Error("Falta GOOGLE_SHEETS_SHEET_ID");
 
-const PRODUCTS_SHEET_NAME = process.env.PRODUCTS_SHEET_NAME ?? "products";
-const VARIANTS_SHEET_NAME = process.env.VARIANTS_SHEET_NAME ?? "variants";
+  const PRODUCTS_SHEET_NAME = process.env.PRODUCTS_SHEET_NAME ?? "products";
+  const VARIANTS_SHEET_NAME = process.env.VARIANTS_SHEET_NAME ?? "variants";
 
-if (!PRODUCTS_SHEET_NAME.trim()) throw new Error("Falta PRODUCTS_SHEET_NAME");
-if (!VARIANTS_SHEET_NAME.trim()) throw new Error("Falta VARIANTS_SHEET_NAME");
-
+  if (!PRODUCTS_SHEET_NAME.trim()) throw new Error("Falta PRODUCTS_SHEET_NAME");
+  if (!VARIANTS_SHEET_NAME.trim()) throw new Error("Falta VARIANTS_SHEET_NAME");
 
   const auth = new google.auth.GoogleAuth({
     credentials: getCredentials(),
@@ -77,7 +86,6 @@ if (!VARIANTS_SHEET_NAME.trim()) throw new Error("Falta VARIANTS_SHEET_NAME");
   const products = rowsToObjects((pRes.data.values ?? []) as any[][]);
   const variants = rowsToObjects((vRes.data.values ?? []) as any[][]);
 
-  // Index variants por product_id
   const byProductId = new Map<string, any[]>();
   for (const v of variants) {
     const pid = String(v.product_id ?? "").trim();
@@ -124,4 +132,31 @@ if (!VARIANTS_SHEET_NAME.trim()) throw new Error("Falta VARIANTS_SHEET_NAME");
     .filter((p: any) => Array.isArray(p.variants) && p.variants.length > 0);
 
   return catalog;
+}
+
+export async function getCatalog() {
+  const now = Date.now();
+
+  // HIT de cache
+  if (_catalogCache && now - _catalogCacheAt < CATALOG_TTL_MS) {
+    return _catalogCache;
+  }
+
+  // Evita “thundering herd”: si entran 10 requests juntos, 1 sola pega a Sheets
+  if (_catalogInFlight) {
+    return _catalogInFlight;
+  }
+
+  _catalogInFlight = (async () => {
+    const fresh = await loadCatalogFromSheets();
+    _catalogCache = fresh;
+    _catalogCacheAt = Date.now();
+    return fresh;
+  })();
+
+  try {
+    return await _catalogInFlight;
+  } finally {
+    _catalogInFlight = null;
+  }
 }

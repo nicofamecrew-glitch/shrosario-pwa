@@ -1,8 +1,6 @@
 import ProductPageClient from "./product-page-client";
 import { headers } from "next/headers";
 
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
 
 type PageProps = { params: { id: string } };
 
@@ -12,8 +10,12 @@ export default async function Page({ params }: PageProps) {
   const proto = process.env.NODE_ENV === "development" ? "http" : "https";
 
   const [prodRes, catRes] = await Promise.all([
-    fetch(`${proto}://${host}/api/products/${params.id}`, { cache: "no-store" }),
-    fetch(`${proto}://${host}/api/catalog`, { cache: "no-store" }), // 👈 ACÁ EL CAMBIO
+ fetch(`${proto}://${host}/api/products/${params.id}`, {
+  next: { revalidate: 60 },
+}),
+fetch(`${proto}://${host}/api/catalog`, {
+  next: { revalidate: 60 },
+}),
   ]);
 
   if (!prodRes.ok) {
@@ -37,7 +39,8 @@ export default async function Page({ params }: PageProps) {
 
 const descRes = skuKey
   ? await fetch(`${proto}://${host}/api/descriptions?sku=${encodeURIComponent(skuKey)}`, {
-      cache: "no-store",
+      next: { revalidate: 300 },
+
     })
   : null;
 

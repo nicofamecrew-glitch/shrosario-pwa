@@ -6,7 +6,10 @@ export default async function Page() {
   const host = h.get("host");
   const proto = process.env.NODE_ENV === "development" ? "http" : "https";
 
-  const res = await fetch(`${proto}://${host}/api/catalog`, { cache: "no-store" });
+ const res = await fetch(`${proto}://${host}/api/catalog`, {
+  next: { revalidate: 60 },
+});
+
   if (!res.ok) throw new Error("api/catalog failed");
 
   const products = await res.json();
