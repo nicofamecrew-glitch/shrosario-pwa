@@ -40,7 +40,12 @@ export default function Filters({
     new Set(products.flatMap((product) => product.variants.map((variant) => variant.size)))
   );
   const types = Array.from(
-    new Set(products.flatMap((product) => product.tags.map((tag) => tag.toLowerCase())))
+    new Set(
+  products.flatMap((product) =>
+    (product.tags ?? []).map((tag) => tag.toLowerCase())
+  )
+)
+
   );
 
   return (
