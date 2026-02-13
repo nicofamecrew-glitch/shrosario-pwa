@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getOrderById, updateOrderWithShipment } from "@/lib/server/ordersSheets";
-import { createZipnovaShipment } from "@/lib/server/zipnova";
+import { zipnovaCreateShipment } from "@/lib/server/zipnova";
+
 
 export const runtime = "nodejs";
 
@@ -27,7 +28,7 @@ export async function POST(req: Request) {
     }
 
     // 3) Crear envío real (Zipnova)
-    const shipment = await createZipnovaShipment(order);
+    const shipment = await zipnovaCreateShipment(order);
     if (!shipment?.id) {
       return NextResponse.json({ ok: false, error: "Shipment creation failed" }, { status: 502 });
     }
