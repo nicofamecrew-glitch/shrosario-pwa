@@ -3918,34 +3918,7 @@
       "coalix"
     ]
   },
-  {
-    "id": "coalix-shampoo-clinical-detox",
-    "brand": "Coalix",
-    "line": "",
-    "name": "Coalix Shampoo Clinical Detox",
-    "category": "",
-    "variants": [
-      {
-        "size": "1000ml",
-        "sku": "COA-SHAMPOO-CLINICAL-DETOX-1000ML",
-        "priceRetail": 0,
-        "priceWholesale": 0,
-        "images": [
-          "/product/coalix-shampoo-clinical-detox-1000ml.png"
-        ]
-      },
-      {
-        "size": "300ML",
-        "sku": "COA-SHAMPOO-CLINICAL-DETOX-300ML",
-        "priceRetail": 0,
-        "priceWholesale": 0,
-        "images": [
-          "/product/coalix-shampoo-clinical-detox-300ml.png"
-        ]
-      }
-    ]
-    
-  },
+  
   {
     "id": "coalix-shampoo-clinical-detox-300ml",
     "brand": "Coalix",
