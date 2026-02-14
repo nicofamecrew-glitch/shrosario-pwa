@@ -3534,26 +3534,50 @@
   },
   
   {
-    "id": "coalix-coloracion-docta",
-    "brand": "Coalix",
-    "line": "",
-    "name": "Coalix Coloracion Docta",
-    "category": "",
-    "variants": [
-      {
-        "size": "Único",
-        "sku": "COA-COALIX-COLORACION-DOCTA",
-        "priceRetail": 0,
-        "priceWholesale": 0,
-        "images": [
+  "id": "coalix-coloracion-docta",
+  "brand": "coalix",
+  "line": "Docta",
+  "name": "Coalix Coloración Docta",
+  "category": "coloracion",
+  "variants": [
+    { "size": "9", "sku": "COA-DOCTA-9", "priceRetail": 0, "priceWholesale": 0, "images": [
           "/product/coalix-coloracion-docta.png"
-        ]
-      }
-    ],
-    "tags": [
-      "coalix"
-    ]
-  },
+        ] },
+    { "size": "8", "sku": "COA-DOCTA-8", "priceRetail": 0, "priceWholesale": 0, "images": [
+          "/product/coalix-coloracion-docta.png"
+        ] },
+    { "size": "7", "sku": "COA-DOCTA-7", "priceRetail": 0, "priceWholesale": 0, "images": [
+          "/product/coalix-coloracion-docta.png"
+        ] },
+    { "size": "6", "sku": "COA-DOCTA-6", "priceRetail": 0, "priceWholesale": 0, "images": [
+          "/product/coalix-coloracion-docta.png"
+        ] },
+    { "size": "5", "sku": "COA-DOCTA-5", "priceRetail": 0, "priceWholesale": 0, "images": [
+          "/product/coalix-coloracion-docta.png"
+        ] },
+
+    { "size": "10_1", "sku": "COA-DOCTA-10_1", "priceRetail": 0, "priceWholesale": 0, "images": [
+          "/product/coalix-coloracion-docta.png"
+        ] },
+    { "size": "9_1", "sku": "COA-DOCTA-9_1", "priceRetail": 0, "priceWholesale": 0, "images": [
+          "/product/coalix-coloracion-docta.png"
+        ] },
+    { "size": "8_1", "sku": "COA-DOCTA-8_1", "priceRetail": 0, "priceWholesale": 0, "images": [
+          "/product/coalix-coloracion-docta.png"
+        ] },
+    { "size": "7_1", "sku": "COA-DOCTA-7_1", "priceRetail": 0, "priceWholesale": 0, "images": [
+          "/product/coalix-coloracion-docta.png"
+        ] },
+
+    { "size": "7_12", "sku": "COA-DOCTA-7_12", "priceRetail": 0, "priceWholesale": 0, "images": [
+          "/product/coalix-coloracion-docta.png"
+        ] },
+    { "size": "9_22", "sku": "COA-DOCTA-9_22", "priceRetail": 0, "priceWholesale": 0, "images": [
+          "/product/coalix-coloracion-docta.png"
+        ] }
+  ],
+  "tags": ["coalix", "coloracion", "docta"]
+},
 
   {
     "id": "coalix-crema-de-peinar-resistence",

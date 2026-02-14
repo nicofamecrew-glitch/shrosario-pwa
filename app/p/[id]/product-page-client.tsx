@@ -36,11 +36,9 @@ const BRAND_LINE_COLORS: Record<string, Rule[]> = {
     { keys: ["hidratation", "hidratación"], color: "#ccd6ae" },
     { keys: ["resistence", "resistance", "cristal argan"], color: "#e6bdaf" },
     { keys: ["curly", "rulos"], color: "#bdd3b2" },
-    {
-      keys: ["for men", "spray", "laca", "protector", "brillo", "acido hialuronico"],
-      color: "#3e3e47",
-    },
-    { keys: ["activador", "docta"], color: "#d97e3e" },
+    { keys: ["for men", "spray", "laca", "protector", "brillo", "acido hialuronico"],color: "#3e3e47" },
+    { keys: ["docta"], color: "#d97e3e" },
+    { keys: ["activador"], color: "#d97e3e" },
     { keys: ["clinical detox"], color: "#9fd0cd" },
     { keys: ["clinical prevent"], color: "#6085a4" },
     { keys: ["clinical control"], color: "#97c8c4" },
@@ -79,7 +77,7 @@ function getSeparatorBySize(size: any, brand?: string) {
   const b = normText(brand ?? "");
   if (b.includes("fidelite")) return ".";
   if (b.includes("ossono")) return "."; // más realista que ","
-  return "/";
+  return null;
 }
 
 function resolveProductColor(product: any): string {
@@ -131,19 +129,18 @@ export default function ProductPageClient({
   // -----------------------
   const BASE_LEVELS = ["0", "1", "3", "4", "5", "6", "7", "8", "9", "10", "100"];
 
-  function baseLevelOfSize(size: any, brand?: string) {
+  function baseLevelOfSize(size: any) {
   const s = String(size ?? "").trim();
-  const sep = getSeparatorBySize(s, brand);
-  return s.split(sep)[0];
+  const sep = getSeparatorBySize(s);
+  return sep ? s.split(sep)[0] : s;
 }
 
-function isBaseTone(size: any, brand?: string) {
+function isBaseTone(size: any) {
   const s = String(size ?? "").trim();
-  const sep = getSeparatorBySize(s, brand);
-
-  // base tone = no separador (ej "7")
-  return !s.includes(sep);
+  const sep = getSeparatorBySize(s);
+  return !sep; // si no hay separador => base
 }
+
 
 
   function isColorLevelsProduct(product: any) {
@@ -193,7 +190,7 @@ return vars.length >= 20 && hasSep >= 10;
     const brand = String((productFixed as any)?.brand ?? "");
 
     for (const v of variants) {
-      const b = baseLevelOfSize(v.size, brand);
+      const b = baseLevelOfSize(v.size);
       if (!map.has(b)) map.set(b, []);
       map.get(b)!.push(v);
     }
@@ -218,14 +215,14 @@ return vars.length >= 20 && hasSep >= 10;
   const [baseSelected, setBaseSelected] = useState<string>(() => {
     const v0 = variants[selectedIndex];
     const brand = String((productFixed as any)?.brand ?? "");
-    const b0 = v0 ? baseLevelOfSize(v0.size, brand) : "7";
+    const b0 = v0 ? baseLevelOfSize(v0.size) : "7";
     return BASE_LEVELS.includes(b0) ? b0 : "7";
   });
 
   useEffect(() => {
     const v0 = variants[0];
     const brand = String((productFixed as any)?.brand ?? "");
-    const b0 = v0 ? baseLevelOfSize(v0.size, brand) : "7";
+    const b0 = v0 ? baseLevelOfSize(v0.size) : "7";
     const next = BASE_LEVELS.includes(b0) ? b0 : "7";
     setBaseSelected(next);
   }, [productFixed?.id, productFixed?.brand, variants]);
@@ -477,7 +474,7 @@ return vars.length >= 20 && hasSep >= 10;
                   <div className="flex flex-wrap gap-3">
                     {(variantsByBase.get(baseSelected) ?? [])
                       .filter((v: any) =>
-                        !isBaseTone(v.size, String((productFixed as any)?.brand ?? ""))
+                        !isBaseTone(v.size)
                       )
                       .slice()
                       .sort((a: any, c: any) =>
