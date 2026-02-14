@@ -12,9 +12,6 @@ import Image from "next/image";
 import FavoriteHeart from "@/components/ui/FavoriteHeart";
 
 type Rule = { keys: string[]; color: string };
- 
-  
-
 
 const BRAND_LINE_COLORS: Record<string, Rule[]> = {
   vexa: [
@@ -63,7 +60,7 @@ const BRAND_LINE_COLORS: Record<string, Rule[]> = {
 };
 
 function normText(s: string) {
-  return s
+  return String(s ?? "")
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "");
@@ -73,23 +70,9 @@ function getSeparatorByBrand(brand: string) {
   const b = normText(brand);
   if (b.includes("fidelite")) return ".";
   if (b.includes("coalix")) return "_";
-  if (b.includes("ossono")) return ",";
+  if (b.includes("ossono")) return ","; // ojo: en tu dataset ossono viene con "."
   return "/"; // fallback
 }
-
-function splitTone(size: any, brand: string) {
-  const s = String(size ?? "").trim();
-  const sep = getSeparatorByBrand(brand);
-  const parts = s.split(sep);
-  return {
-    base: parts[0] ?? "",
-    reflejo: parts[1] ?? "",
-    full: s,
-  };
-}
-
-
-
 
 function resolveProductColor(product: any): string {
   const brand = normText(String(product?.brand ?? ""));
@@ -109,20 +92,25 @@ type Props = {
   description?: any;
 };
 
-export default function ProductPageClient({ product, bestSellers = [], description = null }: Props) {
-
+export default function ProductPageClient({
+  product,
+  bestSellers = [],
+  description = null,
+}: Props) {
   const { addItem, isWholesale } = useCartStore();
   const { toggleFavorite, isFavorite } = useFavoritesStore();
 
   const productFixed = useMemo(() => withVariantImagesOne(product), [product]);
-  const bestSellersFixed = useMemo(() => withVariantImages(bestSellers as any), [bestSellers]);
+  const bestSellersFixed = useMemo(
+    () => withVariantImages(bestSellers as any),
+    [bestSellers]
+  );
 
   // -----------------------
-  // STATE (primero)
+  // STATE
   // -----------------------
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [activeImage, setActiveImage] = useState(0);
-  const [isFav, setIsFav] = useState(false);
 
   // Zipnova (informativo en /p)
   const [zipCp, setZipCp] = useState("");
@@ -131,112 +119,104 @@ export default function ProductPageClient({ product, bestSellers = [], descripti
   const [zipOptions, setZipOptions] = useState<any[]>([]);
 
   // -----------------------
-  // MATRIX HELPERS (Color Master)
+  // MATRIX HELPERS
   // -----------------------
-  const BASE_LEVELS = ["0","1","3","4","5","6","7","8","9","10","100"];
+  const BASE_LEVELS = ["0", "1", "3", "4", "5", "6", "7", "8", "9", "10", "100"];
 
-
-function baseLevelOfSize(size: any, brand?: string) {
-  const s = String(size ?? "").trim();
-  const sep = brand ? getSeparatorByBrand(brand) : "/";
-  return s.split(sep)[0];
-}
-
-
-function isBaseTone(size: any, brand?: string) {
-  const s = String(size ?? "").trim();
-  const sep = brand ? getSeparatorByBrand(brand) : "/";
-  return !s.includes(sep);
-}
-
-// Abajo queremos ver solo lo “reflejo” (sin repetir la base)
-function labelReflejo(size: any) {
-  const s = String(size ?? "").trim();
-  const parts = s.split("/");
-  if (parts.length < 2) return s;
-  return parts[1]; // "7/33" -> "33", "10/11" -> "11"
-}
-function isColorLevelsProduct(product: any) {
-  const id = normText(String(product?.id ?? ""));
-  const name = normText(String(product?.name ?? ""));
-  const line = normText(String(product?.line ?? ""));
-  const brand = normText(String(product?.brand ?? ""));
-
-  // Caso específico: Color Master (lo que estás armando)
-  if (brand.includes("fidelite") && (id.includes("color-master") || name.includes("color") || line.includes("color"))) {
-    return true;
+  function baseLevelOfSize(size: any, brand?: string) {
+    const s = String(size ?? "").trim();
+    const sep = brand ? getSeparatorByBrand(brand) : "/";
+    return s.split(sep)[0];
   }
 
-  // Regla genérica: si tiene MUCHAS variantes y hay varias con "/"
-  const vars = Array.isArray(product?.variants) ? product.variants : [];
-  const hasSlash = vars.filter((v: any) => String(v?.size ?? "").includes("/")).length;
-  return vars.length >= 20 && hasSlash >= 10;
-}
+  function isBaseTone(size: any, brand?: string) {
+    const s = String(size ?? "").trim();
+    const sep = brand ? getSeparatorByBrand(brand) : "/";
+    return !s.includes(sep);
+  }
 
+  function isColorLevelsProduct(product: any) {
+    const id = normText(String(product?.id ?? ""));
+    const name = normText(String(product?.name ?? ""));
+    const line = normText(String(product?.line ?? ""));
+    const brand = normText(String(product?.brand ?? ""));
+
+    // Caso específico: Color Master Fidelité
+    if (
+      brand.includes("fidelite") &&
+      (id.includes("color-master") || name.includes("color") || line.includes("color"))
+    ) {
+      return true;
+    }
+
+    // Regla genérica: muchas variantes con "/"
+    const vars = Array.isArray(product?.variants) ? product.variants : [];
+    const hasSlash = vars.filter((v: any) => String(v?.size ?? "").includes("/")).length;
+    return vars.length >= 20 && hasSlash >= 10;
+  }
 
   // -----------------------
-  // VARIANTS + MATRIX DATA
+  // VARIANTS (dedupe)
   // -----------------------
   const variantsRaw = (productFixed as any)?.variants ?? [];
 
-const variants = useMemo(() => {
-  const seen = new Set<string>();
-  const out: any[] = [];
+  const variants = useMemo(() => {
+    const seen = new Set<string>();
+    const out: any[] = [];
 
-  for (const v of variantsRaw) {
-    const key = String(v?.sku ?? v?.size ?? "");
-    if (!key) continue;
-    if (seen.has(key)) continue;
-    seen.add(key);
-    out.push(v);
-  }
-
-  return out;
-}, [productFixed?.id, variantsRaw]);
+    for (const v of variantsRaw) {
+      const key = String(v?.sku ?? v?.size ?? "");
+      if (!key) continue;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push(v);
+    }
+    return out;
+  }, [productFixed?.id, variantsRaw]);
 
   const isColorLevels = isColorLevelsProduct(productFixed);
 
- const variantsByBase = useMemo(() => {
-  const map = new Map<string, any[]>();
+  const variantsByBase = useMemo(() => {
+    const map = new Map<string, any[]>();
+    const brand = String((productFixed as any)?.brand ?? "");
 
-  for (const v of variants) {
-    const b = baseLevelOfSize(v.size);
-    if (!map.has(b)) map.set(b, []);
-    map.get(b)!.push(v);
-  }
+    for (const v of variants) {
+      const b = baseLevelOfSize(v.size, brand);
+      if (!map.has(b)) map.set(b, []);
+      map.get(b)!.push(v);
+    }
 
-  // ordenar dentro del mismo memo
-  for (const [b, list] of map.entries()) {
-    list.sort((a, c) => {
-      const as = String(a.size ?? "");
-      const cs = String(c.size ?? "");
-      const aIsBase = as === b;
-      const cIsBase = cs === b;
+    for (const [b, list] of map.entries()) {
+      list.sort((a, c) => {
+        const as = String(a.size ?? "");
+        const cs = String(c.size ?? "");
+        const aIsBase = as === b;
+        const cIsBase = cs === b;
 
-      if (aIsBase && !cIsBase) return -1;
-      if (!aIsBase && cIsBase) return 1;
+        if (aIsBase && !cIsBase) return -1;
+        if (!aIsBase && cIsBase) return 1;
 
-      return as.localeCompare(cs, "es", { numeric: true });
-    });
-  }
+        return as.localeCompare(cs, "es", { numeric: true });
+      });
+    }
 
-  return map;
-}, [variants]);
-
+    return map;
+  }, [variants, productFixed?.brand]);
 
   const [baseSelected, setBaseSelected] = useState<string>(() => {
     const v0 = variants[selectedIndex];
-    const b0 = v0 ? baseLevelOfSize(v0.size) : "7";
+    const brand = String((productFixed as any)?.brand ?? "");
+    const b0 = v0 ? baseLevelOfSize(v0.size, brand) : "7";
     return BASE_LEVELS.includes(b0) ? b0 : "7";
   });
 
-useEffect(() => {
-  const v0 = variants[0];
-  const b0 = v0 ? baseLevelOfSize(v0.size) : "7";
-  const next = BASE_LEVELS.includes(b0) ? b0 : "7";
-  setBaseSelected(next);
-}, [productFixed?.id, variants]);
-
+  useEffect(() => {
+    const v0 = variants[0];
+    const brand = String((productFixed as any)?.brand ?? "");
+    const b0 = v0 ? baseLevelOfSize(v0.size, brand) : "7";
+    const next = BASE_LEVELS.includes(b0) ? b0 : "7";
+    setBaseSelected(next);
+  }, [productFixed?.id, productFixed?.brand, variants]);
 
   // reset al cambiar producto
   useEffect(() => {
@@ -247,12 +227,11 @@ useEffect(() => {
   }, [productFixed?.id]);
 
   // -----------------------
-  // DERIVADOS (como ya tenías)
+  // DERIVADOS
   // -----------------------
   const selectedVariant = useMemo(() => {
-  return variants[selectedIndex] ?? variants[0] ?? null;
-}, [variants, selectedIndex]);
-
+    return variants[selectedIndex] ?? variants[0] ?? null;
+  }, [variants, selectedIndex]);
 
   const price = useMemo(() => {
     return selectedVariant ? getVariantPrice(selectedVariant as any, isWholesale) : 0;
@@ -262,15 +241,9 @@ useEffect(() => {
     return price > 0 ? calcAllPlans(price, [2, 3, 6, 9, 12]) : [];
   }, [price]);
 
-  const stock = useMemo(
-    () => Number((selectedVariant as any)?.stock ?? 0),
-    [selectedVariant]
-  );
+  const stock = useMemo(() => Number((selectedVariant as any)?.stock ?? 0), [selectedVariant]);
 
-  const productColor = useMemo(
-    () => resolveProductColor(productFixed as any),
-    [productFixed]
-  );
+  const productColor = useMemo(() => resolveProductColor(productFixed as any), [productFixed]);
 
   const gallery = useMemo(() => {
     const v: any = selectedVariant ?? {};
@@ -352,506 +325,446 @@ useEffect(() => {
   }
 
   return (
-    // ... tu return como lo tenés
-
     <div className="min-h-screen bg-black text-white">
+      <div className="absolute top-0 left-0 right-0 z-40">
+        <div className="mx-auto flex h-14 max-w-[520px] items-center justify-between px-4">
+          <button
+            type="button"
+            onClick={() => history.back()}
+            aria-label="Volver"
+            className="text-2xl font-semibold text-black active:scale-95"
+          >
+            ←
+          </button>
+        </div>
 
- <div className="absolute top-0 left-0 right-0 z-40">
-  <div className="mx-auto flex h-14 max-w-[520px] items-center justify-between px-4">
-    {/* Flecha volver (NEGRA) */}
-    <button
-      type="button"
-      onClick={() => history.back()}
-      aria-label="Volver"
-      className="text-2xl font-semibold text-black active:scale-95"
-    >
-      ←
-    </button>
-</div>
-
- {/* favorite */}
-       {true && (
- 
-         <button
-           type="button"
-           aria-label="Favorito"
-           onClick={(e) => {
-             e.preventDefault();
-             e.stopPropagation();
-             const wasFav = isFavorite(product.id);
-             toggleFavorite(product.id);
-             window.dispatchEvent(
-               new CustomEvent("toast", {
-                 detail: {
-                   message: wasFav ? "Quitado de favoritos" : "Guardado en favoritos",
-                   kind: "success",
-                 },
-               })
-             );
-           }}
-           className="absolute right-3 top-3 z-20 grid h-10 w-10 place-items-center rounded-full bg-black/10 backdrop-blur border border-black/10 active:scale-95"
-         >
-           <FavoriteHeart active={isFavorite(product.id)} size={18} />
-         </button>
-       )}
- 
-</div>
-  
-    {/* HERO (full-bleed blanco) */}
-<div className="w-full bg-white">
-  <div className="relative mx-auto max-w-[520px] ">
-    <div
-      className="pointer-events-none absolute right-0 top-0 h-full w-[62%]"
-      style={{
-        background: productColor,
-        clipPath: "polygon(45% 0%, 100% 0%, 100% 100%, 0% 62%)",
-      }}
-    />
-
-    <div className="relative flex items-center justify-center px-6 py-8">
-      <img
-        key={`${(productFixed as any)?.id}-${selectedIndex}-${activeImage}-${heroSrc}`}
-        src={heroSrc}
-        alt={(productFixed as any)?.name ?? "Producto"}
-        className="h-[320px] w-full object-contain"
-        onError={(e) => {
-          (e.currentTarget as HTMLImageElement).src = "/product/placeholder.png";
-        }}
-      />
-    </div>
-  </div>
-
-  {/* Dots (también sobre blanco full-bleed) */}
-  <div className="mb-4 flex items-center justify-center gap-2">
-    {gallery.slice(0, 5).map((_img: string, i: number) => (
-      <button
-        key={i}
-        type="button"
-        onClick={() => setActiveImage(i)}
-        className={[
-          "h-2.5 w-2.5 rounded-full",
-          i === activeImage ? "bg-black" : "bg-black/20",
-        ].join(" ")}
-        aria-label={`Imagen ${i + 1}`}
-      />
-    ))}
-  </div>
-</div>
-
-{/* CONTENT (pegado al hero, sin redondeo arriba) */}
-<div className="w-full bg-white">
-  <div className="mx-auto max-w-[520px] px-4 pb-28">
-    <section className="-mt-8 rounded-[18px] rounded-t-none bg-[#d2d2d2] p-5">
-      <div className="text-3xl font-extrabold leading-tight text-zinc-900">
-        {(productFixed as any)?.name}
-      </div>
-
-      <div className="mt-1 text-lg font-semibold tracking-wide text-black/70">
-        {productFixed?.line}
-      </div>
-
-      {variants.length ? (
-  isColorLevels ? (
-    <div className="mt-4">
-      {/* TITULO */}
-      <div className="mb-2 text-sm font-extrabold text-black/70">Bases</div>
-
-      {/* BASES (arriba) */}
-      <div className="flex flex-wrap gap-3">
-        {BASE_LEVELS.map((b) => {
-          const list = variantsByBase.get(b) ?? [];
-          const hasAny = list.length > 0;
-          const active = b === baseSelected;
-
-          return (
-            <button
-              key={b}
-              type="button"
-              disabled={!hasAny}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                if (!hasAny) return;
-
-                setBaseSelected(b);
-
-                const baseVar = list.find((x) => String(x.size) === b) ?? list[0];
-                const globalIdx = variants.findIndex((x: any) => x.sku === baseVar?.sku);
-                if (globalIdx >= 0) {
-                  setSelectedIndex(globalIdx);
-                  setActiveImage(0);
-                  setZipError("");
-                  setZipOptions([]);
-                }
-              }}
-              className={[
-                "rounded-full px-6 py-2 text-sm font-extrabold border",
-                active
-                  ? "bg-black text-white border-black"
-                  : "bg-white text-black/90 border-black/10",
-                !hasAny ? "opacity-30 cursor-not-allowed" : "",
-              ].join(" ")}
-            >
-              {b}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* TITULO */}
-      <div className="mt-4 mb-2 text-sm font-extrabold text-black/70">Reflejos</div>
-
-      {/* REFLEJOS (abajo) */}
-      <div className="flex flex-wrap gap-3">
-        {(variantsByBase.get(baseSelected) ?? [])
-          .filter((v: any) => !isBaseTone(v.size))
-          .slice()
-          .sort((a: any, c: any) =>
-            String(a.size ?? "").localeCompare(String(c.size ?? ""), "es", { numeric: true })
-          )
-          .map((v: any) => {
-            const globalIdx = variants.findIndex((x: any) => x.sku === v.sku);
-            const active = globalIdx === selectedIndex;
-
-            return (
-              <button
-                key={v.sku ?? `${(productFixed as any).id}-${String(v.size)}`}
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  if (globalIdx < 0) return;
-                  setSelectedIndex(globalIdx);
-                  setActiveImage(0);
-                  setZipError("");
-                  setZipOptions([]);
-                }}
-                className={[
-                  "rounded-full px-5 py-2 text-sm font-extrabold border",
-                  active
-                    ? "bg-black text-white border-black"
-                    : "bg-white text-black/90 border-black/10",
-                ].join(" ")}
-              >
-                {String(v.size)}
-              </button>
+        <button
+          type="button"
+          aria-label="Favorito"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const wasFav = isFavorite((productFixed as any).id);
+            toggleFavorite((productFixed as any).id);
+            window.dispatchEvent(
+              new CustomEvent("toast", {
+                detail: {
+                  message: wasFav ? "Quitado de favoritos" : "Guardado en favoritos",
+                  kind: "success",
+                },
+              })
             );
-          })}
+          }}
+          className="absolute right-3 top-3 z-20 grid h-10 w-10 place-items-center rounded-full bg-black/10 backdrop-blur border border-black/10 active:scale-95"
+        >
+          <FavoriteHeart active={isFavorite((productFixed as any).id)} size={18} />
+        </button>
       </div>
-    </div>
-  ) : (
-    // ✅ PRODUCTS NORMALES (shampoo, ampolla, máscara, etc.)
-    <div className="mt-4">
-      <div className="mb-2 text-sm font-extrabold text-black/70">Tamaño</div>
 
-      <div className="flex flex-wrap gap-2">
-        {variants.map((v: any, i: number) => {
-          const active = i === selectedIndex;
-          return (
-            <button
-              key={v.sku ?? `${(productFixed as any).id}-${i}`}
-              type="button"
-              data-no-nav
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setSelectedIndex(i);
-                setActiveImage(0);
-                setZipError("");
-                setZipOptions([]);
+      {/* HERO */}
+      <div className="w-full bg-white">
+        <div className="relative mx-auto max-w-[520px] ">
+          <div
+            className="pointer-events-none absolute right-0 top-0 h-full w-[62%]"
+            style={{
+              background: productColor,
+              clipPath: "polygon(45% 0%, 100% 0%, 100% 100%, 0% 62%)",
+            }}
+          />
+
+          <div className="relative flex items-center justify-center px-6 py-8">
+            <img
+              key={`${(productFixed as any)?.id}-${selectedIndex}-${activeImage}-${heroSrc}`}
+              src={heroSrc}
+              alt={(productFixed as any)?.name ?? "Producto"}
+              className="h-[320px] w-full object-contain"
+              onError={(e) => {
+                (e.currentTarget as HTMLImageElement).src = "/product/placeholder.png";
               }}
-              className={[
-                "rounded-full px-4 py-2 text-sm font-extrabold border",
-                active
-                  ? "text-white border-black"
-                  : "bg-white text-black/80 border-black/10",
-              ].join(" ")}
-              style={active ? { background: productColor } : undefined}
-            >
-              {v.size ?? "—"}
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  )
-) : null}
-
-
-
-{/* Marca */}
-<div className="mt-3 flex items-center">
-  <img
-    src={`/brands/${normText(productFixed.brand)}.png`}
-    alt={productFixed.brand}
-    className="h-32 w-auto drop-shadow-[0_1px_2px_rgba(0,0,0,0.35)]"
-    
-
-  />
-</div>
-
-          {/* Precio */}
-          <div className="mt-6">
-            <div
-              className="inline-flex items-center rounded-full border-2 bg-black px-8 py-4 text-4xl font-black text-white"
-              style={{ borderColor: productColor }}
-            >
-              {formatPrice(price)}
-            </div>
-
-            <div className="mt-3 text-sm font-semibold">
-              {stock > 0 ? (
-                <span className="text-green-700">✔ EN STOCK</span>
-              ) : (
-                <span className="text-red-700">✖ SIN STOCK</span>
-              )}
-              <span className="ml-2 text-black/60">
-                {isWholesale ? "Mayorista" : "Minorista"}
-              </span>
-            </div>
+            />
           </div>
+        </div>
 
-          {/* Cuotas (informativo) */}
-          <div className="mt-8">
-            <div className="flex items-center justify-between">
-<div className="text-2xl font-extrabold text-zinc-900">
-  Cuotas
-</div>
+        <div className="mb-4 flex items-center justify-center gap-2">
+          {gallery.slice(0, 5).map((_img: string, i: number) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => setActiveImage(i)}
+              className={[
+                "h-2.5 w-2.5 rounded-full",
+                i === activeImage ? "bg-black" : "bg-black/20",
+              ].join(" ")}
+              aria-label={`Imagen ${i + 1}`}
+            />
+          ))}
+        </div>
+      </div>
 
+      {/* CONTENT */}
+      <div className="w-full bg-white">
+        <div className="mx-auto max-w-[520px] px-4 pb-28">
+          <section className="-mt-8 rounded-[18px] rounded-t-none bg-[#d2d2d2] p-5">
+            <div className="text-3xl font-extrabold leading-tight text-zinc-900">
+              {(productFixed as any)?.name}
+            </div>
 
-  <div className="flex items-center gap-2 px-1">
+            <div className="mt-1 text-lg font-semibold tracking-wide text-black/70">
+              {(productFixed as any)?.line}
+            </div>
 
-    <span className="text-xs font-semibold text-black/70">Pagá con</span>
-    <Image
-  src="/brands/mercado-pago.png"
-  alt="Mercado Pago"
-  width={160}
-  height={40}
-  className="h-[85px] w-auto"
-  priority
-/>
+            {/* VARIANTS: matrix si corresponde, sino pills normales */}
+            {variants.length ? (
+              isColorLevels ? (
+                <div className="mt-4">
+                  <div className="mb-2 text-sm font-extrabold text-black/70">Bases</div>
 
-  </div>
-</div>
+                  <div className="flex flex-wrap gap-3">
+                    {BASE_LEVELS.map((b) => {
+                      const list = variantsByBase.get(b) ?? [];
+                      const hasAny = list.length > 0;
+                      const active = b === baseSelected;
 
+                      return (
+                        <button
+                          key={b}
+                          type="button"
+                          disabled={!hasAny}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            if (!hasAny) return;
 
-            <div className="mt-3 rounded-2xl bg-white p-4 shadow-[0_10px_22px_rgba(0,0,0,0.08)]">
-              <div className="text-sm font-semibold text-black/70">
-                Contado:{" "}
-                <span className="font-black text-black">{formatPrice(price)}</span>
-                <span className="ml-2 text-xs text-black/50">
-                  (contado 0% interés)
-                </span>
+                            setBaseSelected(b);
+
+                            const baseVar = list.find((x) => String(x.size) === b) ?? list[0];
+                            const globalIdx = variants.findIndex((x: any) => x.sku === baseVar?.sku);
+                            if (globalIdx >= 0) {
+                              setSelectedIndex(globalIdx);
+                              setActiveImage(0);
+                              setZipError("");
+                              setZipOptions([]);
+                            }
+                          }}
+                          className={[
+                            "rounded-full px-6 py-2 text-sm font-extrabold border",
+                            active
+                              ? "bg-black text-white border-black"
+                              : "bg-white text-black/90 border-black/10",
+                            !hasAny ? "opacity-30 cursor-not-allowed" : "",
+                          ].join(" ")}
+                        >
+                          {b}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <div className="mt-4 mb-2 text-sm font-extrabold text-black/70">Reflejos</div>
+
+                  <div className="flex flex-wrap gap-3">
+                    {(variantsByBase.get(baseSelected) ?? [])
+                      .filter((v: any) =>
+                        !isBaseTone(v.size, String((productFixed as any)?.brand ?? ""))
+                      )
+                      .slice()
+                      .sort((a: any, c: any) =>
+                        String(a.size ?? "").localeCompare(String(c.size ?? ""), "es", {
+                          numeric: true,
+                        })
+                      )
+                      .map((v: any) => {
+                        const globalIdx = variants.findIndex((x: any) => x.sku === v.sku);
+                        const active = globalIdx === selectedIndex;
+
+                        return (
+                          <button
+                            key={v.sku ?? `${(productFixed as any).id}-${String(v.size)}`}
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              if (globalIdx < 0) return;
+                              setSelectedIndex(globalIdx);
+                              setActiveImage(0);
+                              setZipError("");
+                              setZipOptions([]);
+                            }}
+                            className={[
+                              "rounded-full px-5 py-2 text-sm font-extrabold border",
+                              active
+                                ? "bg-black text-white border-black"
+                                : "bg-white text-black/90 border-black/10",
+                            ].join(" ")}
+                          >
+                            {String(v.size)}
+                          </button>
+                        );
+                      })}
+                  </div>
+                </div>
+              ) : (
+                <div className="mt-4">
+                  <div className="mb-2 text-sm font-extrabold text-black/70">Tamaño</div>
+
+                  <div className="flex flex-wrap gap-2">
+                    {variants.map((v: any, i: number) => {
+                      const active = i === selectedIndex;
+                      return (
+                        <button
+                          key={v.sku ?? `${(productFixed as any).id}-${i}`}
+                          type="button"
+                          data-no-nav
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setSelectedIndex(i);
+                            setActiveImage(0);
+                            setZipError("");
+                            setZipOptions([]);
+                          }}
+                          className={[
+                            "rounded-full px-4 py-2 text-sm font-extrabold border",
+                            active ? "text-white border-black" : "bg-white text-black/80 border-black/10",
+                          ].join(" ")}
+                          style={active ? { background: productColor } : undefined}
+                        >
+                          {v.size ?? "—"}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )
+            ) : null}
+
+            {/* Marca */}
+            <div className="mt-3 flex items-center">
+              <img
+                src={`/brands/${normText((productFixed as any).brand)}.png`}
+                alt={(productFixed as any).brand}
+                className="h-32 w-auto drop-shadow-[0_1px_2px_rgba(0,0,0,0.35)]"
+              />
+            </div>
+
+            {/* Precio */}
+            <div className="mt-6">
+              <div
+                className="inline-flex items-center rounded-full border-2 bg-black px-8 py-4 text-4xl font-black text-white"
+                style={{ borderColor: productColor }}
+              >
+                {formatPrice(price)}
               </div>
 
-              <div className="mt-4 space-y-2">
-                {mpPlans.map((p: any) => (
-                  <div
-                    key={p.installments}
-                    className="flex items-center justify-between rounded-xl border border-black/10 bg-black/5 px-3 py-2"
-                  >
-                    <div className="text-sm font-black text-black">
-                      {p.installments} cuotas
-                    </div>
+              <div className="mt-3 text-sm font-semibold">
+                {stock > 0 ? (
+                  <span className="text-green-700">✔ EN STOCK</span>
+                ) : (
+                  <span className="text-red-700">✖ SIN STOCK</span>
+                )}
+                <span className="ml-2 text-black/60">{isWholesale ? "Mayorista" : "Minorista"}</span>
+              </div>
+            </div>
 
-                    <div className="text-right">
-                     <div className="text-sm font-black text-zinc-900">
-  {formatPrice(p.per)}
-</div>
+            {/* Cuotas */}
+            <div className="mt-8">
+              <div className="flex items-center justify-between">
+                <div className="text-2xl font-extrabold text-zinc-900">Cuotas</div>
 
-                      <div className="text-xs text-black/60">
-                        Total: {formatPrice(p.total)}
+                <div className="flex items-center gap-2 px-1">
+                  <span className="text-xs font-semibold text-black/70">Pagá con</span>
+                  <Image
+                    src="/brands/mercado-pago.png"
+                    alt="Mercado Pago"
+                    width={160}
+                    height={40}
+                    className="h-[85px] w-auto"
+                    priority
+                  />
+                </div>
+              </div>
+
+              <div className="mt-3 rounded-2xl bg-white p-4 shadow-[0_10px_22px_rgba(0,0,0,0.08)]">
+                <div className="text-sm font-semibold text-black/70">
+                  Contado: <span className="font-black text-black">{formatPrice(price)}</span>
+                  <span className="ml-2 text-xs text-black/50">(contado 0% interés)</span>
+                </div>
+
+                <div className="mt-4 space-y-2">
+                  {mpPlans.map((p: any) => (
+                    <div
+                      key={p.installments}
+                      className="flex items-center justify-between rounded-xl border border-black/10 bg-black/5 px-3 py-2"
+                    >
+                      <div className="text-sm font-black text-black">{p.installments} cuotas</div>
+
+                      <div className="text-right">
+                        <div className="text-sm font-black text-zinc-900">{formatPrice(p.per)}</div>
+                        <div className="text-xs text-black/60">Total: {formatPrice(p.total)}</div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
 
-              <div className="mt-3 text-xs text-black/60">
-                Las cuotas son informativas. El valor final se confirma en Mercado Pago
-                al momento de pagar.
+                <div className="mt-3 text-xs text-black/60">
+                  Las cuotas son informativas. El valor final se confirma en Mercado Pago al momento de pagar.
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Envío (informativo Zipnova) */}
-          <div className="mt-6">
-            <div className="rounded-[18px] bg-[#c2c2c2] p-4 shadow-[0_10px_22px_rgba(0,0,0,0.08)]">
+            {/* Envío Zipnova */}
+            <div className="mt-6">
+              <div className="rounded-[18px] bg-[#c2c2c2] p-4 shadow-[0_10px_22px_rgba(0,0,0,0.08)]">
+                <div className="flex items-center justify-between">
+                  <div className="text-sm font-extrabold text-black">Calcula tu envio</div>
+                  <div className="text-xs text-black/50">Estimado</div>
+                </div>
 
-              <div className="flex items-center justify-between">
-                <div className="text-sm font-extrabold text-black">Calcula tu envio</div>
-                <div className="text-xs text-black/50">Estimado</div>
+                <div className="mt-3 flex gap-2">
+                  <input
+                    value={zipCp}
+                    onChange={(e) => setZipCp(e.target.value)}
+                    placeholder="Ingresá tu CP"
+                    className="w-full rounded-xl border border-black/10 px-4 py-3 text-sm font-semibold outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={fetchZipnovaQuote}
+                    className="rounded-xl bg-black px-4 py-3 text-sm font-extrabold text-white"
+                  >
+                    {zipLoading ? "..." : "Calcular"}
+                  </button>
+                </div>
+
+                {zipError ? <div className="mt-3 text-xs font-semibold text-red-600">{zipError}</div> : null}
+
+                {zipOptions.length > 0 ? (
+                  <div className="mt-3 space-y-2">
+                    {zipOptions.slice(0, 4).map((op: any, idx: number) => {
+                      const label = op?.label || op?.name || op?.service_name || `Opción ${idx + 1}`;
+                      const cost = Number(op?.cost ?? op?.price ?? op?.amount ?? 0) || 0;
+                      const eta = op?.eta || op?.delivery_time || op?.estimated_delivery || op?.meta?.eta || "";
+
+                      return (
+                        <div
+                          key={op?.id ?? `${label}-${idx}`}
+                          className="flex items-center justify-between rounded-xl bg-black/5 px-4 py-3"
+                        >
+                          <div className="min-w-0">
+                            <div className="truncate text-sm font-extrabold text-black">{label}</div>
+                            {eta ? <div className="text-xs text-black/60">{String(eta)}</div> : null}
+                          </div>
+
+                          <div className="text-right">
+                            <div className="text-sm font-extrabold text-black">{formatPrice(cost)}</div>
+                          </div>
+                        </div>
+                      );
+                    })}
+
+                    <div className="pt-2 text-xs leading-relaxed text-black/60">
+                      Cotización estimada. El costo final se confirma al finalizar la compra.
+                    </div>
+                  </div>
+                ) : null}
               </div>
+            </div>
 
-              <div className="mt-3 flex gap-2">
-                <input
-                  value={zipCp}
-                  onChange={(e) => setZipCp(e.target.value)}
-                  placeholder="Ingresá tu CP"
-                  className="w-full rounded-xl border border-black/10 px-4 py-3 text-sm font-semibold outline-none"
-                />
-                <button
-                  type="button"
-                  onClick={fetchZipnovaQuote}
-                  className="rounded-xl bg-black px-4 py-3 text-sm font-extrabold text-white"
-                >
-                  {zipLoading ? "..." : "Calcular"}
-                </button>
-              </div>
+            {/* CTA */}
+            <button
+              type="button"
+              disabled={!selectedVariant?.sku || stock <= 0}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (!selectedVariant?.sku) return;
 
-              {zipError ? (
-                <div className="mt-3 text-xs font-semibold text-red-600">{zipError}</div>
+                addItem({
+                  productId: (productFixed as any).id,
+                  variantSku: (selectedVariant as any).sku,
+                  quantity: 1,
+                });
+
+                window.dispatchEvent(
+                  new CustomEvent("toast", {
+                    detail: { message: "Agregado al carrito", kind: "success" },
+                  })
+                );
+              }}
+              className={[
+                "mt-8 w-full rounded-full bg-black py-5 text-2xl font-black text-white",
+                "disabled:opacity-40 disabled:cursor-not-allowed",
+              ].join(" ")}
+            >
+              Agregar al carrito
+            </button>
+          </section>
+
+          {/* Descripción */}
+          <section className="mt-8">
+            <div className="text-xl font-extrabold">Descripción</div>
+
+            <div className="mt-3 rounded-[16px] bg-white p-4 text-sm leading-relaxed text-black/80 shadow-[0_10px_22px_rgba(0,0,0,0.08)]">
+              {description?.short ? <p className="font-semibold text-black/90">{description.short}</p> : null}
+
+              {description?.long ? (
+                <p className={description?.short ? "mt-3" : ""}>{description.long}</p>
+              ) : (
+                <p className="text-black/60">Próximamente: estamos completando la descripción de este producto.</p>
+              )}
+
+              {description?.benefits ? (
+                <div className="mt-4">
+                  <div className="text-xs font-extrabold text-black/70">Beneficios</div>
+
+                  <ul className="mt-2 list-disc pl-5 space-y-1">
+                    {(Array.isArray(description.benefits)
+                      ? (description.benefits as string[])
+                      : String(description.benefits).split("|")
+                    )
+                      .map((b: string) => b.trim())
+                      .filter((b: string) => b.length > 0)
+                      .slice(0, 8)
+                      .map((b: string, i: number) => (
+                        <li key={i}>{b}</li>
+                      ))}
+                  </ul>
+                </div>
               ) : null}
 
-              {zipOptions.length > 0 ? (
-                <div className="mt-3 space-y-2">
-                  {zipOptions.slice(0, 4).map((op: any, idx: number) => {
-                    const label =
-                      op?.label ||
-                      op?.name ||
-                      op?.service_name ||
-                      `Opción ${idx + 1}`;
-
-                    const cost = Number(op?.cost ?? op?.price ?? op?.amount ?? 0) || 0;
-
-                    const eta =
-                      op?.eta ||
-                      op?.delivery_time ||
-                      op?.estimated_delivery ||
-                      op?.meta?.eta ||
-                      "";
-
-                    return (
-                      <div
-                        key={op?.id ?? `${label}-${idx}`}
-                        className="flex items-center justify-between rounded-xl bg-black/5 px-4 py-3"
-                      >
-                        <div className="min-w-0">
-                          <div className="truncate text-sm font-extrabold text-black">
-                            {label}
-                          </div>
-                          {eta ? (
-                            <div className="text-xs text-black/60">{String(eta)}</div>
-                          ) : null}
-                        </div>
-
-                        <div className="text-right">
-                          <div className="text-sm font-extrabold text-black">
-                            {formatPrice(cost)}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-
-                  <div className="pt-2 text-xs leading-relaxed text-black/60">
-                    Cotización estimada. El costo final se confirma al finalizar la compra.
-                  </div>
+              {description?.usage ? (
+                <div className="mt-4">
+                  <div className="text-xs font-extrabold text-black/70">Modo de uso</div>
+                  <p className="mt-2">{description.usage}</p>
                 </div>
               ) : null}
             </div>
-          </div>
-
-          {/* CTA */}
-          <button
-            type="button"
-            disabled={!selectedVariant?.sku || stock <= 0}
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              if (!selectedVariant?.sku) return;
-
-              addItem({
-                productId: (productFixed as any).id,
-                variantSku: (selectedVariant as any).sku,
-                quantity: 1,
-              });
-
-              window.dispatchEvent(
-                new CustomEvent("toast", {
-                  detail: { message: "Agregado al carrito", kind: "success" },
-                })
-              );
-            }}
-            className={[
-              "mt-8 w-full rounded-full bg-black py-5 text-2xl font-black text-white",
-              "disabled:opacity-40 disabled:cursor-not-allowed",
-            ].join(" ")}
-          >
-            Agregar al carrito
-          </button>
-        </section>
-
-        {/* Descripción */}
-        <section className="mt-8">
-          <div className="text-xl font-extrabold">Descripción</div>
-
-          <div className="mt-3 rounded-[16px] bg-white p-4 text-sm leading-relaxed text-black/80 shadow-[0_10px_22px_rgba(0,0,0,0.08)]">
-            {description?.short ? (
-  <p className="font-semibold text-black/90">{description.short}</p>
-) : null}
-
-{description?.long ? (
-  <p className={description?.short ? "mt-3" : ""}>{description.long}</p>
-) : (
-  <p className="text-black/60">
-    Próximamente: estamos completando la descripción de este producto.
-  </p>
-)}
-
-{description?.benefits ? (
-  <div className="mt-4">
-    <div className="text-xs font-extrabold text-black/70">Beneficios</div>
-
-    <ul className="mt-2 list-disc pl-5 space-y-1">
-      {(Array.isArray(description.benefits)
-        ? (description.benefits as string[])
-        : String(description.benefits).split("|")
-      )
-        .map((b: string) => b.trim())
-        .filter((b: string) => b.length > 0)
-        .slice(0, 8)
-        .map((b: string, i: number) => (
-          <li key={i}>{b}</li>
-        ))}
-    </ul>
-  </div>
-) : null}
-
-{description?.usage ? (
-  <div className="mt-4">
-    <div className="text-xs font-extrabold text-black/70">Modo de uso</div>
-    <p className="mt-2">{description.usage}</p>
-  </div>
-) : null}
-
-          </div>
-        </section>
-
-        {/* Lo más vendido — carrusel */}
-        {bestSellersFixed.length > 0 ? (
-          <section className="mt-10">
-            <div className="text-xl font-extrabold">Lo más vendido…</div>
-
-            <div className="mt-4 -mx-4 flex gap-3 overflow-x-auto px-4 pb-3 snap-x snap-mandatory">
-              {bestSellersFixed.map((p) => (
-                <a
-                  key={(p as any).id}
-                  href={`/p/${(p as any).id}`}
-                  className="block min-w-[220px] snap-start"
-                  onClickCapture={(e) => {
-                    const el = e.target as HTMLElement | null;
-                    if (!el) return;
-                    if (el.closest("[data-no-nav]")) e.preventDefault();
-                  }}
-                >
-                  <ProductCard product={p as any} />
-                </a>
-              ))}
-            </div>
           </section>
-        ) : null}
-      </div>
+
+          {/* Lo más vendido */}
+          {bestSellersFixed.length > 0 ? (
+            <section className="mt-10">
+              <div className="text-xl font-extrabold">Lo más vendido…</div>
+
+              <div className="mt-4 -mx-4 flex gap-3 overflow-x-auto px-4 pb-3 snap-x snap-mandatory">
+                {bestSellersFixed.map((p) => (
+                  <a
+                    key={(p as any).id}
+                    href={`/p/${(p as any).id}`}
+                    className="block min-w-[220px] snap-start"
+                    onClickCapture={(e) => {
+                      const el = e.target as HTMLElement | null;
+                      if (!el) return;
+                      if (el.closest("[data-no-nav]")) e.preventDefault();
+                    }}
+                  >
+                    <ProductCard product={p as any} />
+                  </a>
+                ))}
+              </div>
+            </section>
+          ) : null}
+        </div>
       </div>
     </div>
   );
