@@ -127,7 +127,7 @@ export default function ProductPageClient({
   // -----------------------
   // MATRIX HELPERS
   // -----------------------
-  const BASE_LEVELS = ["0", "1", "3", "4", "5", "6", "7", "8", "9", "10", "100"];
+  const BASE_LEVELS = ["0", "1", "3", "4", "5", "6", "7", "8", "9", "10", "100", ".", "11"];
 
   function baseLevelOfSize(size: any) {
   const s = String(size ?? "").trim();
