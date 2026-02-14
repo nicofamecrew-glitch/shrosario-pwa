@@ -66,12 +66,20 @@ function normText(s: string) {
     .replace(/[\u0300-\u036f]/g, "");
 }
 
-function getSeparatorByBrand(brand: string) {
-  const b = normText(brand);
+function getSeparatorBySize(size: any, brand?: string) {
+  const s = String(size ?? "").trim();
+
+  // prioridad por lo que realmente existe en el string
+  if (s.includes("/")) return "/";
+  if (s.includes("_")) return "_";
+  if (s.includes(".")) return ".";
+  if (s.includes(",")) return ",";
+
+  // fallback suave por marca (opcional)
+  const b = normText(brand ?? "");
   if (b.includes("fidelite")) return ".";
-  if (b.includes("coalix")) return "_";
-  if (b.includes("ossono")) return ","; // ojo: en tu dataset ossono viene con "."
-  return "/"; // fallback
+  if (b.includes("ossono")) return "."; // más realista que ","
+  return "/";
 }
 
 function resolveProductColor(product: any): string {
@@ -124,16 +132,19 @@ export default function ProductPageClient({
   const BASE_LEVELS = ["0", "1", "3", "4", "5", "6", "7", "8", "9", "10", "100"];
 
   function baseLevelOfSize(size: any, brand?: string) {
-    const s = String(size ?? "").trim();
-    const sep = brand ? getSeparatorByBrand(brand) : "/";
-    return s.split(sep)[0];
-  }
+  const s = String(size ?? "").trim();
+  const sep = getSeparatorBySize(s, brand);
+  return s.split(sep)[0];
+}
 
-  function isBaseTone(size: any, brand?: string) {
-    const s = String(size ?? "").trim();
-    const sep = brand ? getSeparatorByBrand(brand) : "/";
-    return !s.includes(sep);
-  }
+function isBaseTone(size: any, brand?: string) {
+  const s = String(size ?? "").trim();
+  const sep = getSeparatorBySize(s, brand);
+
+  // base tone = no separador (ej "7")
+  return !s.includes(sep);
+}
+
 
   function isColorLevelsProduct(product: any) {
     const id = normText(String(product?.id ?? ""));
@@ -151,8 +162,9 @@ export default function ProductPageClient({
 
     // Regla genérica: muchas variantes con "/"
     const vars = Array.isArray(product?.variants) ? product.variants : [];
-    const hasSlash = vars.filter((v: any) => String(v?.size ?? "").includes("/")).length;
-    return vars.length >= 20 && hasSlash >= 10;
+    const hasSep = vars.filter((v: any) => /[\/_. ,]/.test(String(v?.size ?? ""))).length;
+return vars.length >= 20 && hasSep >= 10;
+
   }
 
   // -----------------------
