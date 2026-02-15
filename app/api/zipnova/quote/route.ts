@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { appendShippingEvent } from "@/lib/lib/sheets"; // ajustá si tu ruta real es otra
+import { appendShippingEvent } from "@/lib/lib/sheets";
 
 export const runtime = "nodejs";
 
@@ -17,59 +17,85 @@ function safeJsonParse(text: string) {
   }
 }
 
+function cleanZip(v: any) {
+  return String(v ?? "").trim().replace(/\D/g, "");
+}
+
+function toNum(v: any, fallback: number) {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+/**
+ * GET proxy para test rápido desde navegador:
+ * /api/zipnova/quote?debug=1&zipcode=2500&declared_value=20000
+ */
 export async function GET(req: Request) {
   const url = new URL(req.url);
-  const zipcode = url.searchParams.get("zipcode") ?? "2500";
-  const declared_value = Number(url.searchParams.get("declared_value") ?? "20000");
+  const zipcode = url.searchParams.get("zipcode") ?? "";
+  const declared_value = url.searchParams.get("declared_value");
+
+  const body: any = {};
+  if (zipcode) body.zipcode = zipcode;
+  if (declared_value != null) body.declared_value = Number(declared_value);
 
   const fakeReq = new Request(req.url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ zipcode, declared_value }),
+    body: JSON.stringify(body),
   });
 
-  // Reutiliza tu POST real
   return POST(fakeReq as any);
 }
 
-
 export async function POST(req: Request) {
+  const debug = new URL(req.url).searchParams.get("debug") === "1";
+
   try {
-    const KEY = mustEnv("ZIPNOVA_API_KEY"); // API Token
-    const SECRET = mustEnv("ZIPNOVA_API_SECRET"); // API Secret
+    const KEY = mustEnv("ZIPNOVA_API_KEY");
+    const SECRET = mustEnv("ZIPNOVA_API_SECRET");
     const BASE_URL = mustEnv("ZIPNOVA_BASE_URL"); // https://api.zipnova.com.ar
     const QUOTE_PATH = mustEnv("ZIPNOVA_QUOTE_PATH"); // /v2/shipments/quote
-
-    // ✅ IDs reales
-    const ACCOUNT_ID = Number(mustEnv("ZIPNOVA_ACCOUNT_ID")); // 20530
-    const ORIGIN_ID = Number(mustEnv("ZIPNOVA_ORIGIN_ID")); // 374137
+    const ACCOUNT_ID = Number(mustEnv("ZIPNOVA_ACCOUNT_ID"));
+    const ORIGIN_ID = Number(mustEnv("ZIPNOVA_ORIGIN_ID"));
 
     const body = await req.json().catch(() => ({}));
 
-    // ======== Normalización dura (evita fallos por formato) ========
-    const destZipRaw = String(body?.destination?.zipcode ?? body?.zipcode ?? "2000").trim();
-    const destZip = destZipRaw.replace(/\D/g, ""); // solo números
+    // ------------------------
+    // DESTINO: zipcode obligatorio (NO default 2000)
+    // ------------------------
+    const destZip = cleanZip(body?.destination?.zipcode ?? body?.zipcode);
+    if (!destZip) {
+      return NextResponse.json(
+        { ok: false, error: "Missing destination zipcode" },
+        { status: 400 }
+      );
+    }
 
-    const destCity = String(body?.destination?.city ?? body?.city ?? "rosario")
-      .trim()
-      .toLowerCase();
+    // city/state SOLO si vienen (NO default rosario/santa fe)
+    const destCityRaw = body?.destination?.city ?? body?.city;
+    const destStateRaw = body?.destination?.state ?? body?.state;
 
-    const destState = String(body?.destination?.state ?? body?.state ?? "santa fe")
-      .trim()
-      .toLowerCase();
+    const destination: any = { zipcode: destZip, country: "AR" };
+    if (destCityRaw) destination.city = String(destCityRaw).trim().toLowerCase();
+    if (destStateRaw) destination.state = String(destStateRaw).trim().toLowerCase();
 
+    // ------------------------
+    // ITEMS: defaults razonables
+    // ------------------------
     const rawItems = Array.isArray(body?.items) ? body.items : [];
-
     const items =
       rawItems.length > 0
         ? rawItems.map((it: any, idx: number) => ({
             sku: String(it?.sku ?? it?.productId ?? `SKU-${idx + 1}`),
-            weight: Number(it?.weight ?? 500),
-            height: Number(it?.height ?? 10),
-            width: Number(it?.width ?? 10),
-            length: Number(it?.length ?? 10),
-            description: String(it?.description ?? it?.title ?? it?.name ?? it?.productId ?? "Item"),
-            classification_id: Number(it?.classification_id ?? 1),
+            weight: toNum(it?.weight, 500),
+            height: toNum(it?.height, 10),
+            width: toNum(it?.width, 10),
+            length: toNum(it?.length, 10),
+            description: String(
+              it?.description ?? it?.title ?? it?.name ?? it?.productId ?? "Item"
+            ),
+            classification_id: toNum(it?.classification_id, 1),
           }))
         : [
             {
@@ -83,24 +109,23 @@ export async function POST(req: Request) {
             },
           ];
 
-    const declared_value = Number(body?.declared_value ?? body?.declaredValue ?? body?.total ?? 10000);
+    const declared_value = toNum(
+      body?.declared_value ?? body?.declaredValue ?? body?.total,
+      10000
+    );
 
-    // ======== Payload v2 ========
     const payload = {
       account_id: ACCOUNT_ID,
       origin_id: ORIGIN_ID,
       declared_value,
       items,
-      destination: {
-        city: destCity,
-        state: destState,
-        zipcode: destZip,
-        country: "AR",
-      },
+      destination,
     };
 
     const base = String(BASE_URL).replace(/\/$/, "");
-    const path = String(QUOTE_PATH).startsWith("/") ? String(QUOTE_PATH) : `/${String(QUOTE_PATH)}`;
+    const path = String(QUOTE_PATH).startsWith("/")
+      ? String(QUOTE_PATH)
+      : `/${String(QUOTE_PATH)}`;
     const url = `${base}${path}`;
 
     const auth = Buffer.from(`${KEY}:${SECRET}`, "utf8").toString("base64");
@@ -119,7 +144,6 @@ export async function POST(req: Request) {
     const text = await r.text();
     const data = safeJsonParse(text);
 
-    // ✅ Log útil (sin credenciales)
     if (!r.ok) {
       console.error("[ZIPNOVA QUOTE] HTTP error", {
         status: r.status,
@@ -129,45 +153,44 @@ export async function POST(req: Request) {
       });
     }
 
-    // ✅ Caso A: Zipnova devuelve options[] (si alguna cuenta lo trae así)
+    // ------------------------
+    // Normalización de opciones
+    // ------------------------
+    let options: any[] = [];
+
+    // Caso A: options[]
     if (r.ok && Array.isArray((data as any)?.options)) {
-      return NextResponse.json(
-        {
-          ok: true,
-          status: r.status,
-          options: (data as any).options,
-        },
-        { status: 200 }
-      );
+      options = (data as any).options;
     }
 
-    // ✅ Caso B (REAL): Zipnova devuelve results/all_results -> normalizamos a options[]
-    if (r.ok) {
+    // Caso B: all_results[]
+    if (r.ok && options.length === 0) {
       const all = Array.isArray((data as any)?.all_results) ? (data as any).all_results : [];
 
-      const options = all
+      options = all
         .filter((x: any) => x?.selectable !== false)
         .map((x: any) => {
           const carrierName = x?.carrier?.name ?? "Carrier";
           const serviceName = x?.service_type?.name ?? x?.service_type?.code ?? "Servicio";
-          const id = `${x?.carrier?.id ?? "c"}_${x?.service_type?.id ?? x?.service_type?.code ?? "s"}`;
+          const id = `${x?.carrier?.id ?? "c"}_${
+            x?.service_type?.id ?? x?.service_type?.code ?? "s"
+          }`;
 
-          // usamos price_incl_tax si está; si no, price / seller_price*
-          const price = Number(
+          const priceRaw =
             x?.amounts?.price_incl_tax ??
-              x?.amounts?.price ??
-              x?.amounts?.seller_price_incl_tax ??
-              x?.amounts?.seller_price ??
-              0
-          );
+            x?.amounts?.price ??
+            x?.amounts?.seller_price_incl_tax ??
+            x?.amounts?.seller_price ??
+            null;
 
+          const price = priceRaw == null ? null : Number(priceRaw);
           const eta = x?.delivery_time?.estimated_delivery ?? null;
           const tags = Array.isArray(x?.tags) ? x.tags : [];
 
           return {
             id,
             name: `${carrierName} - ${serviceName}`,
-            price: Number.isFinite(price) && price > 0 ? Math.round(price) : 12000,
+            price: Number.isFinite(price as any) ? Math.round(price as number) : null,
             meta: {
               carrier_id: x?.carrier?.id ?? null,
               service_type_id: x?.service_type?.id ?? null,
@@ -175,79 +198,77 @@ export async function POST(req: Request) {
               logistic_type: x?.logistic_type ?? null,
               eta,
               tags,
-              // si después querés mostrar puntos de retiro, lo tenés acá
-              pickup_points_count: Array.isArray(x?.pickup_points) ? x.pickup_points.length : 0,
+              pickup_points_count: Array.isArray(x?.pickup_points)
+                ? x.pickup_points.length
+                : 0,
             },
           };
         })
+        // 👇 clave: si no hay precio, NO inventamos 12000
+        .filter((o: any) => typeof o.price === "number" && o.price > 0)
         .sort((a: any, b: any) => a.price - b.price);
-await appendShippingEvent({
-  event_type: "quote_created",
-  provider: "zipnova",
-  account_id: ACCOUNT_ID,
-  origin_id: ORIGIN_ID,
-  destination_zipcode: destZip,
-  raw: { options_count: options.length },
-});
-const selected =
-  options.find(
-    (o: any) => Array.isArray(o?.meta?.tags) && o.meta.tags.includes("cheapest")
-  ) ?? options[0];
+    }
 
-await appendShippingEvent({
-  event_type: "quote_selected",
-  provider: "zipnova",
-  account_id: ACCOUNT_ID,
-  origin_id: ORIGIN_ID,
-  destination_zipcode: destZip,
-  option_id: selected?.id,
-  option_name: selected?.name,
-  price: selected?.price,
-  eta: selected?.meta?.eta ?? "",
-  carrier_id: selected?.meta?.carrier_id ?? "",
-  service_type_id: selected?.meta?.service_type_id ?? "",
-  service_code: selected?.meta?.service_code ?? "",
-  raw: { selected_id: selected?.id },
-});
+    // ------------------------
+    // Logs a Sheets
+    // ------------------------
+    await appendShippingEvent({
+      event_type: "quote_created",
+      provider: "zipnova",
+      account_id: ACCOUNT_ID,
+      origin_id: ORIGIN_ID,
+      destination_zipcode: destZip,
+      raw: { options_count: options.length },
+    });
 
-      if (options.length > 0) {
-        return NextResponse.json(
-          {
-            ok: true,
-            status: r.status,
-            options,
-          },
-          { status: 200 }
-        );
-      }
+    const selected =
+      options.find(
+        (o: any) => Array.isArray(o?.meta?.tags) && o.meta.tags.includes("cheapest")
+      ) ?? options[0];
 
-      // r.ok pero sin resultados seleccionables -> fallback sin romper checkout
+    if (selected) {
+      await appendShippingEvent({
+        event_type: "quote_selected",
+        provider: "zipnova",
+        account_id: ACCOUNT_ID,
+        origin_id: ORIGIN_ID,
+        destination_zipcode: destZip,
+        option_id: selected?.id,
+        option_name: selected?.name,
+        price: selected?.price,
+        eta: selected?.meta?.eta ?? "",
+        carrier_id: selected?.meta?.carrier_id ?? "",
+        service_type_id: selected?.meta?.service_type_id ?? "",
+        service_code: selected?.meta?.service_code ?? "",
+        raw: { selected_id: selected?.id },
+      });
+    }
+
+    // ------------------------
+    // Respuesta
+    // ------------------------
+    if (r.ok && options.length > 0) {
       return NextResponse.json(
         {
-          ok: false,
+          ok: true,
           status: r.status,
-          error: "Zipnova quote returned no selectable results",
-          zipnova_raw: data,
-          options: [
-            { id: "adriani", name: "Adriani", price: 5000 },
-            { id: "zipnova_est", name: "Zipnova (estimado)", price: 12000 },
-          ],
+          options,
+          ...(debug ? { payloadSent: payload, zipnova_raw: data } : {}),
         },
         { status: 200 }
       );
     }
 
-    // ❌ HTTP error real -> fallback
+    // fallback sin romper checkout
     return NextResponse.json(
       {
         ok: false,
         status: r.status,
-        error: (data as any)?.message ?? (data as any)?.error ?? "Zipnova API error",
-        zipnova_raw: data,
-        options: [
-          { id: "adriani", name: "Adriani", price: 5000 },
-          { id: "zipnova_est", name: "Zipnova (estimado)", price: 12000 },
-        ],
+        error: r.ok
+          ? "Zipnova quote returned no selectable priced results"
+          : (data as any)?.message ?? (data as any)?.error ?? "Zipnova API error",
+        ...(debug ? { payloadSent: payload, zipnova_raw: data } : {}),
+        options: [{ id: "zipnova_est", name: "Zipnova (estimado)", price: 12000 }],
       },
       { status: 200 }
     );
@@ -257,10 +278,7 @@ await appendShippingEvent({
       {
         ok: false,
         error: e?.message ?? "Unknown error",
-        options: [
-          { id: "adriani", name: "Adriani", price: 5000 },
-          { id: "zipnova_est", name: "Zipnova (estimado)", price: 12000 },
-        ],
+        options: [{ id: "zipnova_est", name: "Zipnova (estimado)", price: 12000 }],
       },
       { status: 200 }
     );
