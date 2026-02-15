@@ -206,3 +206,75 @@ export async function updateOrderStatus(orderId: string, status: string) {
   // NOTA: esta sheet debe tener al menos columnas A:C para que tenga sentido.
   await appendMpEvent("orders", [new Date().toISOString(), orderId, status]);
 }
+/* ================= ZIP CACHE (CP -> CIUDAD/PROVINCIA) ================= */
+
+export type ZipCacheRow = {
+  zipcode: string;
+  city: string;
+  state: string;
+  destination_id?: string;
+  updated_at?: string;
+};
+
+/**
+ * Busca un CP en la pestaña "zip_cache".
+ * Requiere headers: zipcode | city | state | destination_id | updated_at
+ */
+export async function getZipCache(zipcode: string): Promise<ZipCacheRow | null> {
+  const z = String(zipcode ?? "").trim().replace(/\D/g, "");
+  if (!z) return null;
+
+  const rows = await getSheetRows("zip_cache"); // devuelve objetos por header
+  if (!rows?.length) return null;
+
+  const found = rows.find((r: any) => String(r.zipcode ?? "").trim() === z);
+  if (!found) return null;
+
+  return {
+    zipcode: z,
+    city: String(found.city ?? "").trim().toLowerCase(),
+    state: String(found.state ?? "").trim().toLowerCase(),
+    destination_id: String(found.destination_id ?? "").trim() || undefined,
+    updated_at: String(found.updated_at ?? "").trim() || undefined,
+  };
+}
+
+/**
+ * Inserta una fila nueva en zip_cache.
+ * (Versión 1 PRO: solo append. Si el CP ya existe, no inserta.)
+ */
+export async function upsertZipCache(row: {
+  zipcode: string;
+  city: string;
+  state: string;
+  destination_id?: string | number | null;
+}) {
+  const zipcode = String(row.zipcode ?? "").trim().replace(/\D/g, "");
+  const city = String(row.city ?? "").trim().toLowerCase();
+  const state = String(row.state ?? "").trim().toLowerCase();
+  const destination_id =
+    row.destination_id == null ? "" : String(row.destination_id).trim();
+  const updated_at = new Date().toISOString();
+
+  if (!zipcode || !city || !state) {
+    throw new Error("upsertZipCache requires zipcode, city, state");
+  }
+
+  const existing = await getZipCache(zipcode);
+  if (existing) {
+    // No duplicamos (pro operativo: el cache no se ensucia)
+    return { ok: true, action: "exists", zipcode };
+  }
+
+  // IMPORTANTE: asegurate que zip_cache tenga columnas A:E
+  await appendRow("zip_cache", "A:E", [
+    zipcode,
+    city,
+    state,
+    destination_id,
+    updated_at,
+  ]);
+
+  return { ok: true, action: "inserted", zipcode };
+}
+

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { appendShippingEvent } from "@/lib/lib/sheets";
+import { appendShippingEvent, getZipCache } from "@/lib/lib/sheets";
 
 export const runtime = "nodejs";
 
@@ -30,23 +30,8 @@ function toNum(v: any, fallback: number) {
  * GET proxy para test rápido desde navegador:
  * /api/zipnova/quote?debug=1&zipcode=2500&declared_value=20000
  */
-export async function GET(req: Request) {
-    
-  const url = new URL(req.url);
-  const zipcode = url.searchParams.get("zipcode") ?? "";
-  const declared_value = url.searchParams.get("declared_value");
-
-  const body: any = {};
-  if (zipcode) body.zipcode = zipcode;
-  if (declared_value != null) body.declared_value = Number(declared_value);
-
-  const fakeReq = new Request(req.url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-
-  return POST(fakeReq as any);
+export async function GET() {
+  return NextResponse.json({ ok: true, marker: "QUOTE_GET_V2_999" });
 }
 
 export async function POST(req: Request) {
@@ -74,12 +59,38 @@ export async function POST(req: Request) {
     }
 
     // city/state SOLO si vienen (NO default rosario/santa fe)
-    const destCityRaw = body?.destination?.city ?? body?.city;
-    const destStateRaw = body?.destination?.state ?? body?.state;
+   // zipcode ya lo tenés calculado como destZip
+let destCityRaw = body?.destination?.city ?? body?.city;
+let destStateRaw = body?.destination?.state ?? body?.state;
 
-    const destination: any = { zipcode: destZip, country: "AR" };
-    if (destCityRaw) destination.city = String(destCityRaw).trim().toLowerCase();
-    if (destStateRaw) destination.state = String(destStateRaw).trim().toLowerCase();
+// Si no viene city/state, lo resolvemos con zip_cache (modo PRO)
+if (!destCityRaw || !destStateRaw) {
+  const cached = await getZipCache(destZip);
+  if (cached?.city && cached?.state) {
+    destCityRaw = cached.city;
+    destStateRaw = cached.state;
+  }
+}
+
+// Si igual no hay city/state, cortamos con error claro (no pegamos a Zipnova al pedo)
+if (!destCityRaw || !destStateRaw) {
+  return NextResponse.json(
+    {
+      ok: false,
+      error: "Zipnova requires destination city/state (or destination.id). Add zipcode to zip_cache.",
+      zipcode: destZip,
+      hint: "Complete zip_cache sheet: zipcode | city | state",
+    },
+    { status: 404 }
+  );
+}
+
+const destination: any = {
+  zipcode: destZip,
+  country: "AR",
+  city: String(destCityRaw).trim().toLowerCase(),
+  state: String(destStateRaw).trim().toLowerCase(),
+};
 
     // ------------------------
     // ITEMS: defaults razonables
