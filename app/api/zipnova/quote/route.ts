@@ -31,6 +31,7 @@ function toNum(v: any, fallback: number) {
  * /api/zipnova/quote?debug=1&zipcode=2500&declared_value=20000
  */
 export async function GET(req: Request) {
+    return NextResponse.json({ ok: true, marker: "QUOTE_GET_V1" });
   const url = new URL(req.url);
   const zipcode = url.searchParams.get("zipcode") ?? "";
   const declared_value = url.searchParams.get("declared_value");
