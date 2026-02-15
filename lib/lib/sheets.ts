@@ -59,7 +59,6 @@ export async function getSheetRows(sheetName: string) {
   if (values.length === 0) return [];
 
   const headers = (values[0] ?? []).map(normalizeHeader);
-
   const hasAnyHeader = headers.some((h) => h.length > 0);
   if (!hasAnyHeader) return [];
 
@@ -90,9 +89,7 @@ export async function appendRow(
   const sheetId = process.env.GOOGLE_SHEETS_SHEET_ID;
   if (!sheetId) throw new Error("Falta GOOGLE_SHEETS_SHEET_ID");
 
-  const sheets = getSheetsClient([
-    "https://www.googleapis.com/auth/spreadsheets",
-  ]);
+  const sheets = getSheetsClient(["https://www.googleapis.com/auth/spreadsheets"]);
 
   await sheets.spreadsheets.values.append({
     spreadsheetId: sheetId,
@@ -199,13 +196,6 @@ export async function appendShippingEvent(ev: ShippingEvent) {
   return appendRow("shipping_events", "A:O", row);
 }
 
-/* ================= UTILIDAD: STATUS DE ORDER ================= */
-
-export async function updateOrderStatus(orderId: string, status: string) {
-  // Mantengo tu comportamiento actual (log a "orders")
-  // NOTA: esta sheet debe tener al menos columnas A:C para que tenga sentido.
-  await appendMpEvent("orders", [new Date().toISOString(), orderId, status]);
-}
 /* ================= ZIP CACHE (CP -> CIUDAD/PROVINCIA) ================= */
 
 export type ZipCacheRow = {
@@ -224,7 +214,7 @@ export async function getZipCache(zipcode: string): Promise<ZipCacheRow | null> 
   const z = String(zipcode ?? "").trim().replace(/\D/g, "");
   if (!z) return null;
 
-  const rows = await getSheetRows("zip_cache"); // devuelve objetos por header
+  const rows = await getSheetRows("zip_cache");
   if (!rows?.length) return null;
 
   const found = rows.find((r: any) => String(r.zipcode ?? "").trim() === z);
@@ -239,10 +229,6 @@ export async function getZipCache(zipcode: string): Promise<ZipCacheRow | null> 
   };
 }
 
-/**
- * Inserta una fila nueva en zip_cache.
- * (Versión 1 PRO: solo append. Si el CP ya existe, no inserta.)
- */
 export async function upsertZipCache(row: {
   zipcode: string;
   city: string;
@@ -261,20 +247,73 @@ export async function upsertZipCache(row: {
   }
 
   const existing = await getZipCache(zipcode);
-  if (existing) {
-    // No duplicamos (pro operativo: el cache no se ensucia)
-    return { ok: true, action: "exists", zipcode };
-  }
+  if (existing) return { ok: true, action: "exists", zipcode };
 
-  // IMPORTANTE: asegurate que zip_cache tenga columnas A:E
-  await appendRow("zip_cache", "A:E", [
-    zipcode,
-    city,
-    state,
-    destination_id,
-    updated_at,
-  ]);
-
+  await appendRow("zip_cache", "A:E", [zipcode, city, state, destination_id, updated_at]);
   return { ok: true, action: "inserted", zipcode };
 }
 
+/* ================= PESOS POR SKU (variants -> gramos) ================= */
+
+function normKey(k: any) {
+  return String(k ?? "").trim().toLowerCase();
+}
+
+function pickFirst(obj: any, keys: string[]) {
+  for (const k of keys) {
+    if (obj && obj[k] != null && String(obj[k]).trim() !== "") return obj[k];
+  }
+  return null;
+}
+
+function parseNumberLoose(v: any): number | null {
+  if (v == null) return null;
+  const s = String(v).trim().replace(",", ".");
+  const n = Number(s);
+  return Number.isFinite(n) ? n : null;
+}
+
+/**
+ * Lee la sheet "variants" y devuelve un Record SKU -> gramos.
+ * Columnas aceptadas:
+ * - sku / sku_code / sku_id / codigo
+ * - grams / gramos / weight_g / peso_g
+ * - weight / peso / kg / weight_kg (si <50 se asume kg y se pasa a gramos)
+ */
+export async function getSkuGramsMap(): Promise<Record<string, number>> {
+  const rows = await getSheetRows("variants");
+  const map: Record<string, number> = {};
+
+  for (const r0 of rows as any[]) {
+    const r: any = {};
+    for (const k of Object.keys(r0)) r[normKey(k)] = r0[k];
+
+    const sku = String(
+      pickFirst(r, ["sku", "sku_code", "sku_id", "codigo", "código"]) ?? ""
+    )
+      .trim()
+      .toUpperCase();
+
+    if (!sku) continue;
+
+    let grams =
+      parseNumberLoose(pickFirst(r, ["grams", "gramos", "weight_g", "peso_g", "g"])) ??
+      null;
+
+    if (grams == null) {
+      const w = parseNumberLoose(pickFirst(r, ["weight", "peso", "kg", "weight_kg"]));
+      if (w != null) grams = w < 50 ? Math.round(w * 1000) : Math.round(w);
+    }
+
+    if (grams == null || grams <= 0) continue;
+    map[sku] = Math.round(grams);
+  }
+
+  return map;
+}
+
+/* ================= UTILIDAD: STATUS DE ORDER ================= */
+
+export async function updateOrderStatus(orderId: string, status: string) {
+  await appendMpEvent("orders", [new Date().toISOString(), orderId, status]);
+}
