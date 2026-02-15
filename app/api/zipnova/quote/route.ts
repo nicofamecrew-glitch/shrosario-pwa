@@ -70,6 +70,14 @@ if (!destCityRaw || !destStateRaw) {
     destCityRaw = cached.city;
     destStateRaw = cached.state;
   }
+  if (debug) {
+  console.log("[ZIPNOVA] destination resolved", {
+    zipcode: destZip,
+    city: destCityRaw,
+    state: destStateRaw,
+  });
+}
+
 }
 
 // Si igual no hay city/state, cortamos con error claro (no pegamos a Zipnova al pedo)
