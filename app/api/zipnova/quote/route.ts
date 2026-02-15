@@ -30,9 +30,24 @@ function toNum(v: any, fallback: number) {
  * GET proxy para test rápido desde navegador:
  * /api/zipnova/quote?debug=1&zipcode=2500&declared_value=20000
  */
-export async function GET() {
-  return NextResponse.json({ ok: true, marker: "QUOTE_GET_V2_999" });
+export async function GET(req: Request) {
+  const url = new URL(req.url);
+  const zipcode = url.searchParams.get("zipcode") ?? "";
+  const declared_value = url.searchParams.get("declared_value");
+
+  const body: any = {};
+  if (zipcode) body.zipcode = zipcode;
+  if (declared_value != null) body.declared_value = Number(declared_value);
+
+  const fakeReq = new Request(req.url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+
+  return POST(fakeReq as any);
 }
+
 
 export async function POST(req: Request) {
   const debug = new URL(req.url).searchParams.get("debug") === "1";
