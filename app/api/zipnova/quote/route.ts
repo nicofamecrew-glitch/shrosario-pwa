@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { appendShippingEvent, getZipCache, getSkuGramsMap } from "@/lib/lib/sheets";
+import { appendShippingEvent, getZipCache, getSkuGramsMap, upsertZipCache } from "@/lib/lib/sheets";
 
 export const runtime = "nodejs";
 
@@ -25,6 +25,80 @@ function toNum(v: any, fallback: number) {
   const n = Number(v);
   return Number.isFinite(n) ? n : fallback;
 }
+
+function optEnv(name: string, fallback: string) {
+  const v = process.env[name];
+  return v ? v : fallback;
+}
+
+async function resolveDestinationFromZipnova(args: {
+  baseUrl: string;
+  key: string;
+  secret: string;
+  zipcode: string;
+}) {
+  const { baseUrl, key, secret, zipcode } = args;
+
+  // Endpoint configurable por env para no adivinar a futuro
+  // Si tu Zipnova usa otro path, lo ajustás en Vercel sin tocar código.
+  const RESOLVE_PATH = optEnv("ZIPNOVA_RESOLVE_PATH", "/v2/locations/resolve");
+
+  const base = String(baseUrl).replace(/\/$/, "");
+  const path = RESOLVE_PATH.startsWith("/") ? RESOLVE_PATH : `/${RESOLVE_PATH}`;
+
+  // Asumo query por zipcode (si tu endpoint usa body, lo cambiamos en 30s)
+  const url = `${base}${path}?zipcode=${encodeURIComponent(zipcode)}`;
+
+  const auth = Buffer.from(`${key}:${secret}`, "utf8").toString("base64");
+
+  const r = await fetch(url, {
+    method: "GET",
+    headers: {
+      Accept: "application/json",
+      Authorization: `Basic ${auth}`,
+    },
+    cache: "no-store",
+  });
+
+  const text = await r.text();
+  const data = safeJsonParse(text);
+
+  if (!r.ok) {
+    return { ok: false as const, status: r.status, data };
+  }
+
+  // Normalización flexible (por si cambia el shape)
+  const city =
+    (data as any)?.city ??
+    (data as any)?.destination?.city ??
+    (data as any)?.location?.city ??
+    null;
+
+  const state =
+    (data as any)?.state ??
+    (data as any)?.destination?.state ??
+    (data as any)?.location?.state ??
+    null;
+
+  const destination_id =
+    (data as any)?.id ??
+    (data as any)?.destination?.id ??
+    (data as any)?.location?.id ??
+    null;
+
+  if (!city || !state) {
+    return { ok: false as const, status: 200, data };
+  }
+
+  return {
+    ok: true as const,
+    city: String(city).trim().toLowerCase(),
+    state: String(state).trim().toLowerCase(),
+    destination_id: destination_id != null ? String(destination_id) : undefined,
+    raw: data,
+  };
+}
+
 
 type PackedBox = {
   weight: number; // gramos
@@ -123,25 +197,60 @@ export async function POST(req: Request) {
     let destCityRaw = body?.destination?.city ?? body?.city;
     let destStateRaw = body?.destination?.state ?? body?.state;
 
-    if (!destCityRaw || !destStateRaw) {
-      const cached = await getZipCache(destZip);
-      if (cached?.city && cached?.state) {
-        destCityRaw = cached.city;
-        destStateRaw = cached.state;
-      }
-    }
+ // Si no viene city/state: 1) intento cache 2) si no existe, consulto Zipnova y cacheo
+if (!destCityRaw || !destStateRaw) {
+  const cached = await getZipCache(destZip);
 
-    if (!destCityRaw || !destStateRaw) {
-      return NextResponse.json(
-        {
-          ok: false,
-          error: "Zipnova requires destination city/state (or destination.id). Add zipcode to zip_cache.",
-          zipcode: destZip,
-          hint: "Complete zip_cache sheet: zipcode | city | state",
-        },
-        { status: 404 }
-      );
+  if (cached?.city && cached?.state) {
+    destCityRaw = cached.city;
+    destStateRaw = cached.state;
+    if (debug) console.log("[ZIPNOVA] destination from cache", { destZip, destCityRaw, destStateRaw });
+  } else {
+    const resolved = await resolveDestinationFromZipnova({
+      baseUrl: BASE_URL,
+      key: KEY,
+      secret: SECRET,
+      zipcode: destZip,
+    });
+
+    if (resolved.ok) {
+      destCityRaw = resolved.city;
+      destStateRaw = resolved.state;
+
+      // guardamos para la próxima
+      await upsertZipCache({
+        zipcode: destZip,
+        city: resolved.city,
+        state: resolved.state,
+        destination_id: resolved.destination_id ?? null,
+      });
+
+      if (debug) console.log("[ZIPNOVA] destination resolved+cached", {
+        destZip,
+        destCityRaw,
+        destStateRaw,
+        destination_id: resolved.destination_id,
+      });
+    } else {
+      console.error("[ZIPNOVA] resolve failed", { destZip, status: resolved.status, raw: resolved.data });
     }
+  }
+}
+
+// Si igual no hay city/state, cortamos con error claro (pero ahora debería pasar solo si Zipnova no resolvió)
+if (!destCityRaw || !destStateRaw) {
+  return NextResponse.json(
+    {
+      ok: false,
+      error:
+        "No pude resolver city/state para este CP. Revisá ZIPNOVA_RESOLVE_PATH o cargalo manualmente en zip_cache.",
+      zipcode: destZip,
+      hint: "Sheet zip_cache: zipcode | city | state | destination_id | updated_at",
+    },
+    { status: 404 }
+  );
+}
+
 
     const destination: any = {
       zipcode: destZip,
