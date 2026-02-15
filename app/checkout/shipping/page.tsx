@@ -61,54 +61,61 @@ export default function ShippingPage() {
   const [selected, setSelected] = useState<ShippingOption | null>(null);
   const [notes, setNotes] = useState("");
 
+  const finalCost = useMemo(() => {
+  if (!selected) return 0;
+  return cartTotal >= freeShippingThreshold ? 0 : selected.cost;
+}, [selected, cartTotal, freeShippingThreshold]);
+
+ console.log(
+  "Zipnova items",
+  items.map((it: any) => ({ variantSku: it?.variantSku, productId: it?.productId, qty: it?.quantity }))
+);
+
+
   async function fetchZipnovaOptions() {
-    try {
-      const res = await fetch("/api/zipnova/quote", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          account_id: "3355",
-          origin_id: "9323",
-          declared_value: cartTotal,
-          items: items.map(it => ({
-            sku: String(it?.variantSku ?? it?.productId ?? "GENERIC"),
-            weight: 500,
-            height: 10,
-            width: 10,
-            length: 10,
-            description: "Producto",
-            classification_id: 1,
-          })),
-          destination: {
-            city: "Posadas",
-            state: "Misiones",
-            zipcode,
-          },
-        }),
-      });
-      const data = await res.json();
-      console.log("Respuesta Zipnova:", data);
+  try {
+    if (!zipcode.trim()) return;
 
-      // Ajustá según la estructura real de la API
-      const opts = (data?.options ?? data?.received ?? []).map((o: any, idx: number) => ({
-        id: o.id ?? `opt-${idx}`,
-        label: o.name ?? o.label ?? "Opción de envío",
-        cost: Number(o.price ?? o.cost ?? 12000),
-      }));
+    const res = await fetch("/api/zipnova/quote", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        destination: { zipcode: zipcode.trim() },
+        declared_value: Math.round(cartTotal), // <- era total
+        items: items.map((it: any) => ({
+          // Zipnova espera SKU + qty
+          sku: String(it?.variantSku ?? it?.sku ?? it?.id ?? it?.productId ?? "")
+            .trim()
+            .toUpperCase(),
+          qty: Number(it?.quantity ?? 1),
+        })),
+      }),
+    });
 
-      setOptions(opts);
-    } catch (err) {
-      console.error("Error cotizando Zipnova:", err);
-      setOptions([]);
-    }
+    const data = await res.json();
+    console.log("Respuesta Zipnova:", data);
+
+    const opts = (data?.options ?? []).map((o: any, idx: number) => ({
+      id: o.id ?? `opt-${idx}`,
+      label: o.name ?? "Opción de envío",
+      cost: Number(o.price ?? 0),
+    }));
+
+    setOptions(opts);
+    setSelected(opts[0] ?? null);
+  } catch (err) {
+    console.error("Error cotizando Zipnova:", err);
+    setOptions([]);
+    setSelected(null);
   }
+}
 
   function saveAndContinue() {
     if (!selected) return;
     const payload: ShippingSelection = {
       method: selected.id,
       label: selected.label,
-      cost: selected.cost,
+      cost: finalCost,
       notes: notes?.trim() ? notes.trim() : undefined,
       updatedAt: new Date().toISOString(),
       total: cartTotal,
@@ -204,7 +211,7 @@ export default function ShippingPage() {
         <div className="flex items-center justify-between">
           <div className="text-gray-300">Envío</div>
           <div className="font-bold text-white">
-            {selected ? formatARS(selected.cost) : "-"}
+            {selected ? formatARS(finalCost) : "-"}
           </div>
         </div>
 
