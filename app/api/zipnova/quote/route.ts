@@ -198,14 +198,25 @@ export async function POST(req: Request) {
     let destStateRaw = body?.destination?.state ?? body?.state;
 
  // Si no viene city/state: 1) intento cache 2) si no existe, consulto Zipnova y cacheo
+// ------------------------
+// Resolver city/state (cache → resolve → quote fallback)
+// ------------------------
 if (!destCityRaw || !destStateRaw) {
   const cached = await getZipCache(destZip);
 
   if (cached?.city && cached?.state) {
     destCityRaw = cached.city;
     destStateRaw = cached.state;
-    if (debug) console.log("[ZIPNOVA] destination from cache", { destZip, destCityRaw, destStateRaw });
+
+    if (debug) {
+      console.log("[ZIPNOVA] destination from cache", {
+        destZip,
+        destCityRaw,
+        destStateRaw,
+      });
+    }
   } else {
+    // 1️⃣ Intento resolve endpoint
     const resolved = await resolveDestinationFromZipnova({
       baseUrl: BASE_URL,
       key: KEY,
@@ -217,7 +228,6 @@ if (!destCityRaw || !destStateRaw) {
       destCityRaw = resolved.city;
       destStateRaw = resolved.state;
 
-      // guardamos para la próxima
       await upsertZipCache({
         zipcode: destZip,
         city: resolved.city,
@@ -225,31 +235,198 @@ if (!destCityRaw || !destStateRaw) {
         destination_id: resolved.destination_id ?? null,
       });
 
-      if (debug) console.log("[ZIPNOVA] destination resolved+cached", {
-        destZip,
-        destCityRaw,
-        destStateRaw,
-        destination_id: resolved.destination_id,
-      });
+      if (debug) {
+        console.log("[ZIPNOVA] resolved via endpoint", {
+          destZip,
+          destCityRaw,
+          destStateRaw,
+        });
+      }
     } else {
-      console.error("[ZIPNOVA] resolve failed", { destZip, status: resolved.status, raw: resolved.data });
+      // 2️⃣ Fallback: intento quote mínimo
+      const minimalPayload = {
+        account_id: ACCOUNT_ID,
+        origin_id: ORIGIN_ID,
+        declared_value: 10000,
+        items: [
+          {
+            sku: "BOX-1",
+            weight: 500,
+            height: 10,
+            width: 10,
+            length: 10,
+            description: "Item",
+            classification_id: 1,
+          },
+        ],
+        destination: {
+          zipcode: destZip,
+          country: "AR",
+        },
+      };
+
+      const base = String(BASE_URL).replace(/\/$/, "");
+      const path = String(QUOTE_PATH).startsWith("/")
+        ? String(QUOTE_PATH)
+        : `/${String(QUOTE_PATH)}`;
+      const urlQuote = `${base}${path}`;
+      const auth = Buffer.from(`${KEY}:${SECRET}`, "utf8").toString("base64");
+
+      const r0 = await fetch(urlQuote, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          Authorization: `Basic ${auth}`,
+        },
+        body: JSON.stringify(minimalPayload),
+        cache: "no-store",
+      });
+
+      const t0 = await r0.text();
+      const d0 = safeJsonParse(t0);
+
+      const zDest = (d0 as any)?.destination;
+
+      const cityFromZipnova = zDest?.city
+        ? String(zDest.city).trim().toLowerCase()
+        : "";
+      const stateFromZipnova = zDest?.state
+        ? String(zDest.state).trim().toLowerCase()
+        : "";
+
+      if (cityFromZipnova && stateFromZipnova) {
+        destCityRaw = cityFromZipnova;
+        destStateRaw = stateFromZipnova;
+
+        await upsertZipCache({
+          zipcode: destZip,
+          city: cityFromZipnova,
+          state: stateFromZipnova,
+          destination_id: zDest?.id ?? null,
+        });
+
+        if (debug) {
+          console.log("[ZIPNOVA] auto-resolved via quote", {
+            destZip,
+            destCityRaw,
+            destStateRaw,
+          });
+        }
+      } else {
+        return NextResponse.json(
+          {
+            ok: false,
+            error:
+              "No se pudo resolver city/state para ese CP. Cargalo en zip_cache.",
+            zipcode: destZip,
+            zipnova_status: r0.status,
+            zipnova_raw: debug ? d0 : undefined,
+          },
+          { status: 404 }
+        );
+      }
     }
   }
 }
 
+
 // Si igual no hay city/state, cortamos con error claro (pero ahora debería pasar solo si Zipnova no resolvió)
+// Si no viene city/state, intentamos cache + “auto-resolver” con Zipnova
 if (!destCityRaw || !destStateRaw) {
-  return NextResponse.json(
-    {
-      ok: false,
-      error:
-        "No pude resolver city/state para este CP. Revisá ZIPNOVA_RESOLVE_PATH o cargalo manualmente en zip_cache.",
-      zipcode: destZip,
-      hint: "Sheet zip_cache: zipcode | city | state | destination_id | updated_at",
-    },
-    { status: 404 }
-  );
+  const cached = await getZipCache(destZip);
+  if (cached?.city && cached?.state) {
+    destCityRaw = cached.city;
+    destStateRaw = cached.state;
+  } else {
+    // Intento 1: pedir quote SOLO con zipcode y ver si Zipnova lo resuelve
+    const minimalPayload = {
+      account_id: ACCOUNT_ID,
+      origin_id: ORIGIN_ID,
+      declared_value: 10000,
+      items: [
+        {
+          sku: "BOX-1",
+          weight: 500,
+          height: 10,
+          width: 10,
+          length: 10,
+          description: "Item",
+          classification_id: 1,
+        },
+      ],
+      destination: {
+        zipcode: destZip,
+        country: "AR",
+      },
+    };
+
+    const base = String(BASE_URL).replace(/\/$/, "");
+    const path = String(QUOTE_PATH).startsWith("/") ? String(QUOTE_PATH) : `/${String(QUOTE_PATH)}`;
+    const urlQuote = `${base}${path}`;
+    const auth = Buffer.from(`${KEY}:${SECRET}`, "utf8").toString("base64");
+
+    const r0 = await fetch(urlQuote, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: `Basic ${auth}`,
+      },
+      body: JSON.stringify(minimalPayload),
+      cache: "no-store",
+    });
+
+    const t0 = await r0.text();
+    const d0 = safeJsonParse(t0);
+
+    const zDest = (d0 as any)?.destination;
+    const cityFromZipnova = zDest?.city ? String(zDest.city).trim().toLowerCase() : "";
+    const stateFromZipnova = zDest?.state ? String(zDest.state).trim().toLowerCase() : "";
+
+    if (cityFromZipnova && stateFromZipnova) {
+      destCityRaw = cityFromZipnova;
+      destStateRaw = stateFromZipnova;
+
+      // Guardamos para la próxima (no rompe nada si ya existe)
+      try {
+        // si tenés upsertZipCache importado, usalo. Si no, importalo desde sheets.
+        await upsertZipCache({
+          zipcode: destZip,
+          city: cityFromZipnova,
+          state: stateFromZipnova,
+          destination_id: zDest?.id ?? null,
+        });
+      } catch (e) {
+        // no matamos el request por no poder escribir cache
+        console.warn("[ZIPNOVA] could not upsert zip_cache", (e as any)?.message);
+      }
+
+      if (debug) {
+        console.log("[ZIPNOVA] auto-resolved zipcode via zipnova", {
+          zipcode: destZip,
+          city: destCityRaw,
+          state: destStateRaw,
+          destination_id: zDest?.id ?? null,
+        });
+      }
+    } else {
+      // Si Zipnova tampoco lo resuelve, recién ahí pedimos carga manual (raro)
+      return NextResponse.json(
+        {
+          ok: false,
+          error:
+            "No se pudo resolver city/state para ese CP. Cargalo en zip_cache (zipcode | city | state).",
+          zipcode: destZip,
+          zipnova_status: r0.status,
+          zipnova_raw: debug ? d0 : undefined,
+        },
+        { status: 404 }
+      );
+    }
+  }
 }
+
 
 
     const destination: any = {
