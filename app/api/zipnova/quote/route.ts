@@ -17,6 +17,22 @@ function safeJsonParse(text: string) {
   }
 }
 
+export async function GET(req: Request) {
+  const url = new URL(req.url);
+  const zipcode = url.searchParams.get("zipcode") ?? "2500";
+  const declared_value = Number(url.searchParams.get("declared_value") ?? "20000");
+
+  const fakeReq = new Request(req.url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ zipcode, declared_value }),
+  });
+
+  // Reutiliza tu POST real
+  return POST(fakeReq as any);
+}
+
+
 export async function POST(req: Request) {
   try {
     const KEY = mustEnv("ZIPNOVA_API_KEY"); // API Token
