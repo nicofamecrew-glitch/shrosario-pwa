@@ -17,7 +17,7 @@ export default async function Page() {
   const products = await res.json();
 
  return (
-  <>
+  <div className="min-h-screen bg-[hsl(var(--app-bg))] text-[hsl(var(--app-fg))]">
     <HomeSteamPage products={products as any} />
 
     <PromoPopup
@@ -31,8 +31,9 @@ export default async function Page() {
       waText="Hola, vengo desde la app SH Rosario. Quiero la promo Vexa."
       imageUrl="/promo/promo-vexa.webp"
     />
-  </>
+  </div>
 );
+
 
 
 }

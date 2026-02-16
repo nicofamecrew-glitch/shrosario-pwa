@@ -129,8 +129,10 @@ export default function AgendaClient() {
   // Loader inicial
   if (!mounted) {
     return (
-      <div className="min-h-[100svh] bg-[#0b0b0b] text-white p-4">
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-white/60">
+      <div className="min-h-[100svh] bg-[hsl(var(--app-bg))] text-[hsl(var(--app-fg))] p-4">
+
+        <div className="rounded-2xl border border-black/10 bg-black/5 p-4 text-sm text-black/60">
+
           Cargando agenda…
         </div>
       </div>
@@ -219,7 +221,8 @@ export default function AgendaClient() {
   }
 
   return (
-    <div className="min-h-[100svh] bg-[#0b0b0b] text-white">
+    <div className="min-h-[100svh] bg-[hsl(var(--app-bg))] text-[hsl(var(--app-fg))]">
+
       <div className="mx-auto max-w-[1200px] px-3 py-4">
         <AgendaHeader
           currentDate={currentDate}
@@ -240,7 +243,8 @@ export default function AgendaClient() {
 
         <div className="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-[280px_1fr]">
           {/* SIDEBAR (MiniMonth solo desktop para evitar "doble calendario" en mobile) */}
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
+          <div className="rounded-2xl border border-black/10 bg-black/5 p-3">
+
             <div className="hidden lg:block">
               <MiniMonth value={currentDate} onChange={setCurrentDate} />
             </div>
@@ -321,7 +325,7 @@ export default function AgendaClient() {
           {/* MAIN */}
           <div>
             <div className="flex items-center justify-between px-2 pb-2">
-              <div className="text-sm font-semibold text-white/80">Turnos</div>
+              <div className="text-sm font-semibold text-black/70">Turnos</div>
               <button
                 type="button"
                 onClick={openNewTurno}
@@ -331,7 +335,7 @@ export default function AgendaClient() {
               </button>
             </div>
 
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-2">
+            <div className="rounded-2xl border border-black/10 bg-black/5 p-3">
               <WeekGrid
                 currentDate={currentDate}
                 view={view}
