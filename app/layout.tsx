@@ -6,7 +6,7 @@ import { Poppins } from "next/font/google";
 import NextTopLoader from "nextjs-toploader";
 import AppTransitions from "@/components/AppTransitions";
 import NavDebug from "@/components/dev/NavDebug";
-import { html } from "framer-motion/client";
+
 import ThemeToggle from "@/components/ThemeToggle";
 
 const inter = Poppins({
