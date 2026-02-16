@@ -162,13 +162,21 @@ function packIntoBoxes(totalGrams: number): PackedBox[] {
  * /api/zipnova/quote?debug=1&zipcode=2500&declared_value=20000
  */
 export async function GET(req: Request) {
-  const url = new URL(req.url);
-  const zipcode = url.searchParams.get("zipcode") ?? "";
-  const declared_value = url.searchParams.get("declared_value");
+const url = new URL(req.url);
+const searchParams = url.searchParams;
+
+const zipcode = searchParams.get("zipcode") ?? "";
+const declared_value = searchParams.get("declared_value");
+const weightFromQuery = Number(searchParams.get("weight") ?? 500);
+
+
 
   const body: any = {};
   if (zipcode) body.zipcode = zipcode;
   if (declared_value != null) body.declared_value = Number(declared_value);
+
+  const weight = searchParams.get("weight");
+if (weight != null) body.weight = Number(weight);
 
   const fakeReq = new Request(req.url, {
     method: "POST",
@@ -202,6 +210,13 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
+  const u = new URL(req.url);
+
+// prioridad: body.weight > query.weight > 500
+const weightFromQuery = toNum(
+  body?.weight ?? u.searchParams.get("weight"),
+  500
+);
 
     // ------------------------
     // ITEMS (PRO)  ✅ primero, SIEMPRE
@@ -267,17 +282,18 @@ export async function POST(req: Request) {
     }
     // C) Sin items => fallback
     else {
-      items = [
-        {
-          sku: "BOX-1",
-          weight: 500,
-          height: 10,
-          width: 10,
-          length: 10,
-          description: "Item",
-          classification_id: 1,
-        },
-      ];
+     items = [
+  {
+    sku: "BOX-1",
+    weight: weightFromQuery,
+    height: 30,
+    width: 30,
+    length: 40,
+    description: "Item",
+    classification_id: 1,
+  },
+];
+
     }
 
     const totalWeight = items.reduce(
