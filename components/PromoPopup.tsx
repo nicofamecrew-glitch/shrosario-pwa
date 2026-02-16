@@ -41,25 +41,26 @@ export default function PromoPopup({
 
   // decide si abre
   useEffect(() => {
-    if (alwaysShow) {
-      setOpen(true);
-      return;
-    }
+  if (alwaysShow) {
+    setOpen(true);
+    return;
+  }
 
-    try {
-      const raw = localStorage.getItem(storageKey);
-      if (!raw) {
-        setOpen(true);
-        return;
-      }
-      const last = Number(raw);
-      const diffMs = Date.now() - last;
-      const cooldownMs = cooldownHours * 60 * 60 * 1000;
-      if (diffMs > cooldownMs) setOpen(true);
-    } catch {
+  try {
+    const raw = localStorage.getItem(storageKey);
+    const last = raw ? Number(raw) : 0;
+    const cooldownMs = cooldownHours * 60 * 60 * 1000;
+
+    // si nunca se vio o pasó el cooldown -> abrir y marcar visto ya
+    if (!last || Date.now() - last > cooldownMs) {
       setOpen(true);
+      localStorage.setItem(storageKey, String(Date.now())); // ✅ marca visto al mostrar
     }
-  }, [storageKey, cooldownHours, alwaysShow]);
+  } catch {
+    setOpen(true);
+  }
+}, [storageKey, cooldownHours, alwaysShow]);
+
 
   function close() {
     setOpen(false);
