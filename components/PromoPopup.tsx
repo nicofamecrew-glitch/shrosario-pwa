@@ -79,20 +79,20 @@ export default function PromoPopup({
       : null;
 
   return (
-<div className="fixed left-0 top-0 w-screen h-screen z-[9999] flex justify-center items-start pt-32">
+<div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+
 
 
       {/* overlay: el fondo oscuro */}
       <button
-        aria-label="Cerrar promo"
-        onClick={close}
-       className="fixed left-0 top-0 w-screen h-screen bg-black/70 backdrop-blur-sm"
-
-
-      />
+  aria-label="Cerrar promo"
+  onClick={close}
+  className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+/>
 
       {/* modal: la caja blanca */}
-      <div className="relative w-[92%] max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl">
+      <div className="relative w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl max-h-[90vh] overflow-y-auto">
+
  {imageUrl && imgOk && (
   <div className="bg-black">
     <img
