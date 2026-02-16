@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useCartStore } from "@/lib/store";
 import { validateWholesaleCode } from "@/lib/wholesale";
+import { useRouter } from "next/navigation";
+
 
 export default function WholesaleGate() {
   const { isWholesale, setWholesale } = useCartStore();
@@ -11,6 +13,7 @@ export default function WholesaleGate() {
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
   const [mounted, setMounted] = useState(false);
+  const router = useRouter();
 
   useEffect(() => setMounted(true), []);
 
@@ -47,6 +50,13 @@ export default function WholesaleGate() {
     }
     setError("Codigo incorrecto.");
   }
+  if (validateWholesaleCode(code)) {
+  setWholesale(true);
+  onClose();
+  router.push("/mayorista");
+  router.refresh(); // opcional, para recalcular precios en server/client
+  return;
+}
 
   const modal =
     open && mounted
