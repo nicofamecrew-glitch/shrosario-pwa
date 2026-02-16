@@ -64,12 +64,6 @@ export default function PromoPopup({
 
   function close() {
     setOpen(false);
-
-    if (alwaysShow) return;
-
-    try {
-      localStorage.setItem(storageKey, String(Date.now()));
-    } catch {}
   }
 
   // lock scroll cuando está abierto
