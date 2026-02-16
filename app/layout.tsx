@@ -6,6 +6,7 @@ import { Poppins } from "next/font/google";
 import NextTopLoader from "nextjs-toploader";
 import AppTransitions from "@/components/AppTransitions";
 import NavDebug from "@/components/dev/NavDebug";
+import { html } from "framer-motion/client";
 
 const inter = Poppins({
   subsets: ["latin"],
@@ -17,8 +18,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   const isProd = process.env.NODE_ENV === "production";
  
   return (
-    <html lang="es" className="bg-black text-white">
+    <html lang="es" data-theme="light">
+
   <body className={inter.className}>
+ 
 
 
 
