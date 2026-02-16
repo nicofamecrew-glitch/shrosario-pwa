@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 
 type PromoPopupProps = {
   promoId: string;          // cambia cuando cambie la promo (ej: "promo-2026-02-semana1")
@@ -32,6 +33,15 @@ export default function PromoPopup({
 }: PromoPopupProps) {
   const storageKey = useMemo(() => `promo_seen_${promoId}`, [promoId]);
   const [open, setOpen] = useState(false);
+  useEffect(() => {
+  if (!open) return;
+  const prev = document.body.style.overflow;
+  document.body.style.overflow = "hidden";
+  return () => {
+    document.body.style.overflow = prev;
+  };
+}, [open]);
+
   const [imgOk, setImgOk] = useState(true);
 
  useEffect(() => {
@@ -78,11 +88,20 @@ export default function PromoPopup({
       ? `https://wa.me/${waNumberE164}?text=${encodeURIComponent(waText)}`
       : null;
 
+function BodyPortal({ children }: { children: React.ReactNode }) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return null;
+  return createPortal(children, document.body);
+}
+
+
   return (
+    <BodyPortal>
 <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
 
 
-
+ 
       {/* overlay: el fondo oscuro */}
       <button
   aria-label="Cerrar promo"
@@ -162,9 +181,10 @@ export default function PromoPopup({
         Ahora no
       </button>
     </div>
+    
   </div>
 </div>   
 </div>
-    
+    </BodyPortal>
   );
 }
