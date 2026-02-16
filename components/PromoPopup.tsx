@@ -94,6 +94,15 @@ useEffect(() => {
   setMounted(true);
 }, []);
 
+useEffect(() => {
+  if (!open) return;
+  const prev = document.body.style.overflow;
+  document.body.style.overflow = "hidden";
+  return () => {
+    document.body.style.overflow = prev;
+  };
+}, [open]);
+
 if (!open || !mounted) return null;
 
 return createPortal(
@@ -103,9 +112,7 @@ return createPortal(
       onClick={close}
       className="absolute inset-0 bg-black/70 backdrop-blur-sm"
     />
-
     <div className="relative w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl max-h-[90vh] overflow-y-auto">
-
  {imageUrl && imgOk && (
   <div className="bg-black">
     <img
