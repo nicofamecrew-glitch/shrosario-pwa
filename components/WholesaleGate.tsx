@@ -110,11 +110,10 @@ export default function WholesaleGate() {
     <div>
       <button
         className="rounded-full border border-panel px-4 py-2 text-sm"
-        onClick={() => setOpen(true)}
-      >
-        {isWholesale ? "Modo mayorista activo" : "Activar mayorista"}
-      </button>
-
+       onClick={() => router.push("/account/wholesale")}
+>
+  {isWholesale ? "Mayorista: gestión" : "Solicitar mayorista"}
+</button>
       {modal}
     </div>
   );
