@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useCartStore } from "@/lib/store";
 import { useCatalogStore } from "@/lib/lib/catalogStore";
 import { findVariant, getVariantPrice } from "@/lib/pricing";
+import LocationAutocomplete, { type ZipRow } from "@/components/shipping/LocationAutocomplete";
 
 const STORAGE_KEY = "sh_shipping_v1";
 
@@ -60,16 +61,20 @@ export default function ShippingPage() {
   const [options, setOptions] = useState<ShippingOption[]>([]);
   const [selected, setSelected] = useState<ShippingOption | null>(null);
   const [notes, setNotes] = useState("");
+  const [locationQuery, setLocationQuery] = useState("");
+  const [picked, setPicked] = useState<ZipRow | null>(null);
 
   const finalCost = useMemo(() => {
   if (!selected) return 0;
   return cartTotal >= freeShippingThreshold ? 0 : selected.cost;
 }, [selected, cartTotal, freeShippingThreshold]);
 
- console.log(
-  "Zipnova items",
-  items.map((it: any) => ({ variantSku: it?.variantSku, productId: it?.productId, qty: it?.quantity }))
-);
+if (process.env.NODE_ENV === "development") {
+  console.log("Zipnova items", items.map((it: any) => ({
+    variantSku: it?.variantSku, productId: it?.productId, qty: it?.quantity
+  })));
+}
+
 
 
   async function fetchZipnovaOptions() {
@@ -153,24 +158,42 @@ export default function ShippingPage() {
           Envío gratis desde {formatARS(freeShippingThreshold)} (no aplica a retiro).
         </div>
       </div>
+{/* DESTINO (autocomplete) */}
+<div className="mt-4 rounded-2xl bg-white/5 p-4">
+  <label className="text-sm font-bold text-white">Destino</label>
 
-      {/* Campo para código postal */}
-      <div className="mt-4 rounded-2xl bg-white/5 p-4">
-        <label className="text-sm font-bold text-white">Código Postal destino</label>
-        <input
-          type="text"
-          value={zipcode}
-          onChange={(e) => setZipcode(e.target.value)}
-          placeholder="Ej: 3300"
-          className="mt-2 w-full rounded-xl bg-black/40 p-3 text-white outline-none"
-        />
-        <button
-          onClick={fetchZipnovaOptions}
-          className="mt-3 w-full rounded-xl bg-white/10 px-4 py-3 font-bold text-white"
-        >
-          Cotizar envíos
-        </button>
-      </div>
+  <LocationAutocomplete
+    value={locationQuery}
+    onChange={(v) => {
+      setLocationQuery(v);
+      setPicked(null);
+      // si vuelve a tipear, “desbloqueamos” el zipcode hasta que seleccione
+      if (zipcode) setZipcode("");
+    }}
+    onSelect={(row) => {
+      setPicked(row);
+      setZipcode(row.zipcode);
+      setLocationQuery(`${row.city} (${row.state}) · CP ${row.zipcode}`);
+      setTimeout(() => fetchZipnovaOptions(), 0);
+    }}
+    placeholder="Buscar por localidad o CP (ej: 2500 o Cañada)"
+  />
+
+  {picked && (
+    <div className="mt-2 text-xs text-white/70">
+      Seleccionado: <span className="text-white font-semibold">{picked.city}</span>,{" "}
+      {picked.state} — CP <span className="text-white font-semibold">{picked.zipcode}</span>
+    </div>
+  )}
+
+  <button
+    onClick={fetchZipnovaOptions}
+    disabled={!zipcode.trim()}
+    className="mt-3 w-full rounded-xl bg-white/10 px-4 py-3 font-bold text-white disabled:opacity-40"
+  >
+    Cotizar envíos
+  </button>
+</div>
 
       {/* Opciones dinámicas */}
       <div className="mt-4 space-y-3">

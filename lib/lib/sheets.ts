@@ -1,6 +1,7 @@
 import { google } from "googleapis";
 import "server-only";
 
+
 export const runtime = "nodejs";
 
 /* ================= CREDENCIALES ================= */
@@ -251,6 +252,43 @@ export async function upsertZipCache(row: {
 
   await appendRow("zip_cache", "A:E", [zipcode, city, state, destination_id, updated_at]);
   return { ok: true, action: "inserted", zipcode };
+}
+
+export async function searchZipCache(q: string, limit = 20): Promise<ZipCacheRow[]> {
+  const query = String(q ?? "").trim().toLowerCase();
+  if (!query) return [];
+
+  // ✅ lee sheet zip_cache (mismo sheetId/SA que ya usás)
+const rows = await getSheetRows("zip_cache");
+
+  // 👆 IMPORTANTE: usá TU función real para leer filas.
+  // Si no existe "readSheetRows", te digo cómo adaptarlo con tu código actual.
+
+  const isNumeric = /^\d+$/.test(query);
+
+  const out: ZipCacheRow[] = [];
+  for (const r of rows) {
+    const zipcode = String(r?.zipcode ?? r?.ZIPCODE ?? r?.Zipcode ?? "").trim();
+    const city = String(r?.city ?? r?.CITY ?? "").trim();
+    const state = String(r?.state ?? r?.STATE ?? "").trim();
+    const destination_id = r?.destination_id ?? r?.destinationId ?? null;
+
+    if (!zipcode || !city || !state) continue;
+
+    const z = zipcode.toLowerCase();
+    const c = city.toLowerCase();
+
+    const hit = isNumeric
+      ? z.startsWith(query)
+      : c.includes(query);
+
+    if (hit) {
+      out.push({ zipcode, city, state, destination_id });
+      if (out.length >= limit) break;
+    }
+  }
+
+  return out;
 }
 
 /* ================= PESOS POR SKU (variants -> gramos) ================= */
