@@ -15,10 +15,11 @@ const inter = Poppins({
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const isProd = process.env.NODE_ENV === "production";
-
+ 
   return (
     <html lang="es">
-      <body className={inter.className}>
+      <body className={`${inter.className} bg-white text-black`}>
+
         <Providers>
           <ClientShell>
             {isProd ? <NextTopLoader showSpinner={false} /> : null}
