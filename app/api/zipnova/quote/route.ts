@@ -331,102 +331,6 @@ if (!destCityRaw || !destStateRaw) {
 }
 
 
-// Si igual no hay city/state, cortamos con error claro (pero ahora debería pasar solo si Zipnova no resolvió)
-// Si no viene city/state, intentamos cache + “auto-resolver” con Zipnova
-if (!destCityRaw || !destStateRaw) {
-  const cached = await getZipCache(destZip);
-  if (cached?.city && cached?.state) {
-    destCityRaw = cached.city;
-    destStateRaw = cached.state;
-  } else {
-    // Intento 1: pedir quote SOLO con zipcode y ver si Zipnova lo resuelve
-    const minimalPayload = {
-      account_id: ACCOUNT_ID,
-      origin_id: ORIGIN_ID,
-      declared_value: 10000,
-      items: [
-        {
-          sku: "BOX-1",
-          weight: 500,
-          height: 10,
-          width: 10,
-          length: 10,
-          description: "Item",
-          classification_id: 1,
-        },
-      ],
-      destination: {
-        zipcode: destZip,
-        country: "AR",
-      },
-    };
-
-    const base = String(BASE_URL).replace(/\/$/, "");
-    const path = String(QUOTE_PATH).startsWith("/") ? String(QUOTE_PATH) : `/${String(QUOTE_PATH)}`;
-    const urlQuote = `${base}${path}`;
-    const auth = Buffer.from(`${KEY}:${SECRET}`, "utf8").toString("base64");
-
-    const r0 = await fetch(urlQuote, {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        Authorization: `Basic ${auth}`,
-      },
-      body: JSON.stringify(minimalPayload),
-      cache: "no-store",
-    });
-
-    const t0 = await r0.text();
-    const d0 = safeJsonParse(t0);
-
-    const zDest = (d0 as any)?.destination;
-    const cityFromZipnova = zDest?.city ? String(zDest.city).trim().toLowerCase() : "";
-    const stateFromZipnova = zDest?.state ? String(zDest.state).trim().toLowerCase() : "";
-
-    if (cityFromZipnova && stateFromZipnova) {
-      destCityRaw = cityFromZipnova;
-      destStateRaw = stateFromZipnova;
-
-      // Guardamos para la próxima (no rompe nada si ya existe)
-      try {
-        // si tenés upsertZipCache importado, usalo. Si no, importalo desde sheets.
-        await upsertZipCache({
-          zipcode: destZip,
-          city: cityFromZipnova,
-          state: stateFromZipnova,
-          destination_id: zDest?.id ?? null,
-        });
-      } catch (e) {
-        // no matamos el request por no poder escribir cache
-        console.warn("[ZIPNOVA] could not upsert zip_cache", (e as any)?.message);
-      }
-
-      if (debug) {
-        console.log("[ZIPNOVA] auto-resolved zipcode via zipnova", {
-          zipcode: destZip,
-          city: destCityRaw,
-          state: destStateRaw,
-          destination_id: zDest?.id ?? null,
-        });
-      }
-    } else {
-      // Si Zipnova tampoco lo resuelve, recién ahí pedimos carga manual (raro)
-      return NextResponse.json(
-        {
-          ok: false,
-          error:
-            "No se pudo resolver city/state para ese CP. Cargalo en zip_cache (zipcode | city | state).",
-          zipcode: destZip,
-          zipnova_status: r0.status,
-          zipnova_raw: debug ? d0 : undefined,
-        },
-        { status: 404 }
-      );
-    }
-  }
-}
-
 
 
     const destination: any = {
@@ -508,6 +412,16 @@ if (!destCityRaw || !destStateRaw) {
     }
 
     const declared_value = toNum(body?.declared_value ?? body?.declaredValue ?? body?.total, 10000);
+// total grams enviados a Zipnova (suma de bultos)
+const totalWeight = items.reduce((acc, it) => acc + (Number(it?.weight) || 0), 0);
+
+// modo de armado (para auditar)
+const quote_mode =
+  rawItems.length > 0 && rawItems.some((x: any) => x?.weight)
+    ? "frontend_weight"
+    : rawItems.length > 0
+    ? "sku_qty"
+    : "fallback";
 
     const payload = {
       account_id: ACCOUNT_ID,
@@ -593,14 +507,20 @@ if (!destCityRaw || !destStateRaw) {
     // ------------------------
     // Logs a Sheets
     // ------------------------
-    await appendShippingEvent({
-      event_type: "quote_created",
-      provider: "zipnova",
-      account_id: ACCOUNT_ID,
-      origin_id: ORIGIN_ID,
-      destination_zipcode: destZip,
-      raw: { options_count: options.length, items_count: items.length },
-    });
+  await appendShippingEvent({
+  event_type: "quote_created",
+  provider: "zipnova",
+  account_id: ACCOUNT_ID,
+  origin_id: ORIGIN_ID,
+  destination_zipcode: destZip,
+  raw: {
+    options_count: options.length,
+    items_count: items.length,
+    total_weight_grams: totalWeight,
+    quote_mode,
+  },
+});
+
 
     const selected =
       options.find((o: any) => Array.isArray(o?.meta?.tags) && o.meta.tags.includes("cheapest")) ?? options[0];
