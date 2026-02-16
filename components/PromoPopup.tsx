@@ -88,29 +88,23 @@ export default function PromoPopup({
       ? `https://wa.me/${waNumberE164}?text=${encodeURIComponent(waText)}`
       : null;
 
-function BodyPortal({ children }: { children: React.ReactNode }) {
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-  if (!mounted) return null;
-  return createPortal(children, document.body);
-}
+const [mounted, setMounted] = useState(false);
 
+useEffect(() => {
+  setMounted(true);
+}, []);
 
-  return (
-    <BodyPortal>
-<div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+if (!open || !mounted) return null;
 
+return createPortal(
+  <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+    <button
+      aria-label="Cerrar promo"
+      onClick={close}
+      className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+    />
 
- 
-      {/* overlay: el fondo oscuro */}
-      <button
-  aria-label="Cerrar promo"
-  onClick={close}
-  className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-/>
-
-      {/* modal: la caja blanca */}
-      <div className="relative w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl max-h-[90vh] overflow-y-auto">
+    <div className="relative w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl max-h-[90vh] overflow-y-auto">
 
  {imageUrl && imgOk && (
   <div className="bg-black">
@@ -185,6 +179,7 @@ function BodyPortal({ children }: { children: React.ReactNode }) {
   </div>
 </div>   
 </div>
-    </BodyPortal>
-  );
+   ,
+  document.body
+);
 }
