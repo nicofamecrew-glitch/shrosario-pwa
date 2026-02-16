@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server";
-import { appendShippingEvent, getZipCache, getSkuGramsMap, upsertZipCache } from "@/lib/lib/sheets";
+import {
+  appendShippingEvent,
+  getZipCache,
+  getSkuGramsMap,
+  upsertZipCache,
+} from "@/lib/lib/sheets";
 
 export const runtime = "nodejs";
 
@@ -39,14 +44,13 @@ async function resolveDestinationFromZipnova(args: {
 }) {
   const { baseUrl, key, secret, zipcode } = args;
 
-  // Endpoint configurable por env para no adivinar a futuro
-  // Si tu Zipnova usa otro path, lo ajustás en Vercel sin tocar código.
-  const RESOLVE_PATH = optEnv("ZIPNOVA_RESOLVE_PATH", "/v2/locations/resolve");
+  const RESOLVE_PATH = optEnv(
+    "ZIPNOVA_RESOLVE_PATH",
+    "/v2/locations/resolve"
+  );
 
   const base = String(baseUrl).replace(/\/$/, "");
   const path = RESOLVE_PATH.startsWith("/") ? RESOLVE_PATH : `/${RESOLVE_PATH}`;
-
-  // Asumo query por zipcode (si tu endpoint usa body, lo cambiamos en 30s)
   const url = `${base}${path}?zipcode=${encodeURIComponent(zipcode)}`;
 
   const auth = Buffer.from(`${key}:${secret}`, "utf8").toString("base64");
@@ -67,7 +71,6 @@ async function resolveDestinationFromZipnova(args: {
     return { ok: false as const, status: r.status, data };
   }
 
-  // Normalización flexible (por si cambia el shape)
   const city =
     (data as any)?.city ??
     (data as any)?.destination?.city ??
@@ -99,7 +102,6 @@ async function resolveDestinationFromZipnova(args: {
   };
 }
 
-
 type PackedBox = {
   weight: number; // gramos
   height: number;
@@ -109,7 +111,6 @@ type PackedBox = {
 };
 
 function packIntoBoxes(totalGrams: number): PackedBox[] {
-  // 3–4 bultos máximo, conservador
   const S = 3000,
     M = 6000,
     L = 10000;
@@ -117,7 +118,11 @@ function packIntoBoxes(totalGrams: number): PackedBox[] {
   const boxes: PackedBox[] = [];
   let remaining = Math.max(0, Math.round(totalGrams));
 
-  const pushBox = (w: number, dims: [number, number, number], label: string) => {
+  const pushBox = (
+    w: number,
+    dims: [number, number, number],
+    label: string
+  ) => {
     const [length, width, height] = dims;
     boxes.push({ weight: w, length, width, height, description: label });
   };
@@ -138,7 +143,6 @@ function packIntoBoxes(totalGrams: number): PackedBox[] {
     }
   }
 
-  // si quedó resto y ya tenés 4 bultos, lo sumás al último y lo agrandás
   if (remaining > 0 && boxes.length > 0) {
     const last = boxes[boxes.length - 1];
     last.weight += remaining;
@@ -148,7 +152,9 @@ function packIntoBoxes(totalGrams: number): PackedBox[] {
     last.description = "Bulto XL";
   }
 
-  return boxes.length ? boxes : [{ weight: 500, length: 10, width: 10, height: 10, description: "Bulto S" }];
+  return boxes.length
+    ? boxes
+    : [{ weight: 500, length: 10, width: 10, height: 10, description: "Bulto S" }];
 }
 
 /**
@@ -191,157 +197,14 @@ export async function POST(req: Request) {
     // ------------------------
     const destZip = cleanZip(body?.destination?.zipcode ?? body?.zipcode);
     if (!destZip) {
-      return NextResponse.json({ ok: false, error: "Missing destination zipcode" }, { status: 400 });
+      return NextResponse.json(
+        { ok: false, error: "Missing destination zipcode" },
+        { status: 400 }
+      );
     }
-
-    let destCityRaw = body?.destination?.city ?? body?.city;
-    let destStateRaw = body?.destination?.state ?? body?.state;
-
- // Si no viene city/state: 1) intento cache 2) si no existe, consulto Zipnova y cacheo
-// ------------------------
-// Resolver city/state (cache → resolve → quote fallback)
-// ------------------------
-if (!destCityRaw || !destStateRaw) {
-  const cached = await getZipCache(destZip);
-
-  if (cached?.city && cached?.state) {
-    destCityRaw = cached.city;
-    destStateRaw = cached.state;
-
-    if (debug) {
-      console.log("[ZIPNOVA] destination from cache", {
-        destZip,
-        destCityRaw,
-        destStateRaw,
-      });
-    }
-  } else {
-    // 1️⃣ Intento resolve endpoint
-    const resolved = await resolveDestinationFromZipnova({
-      baseUrl: BASE_URL,
-      key: KEY,
-      secret: SECRET,
-      zipcode: destZip,
-    });
-
-    if (resolved.ok) {
-      destCityRaw = resolved.city;
-      destStateRaw = resolved.state;
-
-      await upsertZipCache({
-        zipcode: destZip,
-        city: resolved.city,
-        state: resolved.state,
-        destination_id: resolved.destination_id ?? null,
-      });
-
-      if (debug) {
-        console.log("[ZIPNOVA] resolved via endpoint", {
-          destZip,
-          destCityRaw,
-          destStateRaw,
-        });
-      }
-    } else {
-      // 2️⃣ Fallback: intento quote mínimo
-      const minimalPayload = {
-        account_id: ACCOUNT_ID,
-        origin_id: ORIGIN_ID,
-        declared_value: 10000,
-        items: [
-          {
-            sku: "BOX-1",
-            weight: 500,
-            height: 10,
-            width: 10,
-            length: 10,
-            description: "Item",
-            classification_id: 1,
-          },
-        ],
-        destination: {
-          zipcode: destZip,
-          country: "AR",
-        },
-      };
-
-      const base = String(BASE_URL).replace(/\/$/, "");
-      const path = String(QUOTE_PATH).startsWith("/")
-        ? String(QUOTE_PATH)
-        : `/${String(QUOTE_PATH)}`;
-      const urlQuote = `${base}${path}`;
-      const auth = Buffer.from(`${KEY}:${SECRET}`, "utf8").toString("base64");
-
-      const r0 = await fetch(urlQuote, {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-          Authorization: `Basic ${auth}`,
-        },
-        body: JSON.stringify(minimalPayload),
-        cache: "no-store",
-      });
-
-      const t0 = await r0.text();
-      const d0 = safeJsonParse(t0);
-
-      const zDest = (d0 as any)?.destination;
-
-      const cityFromZipnova = zDest?.city
-        ? String(zDest.city).trim().toLowerCase()
-        : "";
-      const stateFromZipnova = zDest?.state
-        ? String(zDest.state).trim().toLowerCase()
-        : "";
-
-      if (cityFromZipnova && stateFromZipnova) {
-        destCityRaw = cityFromZipnova;
-        destStateRaw = stateFromZipnova;
-
-        await upsertZipCache({
-          zipcode: destZip,
-          city: cityFromZipnova,
-          state: stateFromZipnova,
-          destination_id: zDest?.id ?? null,
-        });
-
-        if (debug) {
-          console.log("[ZIPNOVA] auto-resolved via quote", {
-            destZip,
-            destCityRaw,
-            destStateRaw,
-          });
-        }
-      } else {
-        return NextResponse.json(
-          {
-            ok: false,
-            error:
-              "No se pudo resolver city/state para ese CP. Cargalo en zip_cache.",
-            zipcode: destZip,
-            zipnova_status: r0.status,
-            zipnova_raw: debug ? d0 : undefined,
-          },
-          { status: 404 }
-        );
-      }
-    }
-  }
-}
-
-
-
-
-    const destination: any = {
-      zipcode: destZip,
-      country: "AR",
-      city: String(destCityRaw).trim().toLowerCase(),
-      state: String(destStateRaw).trim().toLowerCase(),
-    };
 
     // ------------------------
-    // ITEMS (PRO)
+    // ITEMS (PRO)  ✅ primero, SIEMPRE
     // ------------------------
     const rawItems = Array.isArray(body?.items) ? body.items : [];
     let items: any[] = [];
@@ -349,7 +212,9 @@ if (!destCityRaw || !destStateRaw) {
     // A) Si el frontend ya manda weight/dims => respetamos
     if (rawItems.length > 0 && rawItems.some((x: any) => x?.weight)) {
       items = rawItems.map((it: any, idx: number) => ({
-        sku: String(it?.sku ?? it?.productId ?? `SKU-${idx + 1}`).trim().toUpperCase(),
+        sku: String(it?.sku ?? it?.productId ?? `SKU-${idx + 1}`)
+          .trim()
+          .toUpperCase(),
         weight: toNum(it?.weight, 500),
         height: toNum(it?.height, 10),
         width: toNum(it?.width, 10),
@@ -368,7 +233,6 @@ if (!destCityRaw || !destStateRaw) {
       for (const it of rawItems) {
         const sku = String(it?.sku ?? "").trim().toUpperCase();
         const qty = Math.max(1, toNum(it?.qty ?? it?.quantity ?? 1, 1));
-
         if (!sku) continue;
 
         const g = gramsBySku[sku];
@@ -393,7 +257,12 @@ if (!destCityRaw || !destStateRaw) {
       }));
 
       if (debug) {
-        console.log("[ZIPNOVA] pack debug", { totalGrams, boxes, missingCount: missing.length, missing });
+        console.log("[ZIPNOVA] pack debug", {
+          totalGrams,
+          boxes,
+          missingCount: missing.length,
+          missing,
+        });
       }
     }
     // C) Sin items => fallback
@@ -411,28 +280,174 @@ if (!destCityRaw || !destStateRaw) {
       ];
     }
 
-    const declared_value = toNum(body?.declared_value ?? body?.declaredValue ?? body?.total, 10000);
-// total grams enviados a Zipnova (suma de bultos)
-const totalWeight = items.reduce((acc, it) => acc + (Number(it?.weight) || 0), 0);
+    const totalWeight = items.reduce(
+      (acc, it) => acc + (Number(it?.weight) || 0),
+      0
+    );
 
-// modo de armado (para auditar)
-const quote_mode =
-  rawItems.length > 0 && rawItems.some((x: any) => x?.weight)
-    ? "frontend_weight"
-    : rawItems.length > 0
-    ? "sku_qty"
-    : "fallback";
+    const quote_mode =
+      rawItems.length > 0 && rawItems.some((x: any) => x?.weight)
+        ? "frontend_weight"
+        : rawItems.length > 0
+        ? "sku_qty"
+        : "fallback";
 
+    // ------------------------
+    // DECLARED VALUE
+    // ------------------------
+    const declared_value = toNum(
+      body?.declared_value ?? body?.declaredValue ?? body?.total,
+      10000
+    );
+
+    // ------------------------
+    // CITY/STATE (cache → resolve → quote mínimo)
+    // ------------------------
+    let destCityRaw = body?.destination?.city ?? body?.city;
+    let destStateRaw = body?.destination?.state ?? body?.state;
+
+    if (!destCityRaw || !destStateRaw) {
+      const cached = await getZipCache(destZip);
+
+      if (cached?.city && cached?.state) {
+        destCityRaw = cached.city;
+        destStateRaw = cached.state;
+
+        if (debug) {
+          console.log("[ZIPNOVA] destination from cache", {
+            destZip,
+            destCityRaw,
+            destStateRaw,
+          });
+        }
+      } else {
+        // 1️⃣ Intento resolve endpoint
+        const resolved = await resolveDestinationFromZipnova({
+          baseUrl: BASE_URL,
+          key: KEY,
+          secret: SECRET,
+          zipcode: destZip,
+        });
+
+        if (resolved.ok) {
+          destCityRaw = resolved.city;
+          destStateRaw = resolved.state;
+
+          await upsertZipCache({
+            zipcode: destZip,
+            city: resolved.city,
+            state: resolved.state,
+            destination_id: resolved.destination_id ?? null,
+          });
+
+          if (debug) {
+            console.log("[ZIPNOVA] resolved via endpoint", {
+              destZip,
+              destCityRaw,
+              destStateRaw,
+            });
+          }
+        } else {
+          // 2️⃣ Fallback: quote mínimo PARA RESOLVER CIUDAD/PROVINCIA
+          //     ✅ usa los mismos items reales (peso) para que no “mienta”
+          const minimalPayload = {
+            account_id: ACCOUNT_ID,
+            origin_id: ORIGIN_ID,
+            declared_value: Math.max(10000, declared_value),
+            items,
+            destination: {
+              zipcode: destZip,
+              country: "AR",
+            },
+          };
+
+          const base = String(BASE_URL).replace(/\/$/, "");
+          const path = String(QUOTE_PATH).startsWith("/")
+            ? String(QUOTE_PATH)
+            : `/${String(QUOTE_PATH)}`;
+          const urlQuote = `${base}${path}`;
+          const auth = Buffer.from(`${KEY}:${SECRET}`, "utf8").toString("base64");
+
+          const r0 = await fetch(urlQuote, {
+            method: "POST",
+            headers: {
+              Accept: "application/json",
+              "Content-Type": "application/json",
+              Authorization: `Basic ${auth}`,
+            },
+            body: JSON.stringify(minimalPayload),
+            cache: "no-store",
+          });
+
+          const t0 = await r0.text();
+          const d0 = safeJsonParse(t0);
+
+          const zDest = (d0 as any)?.destination;
+
+          const cityFromZipnova = zDest?.city
+            ? String(zDest.city).trim().toLowerCase()
+            : "";
+          const stateFromZipnova = zDest?.state
+            ? String(zDest.state).trim().toLowerCase()
+            : "";
+
+          if (cityFromZipnova && stateFromZipnova) {
+            destCityRaw = cityFromZipnova;
+            destStateRaw = stateFromZipnova;
+
+            await upsertZipCache({
+              zipcode: destZip,
+              city: cityFromZipnova,
+              state: stateFromZipnova,
+              destination_id: zDest?.id ?? null,
+            });
+
+            if (debug) {
+              console.log("[ZIPNOVA] auto-resolved via quote", {
+                destZip,
+                destCityRaw,
+                destStateRaw,
+              });
+            }
+          } else {
+            return NextResponse.json(
+              {
+                ok: false,
+                error:
+                  "No se pudo resolver city/state para ese CP. Cargalo en zip_cache.",
+                zipcode: destZip,
+                zipnova_status: r0.status,
+                zipnova_raw: debug ? d0 : undefined,
+              },
+              { status: 404 }
+            );
+          }
+        }
+      }
+    }
+
+    const destination: any = {
+      zipcode: destZip,
+      country: "AR",
+      city: String(destCityRaw).trim().toLowerCase(),
+      state: String(destStateRaw).trim().toLowerCase(),
+    };
+
+    // ------------------------
+    // Payload final
+    // ------------------------
     const payload = {
       account_id: ACCOUNT_ID,
-      origin_id: ORIGIN_ID, // <-- ORIGEN ROSARIO (tu origin_id)
+      origin_id: ORIGIN_ID,
       declared_value,
       items,
       destination,
     };
 
     const base = String(BASE_URL).replace(/\/$/, "");
-    const path = String(QUOTE_PATH).startsWith("/") ? String(QUOTE_PATH) : `/${String(QUOTE_PATH)}`;
+    const path = String(QUOTE_PATH).startsWith("/")
+      ? String(QUOTE_PATH)
+      : `/${String(QUOTE_PATH)}`;
     const url = `${base}${path}`;
 
     const auth = Buffer.from(`${KEY}:${SECRET}`, "utf8").toString("base64");
@@ -452,7 +467,12 @@ const quote_mode =
     const data = safeJsonParse(text);
 
     if (!r.ok) {
-      console.error("[ZIPNOVA QUOTE] HTTP error", { status: r.status, url, payload, response: data });
+      console.error("[ZIPNOVA QUOTE] HTTP error", {
+        status: r.status,
+        url,
+        payload,
+        response: data,
+      });
     }
 
     // ------------------------
@@ -465,14 +485,19 @@ const quote_mode =
     }
 
     if (r.ok && options.length === 0) {
-      const all = Array.isArray((data as any)?.all_results) ? (data as any).all_results : [];
+      const all = Array.isArray((data as any)?.all_results)
+        ? (data as any).all_results
+        : [];
 
       options = all
         .filter((x: any) => x?.selectable !== false)
         .map((x: any) => {
           const carrierName = x?.carrier?.name ?? "Carrier";
-          const serviceName = x?.service_type?.name ?? x?.service_type?.code ?? "Servicio";
-          const id = `${x?.carrier?.id ?? "c"}_${x?.service_type?.id ?? x?.service_type?.code ?? "s"}`;
+          const serviceName =
+            x?.service_type?.name ?? x?.service_type?.code ?? "Servicio";
+          const id = `${x?.carrier?.id ?? "c"}_${
+            x?.service_type?.id ?? x?.service_type?.code ?? "s"
+          }`;
 
           const priceRaw =
             x?.amounts?.price_incl_tax ??
@@ -496,7 +521,9 @@ const quote_mode =
               logistic_type: x?.logistic_type ?? null,
               eta,
               tags,
-              pickup_points_count: Array.isArray(x?.pickup_points) ? x.pickup_points.length : 0,
+              pickup_points_count: Array.isArray(x?.pickup_points)
+                ? x.pickup_points.length
+                : 0,
             },
           };
         })
@@ -507,23 +534,24 @@ const quote_mode =
     // ------------------------
     // Logs a Sheets
     // ------------------------
-  await appendShippingEvent({
-  event_type: "quote_created",
-  provider: "zipnova",
-  account_id: ACCOUNT_ID,
-  origin_id: ORIGIN_ID,
-  destination_zipcode: destZip,
-  raw: {
-    options_count: options.length,
-    items_count: items.length,
-    total_weight_grams: totalWeight,
-    quote_mode,
-  },
-});
-
+    await appendShippingEvent({
+      event_type: "quote_created",
+      provider: "zipnova",
+      account_id: ACCOUNT_ID,
+      origin_id: ORIGIN_ID,
+      destination_zipcode: destZip,
+      raw: {
+        options_count: options.length,
+        items_count: items.length,
+        total_weight_grams: totalWeight,
+        quote_mode,
+      },
+    });
 
     const selected =
-      options.find((o: any) => Array.isArray(o?.meta?.tags) && o.meta.tags.includes("cheapest")) ?? options[0];
+      options.find(
+        (o: any) => Array.isArray(o?.meta?.tags) && o.meta.tags.includes("cheapest")
+      ) ?? options[0];
 
     if (selected) {
       await appendShippingEvent({
@@ -548,7 +576,12 @@ const quote_mode =
     // ------------------------
     if (r.ok && options.length > 0) {
       return NextResponse.json(
-        { ok: true, status: r.status, options, ...(debug ? { payloadSent: payload, zipnova_raw: data } : {}) },
+        {
+          ok: true,
+          status: r.status,
+          options,
+          ...(debug ? { payloadSent: payload, zipnova_raw: data } : {}),
+        },
         { status: 200 }
       );
     }
@@ -559,7 +592,9 @@ const quote_mode =
         status: r.status,
         error: r.ok
           ? "Zipnova quote returned no selectable priced results"
-          : (data as any)?.message ?? (data as any)?.error ?? "Zipnova API error",
+          : (data as any)?.message ??
+            (data as any)?.error ??
+            "Zipnova API error",
         ...(debug ? { payloadSent: payload, zipnova_raw: data } : {}),
         options: [{ id: "zipnova_est", name: "Zipnova (estimado)", price: 12000 }],
       },
@@ -568,7 +603,11 @@ const quote_mode =
   } catch (e: any) {
     console.error("[ZIPNOVA QUOTE] fatal", e?.message);
     return NextResponse.json(
-      { ok: false, error: e?.message ?? "Unknown error", options: [{ id: "zipnova_est", name: "Zipnova (estimado)", price: 12000 }] },
+      {
+        ok: false,
+        error: e?.message ?? "Unknown error",
+        options: [{ id: "zipnova_est", name: "Zipnova (estimado)", price: 12000 }],
+      },
       { status: 200 }
     );
   }
