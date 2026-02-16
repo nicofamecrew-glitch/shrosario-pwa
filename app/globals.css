@@ -43,24 +43,21 @@ input, select, textarea, button {
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
-:root{
-  --bg: 0 0% 0%;
-  --fg: 0 0% 100%;
-  --surface: 0 0% 8%;
-  --ink: 0 0% 12%;
-  --panel: 0 0% 20%;
+:root {
+  --app-bg: 0 0% 0%;
+  --app-fg: 0 0% 100%;
+  --app-surface: 0 0% 8%;
+  --app-panel: 0 0% 18%;
 }
 
-html[data-theme="light"]{
-  --bg: 0 0% 100%;
-  --fg: 0 0% 5%;
-  --surface: 0 0% 98%;
-  --ink: 0 0% 100%;
-  --panel: 0 0% 90%;
+html[data-theme="light"] {
+  --app-bg: 0 0% 100%;
+  --app-fg: 0 0% 5%;
+  --app-surface: 0 0% 98%;
+  --app-panel: 0 0% 90%;
 }
 
-/* Asegura que el fondo y texto global acompañen */
-html, body{
-  background: hsl(var(--bg));
-  color: hsl(var(--fg));
+html, body {
+  background: hsl(var(--app-bg));
+  color: hsl(var(--app-fg));
 }

@@ -7,6 +7,7 @@ import NextTopLoader from "nextjs-toploader";
 import AppTransitions from "@/components/AppTransitions";
 import NavDebug from "@/components/dev/NavDebug";
 import { html } from "framer-motion/client";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const inter = Poppins({
   subsets: ["latin"],
@@ -22,18 +23,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
   <body className={inter.className}>
  
-
-
-
         <Providers>
           <ClientShell>
             {isProd ? <NextTopLoader showSpinner={false} /> : null}
+          <ThemeToggle />
+
 
             <AppTransitions>{children}</AppTransitions>
 
             {isProd ? null : <NavDebug />}
           </ClientShell>
         </Providers>
+        
 
         {/* Mercado Pago SDK */}
         <Script
