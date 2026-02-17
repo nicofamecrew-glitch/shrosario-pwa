@@ -90,7 +90,7 @@ export default function CatalogPage({ products }: { products: Product[] }) {
   const q = norm(qRaw);
 
   const [search, setSearch] = useState("");
-  const [brand, setBrand] = useState("brandFromUrl");
+  const [brand, setBrand] = useState(brandFromUrl);
   const [category, setCategory] = useState("all");
   const [size, setSize] = useState("all");
   const [type, setType] = useState("all");
@@ -187,7 +187,8 @@ useEffect(() => {
   const canLoadMore = deduped.length > visible;
 
   return (
-    <div className="min-h-screen bg-ink text-white">
+  <div className="min-h-screen bg-[hsl(var(--app-bg))] text-[hsl(var(--app-fg))]">
+
       <main className="container pb-20">
         <Filters
           products={products}
@@ -205,15 +206,16 @@ useEffect(() => {
         />
 
         {qRaw ? (
-          <div className="mt-4 text-sm text-white/60">
-            Resultados para: <span className="text-white/90">“{qRaw}”</span>
-          </div>
+          <div className="mt-4 text-sm text-black/60 dark:text-white/60">
+  Resultados para: <span className="text-black/90 dark:text-white/90">“{qRaw}”</span>
+</div>
+
         ) : null}
 
         <section className="mt-8">
           {deduped.length === 0 ? (
             <div className="py-20 text-center">
-              <p className="text-sm text-muted">
+              <p className="text-sm text-black/60 dark:text-white/60">
                 No encontramos productos con esos filtros.
               </p>
 
@@ -227,7 +229,8 @@ useEffect(() => {
                   setType("all");
                   setVisible(PAGE_SIZE);
                 }}
-                className="mt-4 inline-flex items-center justify-center rounded-full border border-panel px-4 py-2 text-sm"
+className="mt-4 inline-flex items-center justify-center rounded-full border border-black/10 bg-[hsl(var(--app-surface))] px-4 py-2 text-sm text-[hsl(var(--app-fg))] dark:border-white/10"
+
               >
                 Limpiar filtros
               </button>
@@ -260,7 +263,8 @@ useEffect(() => {
                   <button
                     type="button"
                     onClick={() => setVisible((v) => v + PAGE_SIZE)}
-                    className="rounded-full border border-panel px-5 py-2 text-sm font-semibold"
+                   className="rounded-full border border-black/10 bg-[hsl(var(--app-surface))] px-5 py-2 text-sm font-semibold text-[hsl(var(--app-fg))] dark:border-white/10"
+
                   >
                     Ver más ({Math.min(visible + PAGE_SIZE, deduped.length)}/
                     {deduped.length})
