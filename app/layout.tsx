@@ -22,8 +22,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="es" suppressHydrationWarning>
 
 
-  <body className={`${inter.className} min-h-screen bg-white text-[#111] dark:bg-black dark:text-white`}>
-
+  <body className={`${inter.className} min-h-screen bg-[hsl(var(--app-bg))] text-[hsl(var(--app-fg))]`}>
  
         <Providers>
           <ClientShell>
