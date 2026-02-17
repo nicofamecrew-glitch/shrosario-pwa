@@ -19,9 +19,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   const isProd = process.env.NODE_ENV === "production";
  
   return (
-    <html lang="es" data-theme="light">
+    <html lang="es" suppressHydrationWarning>
 
-  <body className={inter.className}>
+
+  <body className={`${inter.className} min-h-screen bg-white text-[#111] dark:bg-black dark:text-white`}>
+
  
         <Providers>
           <ClientShell>

@@ -7,22 +7,17 @@ type Theme = "dark" | "light";
 function applyTheme(next: Theme) {
   const root = document.documentElement;
 
-  // Mantengo tu dataset por compatibilidad
-  root.dataset.theme = next;
+  if (next === "dark") root.classList.add("dark");
+  else root.classList.remove("dark");
 
-  // Esto habilita Tailwind `dark:`
-  root.classList.toggle("dark", next === "dark");
-
-  // Persistencia
   localStorage.setItem("theme", next);
 }
 
 export default function ThemeToggle() {
-  const [theme, setTheme] = useState<Theme>("dark");
+  const [theme, setTheme] = useState<Theme>("light");
 
   useEffect(() => {
-    // Evita crash si algo raro: default dark
-    const saved = (localStorage.getItem("theme") as Theme) || "dark";
+    const saved = (localStorage.getItem("theme") as Theme) || "light";
     setTheme(saved);
     applyTheme(saved);
   }, []);
@@ -36,14 +31,7 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={toggle}
-      className={[
-        "fixed right-4 bottom-24 z-[9999] rounded-full px-4 py-2 text-sm font-semibold backdrop-blur",
-        // light
-        "border border-[#e5e7eb] bg-white/80 text-[#111]",
-        // dark
-        "dark:border-white/15 dark:bg-black/40 dark:text-white",
-        "active:scale-[0.98] transition-transform",
-      ].join(" ")}
+      className="fixed right-4 bottom-24 z-[9999] rounded-full px-4 py-2 text-sm font-semibold backdrop-blur border border-[#e5e7eb] bg-white text-[#111] dark:border-white/15 dark:bg-black/40 dark:text-white active:scale-[0.98] transition-transform"
       aria-label="Cambiar tema"
       title="Cambiar tema"
     >
