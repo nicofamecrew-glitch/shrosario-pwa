@@ -2,28 +2,48 @@
 
 import { useEffect, useState } from "react";
 
+type Theme = "dark" | "light";
+
+function applyTheme(next: Theme) {
+  const root = document.documentElement;
+
+  // Mantengo tu dataset por compatibilidad
+  root.dataset.theme = next;
+
+  // Esto habilita Tailwind `dark:`
+  root.classList.toggle("dark", next === "dark");
+
+  // Persistencia
+  localStorage.setItem("theme", next);
+}
+
 export default function ThemeToggle() {
-  const [theme, setTheme] = useState<"dark" | "light">("dark");
+  const [theme, setTheme] = useState<Theme>("dark");
 
   useEffect(() => {
-    const saved = (localStorage.getItem("theme") as "dark" | "light") || "dark";
+    // Evita crash si algo raro: default dark
+    const saved = (localStorage.getItem("theme") as Theme) || "dark";
     setTheme(saved);
-    document.documentElement.classList.toggle("dark", saved === "dark");
-
+    applyTheme(saved);
   }, []);
 
   function toggle() {
-    const next = theme === "dark" ? "light" : "dark";
+    const next: Theme = theme === "dark" ? "light" : "dark";
     setTheme(next);
-    document.documentElement.classList.toggle("dark", next === "dark");
-
-    localStorage.setItem("theme", next);
+    applyTheme(next);
   }
 
   return (
     <button
       onClick={toggle}
-      className="fixed right-4 bottom-24 z-[9999] rounded-full border border-white/15 bg-black/40 px-4 py-2 text-sm font-semibold text-white backdrop-blur"
+      className={[
+        "fixed right-4 bottom-24 z-[9999] rounded-full px-4 py-2 text-sm font-semibold backdrop-blur",
+        // light
+        "border border-[#e5e7eb] bg-white/80 text-[#111]",
+        // dark
+        "dark:border-white/15 dark:bg-black/40 dark:text-white",
+        "active:scale-[0.98] transition-transform",
+      ].join(" ")}
       aria-label="Cambiar tema"
       title="Cambiar tema"
     >
