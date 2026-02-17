@@ -8,13 +8,15 @@ export default function ThemeToggle() {
   useEffect(() => {
     const saved = (localStorage.getItem("theme") as "dark" | "light") || "dark";
     setTheme(saved);
-    document.documentElement.dataset.theme = saved;
+    document.documentElement.classList.toggle("dark", saved === "dark");
+
   }, []);
 
   function toggle() {
     const next = theme === "dark" ? "light" : "dark";
     setTheme(next);
-    document.documentElement.dataset.theme = next;
+    document.documentElement.classList.toggle("dark", next === "dark");
+
     localStorage.setItem("theme", next);
   }
 

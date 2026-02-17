@@ -120,10 +120,12 @@ function BrandGrid({
     <section className="mt-10">
       <div className="flex items-end justify-between gap-3">
         <div className="min-w-0">
-          <h2 className="text-base font-semibold tracking-tight text-white">
+         <h2 className="text-base font-semibold tracking-tight text-[#111] dark:text-white">
+
             Comprar por marca
           </h2>
-          <p className="mt-0.5 text-xs text-white/60">
+         <p className="mt-0.5 text-xs text-[#6b7280] dark:text-white/60">
+
             Entrás directo al catálogo filtrado
           </p>
         </div>
@@ -189,10 +191,11 @@ function BrandCarousel({
     <section className="mt-10">
       <div className="flex w-full items-end justify-between gap-3">
         <div className="min-w-0">
-          <h2 className="text-base font-semibold tracking-tight text-white">
+         <h2 className="text-base font-semibold tracking-tight text-[#111] dark:text-white">
             {title}
           </h2>
-          <p className="mt-0.5 text-xs text-white/60">Selección rápida</p>
+         <p className="mt-0.5 text-xs text-[#6b7280] dark:text-white/60">
+Selección rápida</p>
         </div>
 
         <Link
@@ -368,11 +371,13 @@ export default function HomeSteamPage({ products }: { products: Product[] }) {
               <div key={block?.id ?? block?.key ?? i}>
                 <div className="flex w-full items-end justify-between gap-3">
                   <div className="min-w-0">
-                    <h2 className="text-base font-semibold tracking-tight text-white">
+                    <h2 className="text-base font-semibold tracking-tight text-[#111] dark:text-white">
+
                       {block?.title ?? "Bloque"}
                     </h2>
                     {block?.subtitle ? (
-                      <p className="mt-0.5 text-xs text-white/60">
+                     <p className="mt-0.5 text-xs text-[#6b7280] dark:text-white/60">
+
                         {block.subtitle}
                       </p>
                     ) : null}
@@ -381,7 +386,8 @@ export default function HomeSteamPage({ products }: { products: Product[] }) {
                   {block?.ctaHref ? (
                     <Link
                       href={block.ctaHref}
-                      className="shrink-0 inline-flex items-center justify-center rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-medium text-white/80 active:scale-[0.98]"
+                     className="shrink-0 inline-flex items-center justify-center rounded-full border border-[#e5e7eb] bg-white px-3 py-1.5 text-xs font-semibold text-[#ee078e] active:scale-[0.98] dark:border-white/15 dark:bg-white/5 dark:text-white/80"
+
                     >
                       {block?.ctaLabel?.trim() ? block.ctaLabel : "Ver todo"}
                     </Link>
