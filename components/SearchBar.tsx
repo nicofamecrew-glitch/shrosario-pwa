@@ -31,15 +31,18 @@ export default function SearchBar({
   return (
     <div className={className}>
       <div
-        className="
-          flex items-center gap-2 rounded-2xl
-          bg-white/10 backdrop-blur-md
-          px-4 py-3
-          border border-white/10
-        "
-      >
+  className={[
+    "flex items-center gap-2 rounded-2xl px-4 py-3 backdrop-blur-md",
+    // light
+    "bg-[#f8f9fb] border border-[#e5e7eb]",
+    // dark (tu look actual)
+    "data-[theme=dark]:bg-white/10 data-[theme=dark]:border-white/10",
+  ].join(" ")}
+>
+
         <svg
-          className="h-5 w-5 opacity-70"
+  className="h-5 w-5 opacity-70 text-[#6b7280] data-[theme=dark]:text-white"
+
           viewBox="0 0 24 24"
           fill="none"
           aria-hidden="true"
@@ -59,13 +62,20 @@ export default function SearchBar({
             if (e.key === "Enter") go();
           }}
           placeholder={placeholder}
-          className="w-full bg-transparent text-white placeholder:text-white/50 outline-none"
+         className="w-full bg-transparent text-[#111] placeholder:text-[#9ca3af] outline-none data-[theme=dark]:text-white data-[theme=dark]:placeholder:text-white/50"
+
         />
 
         <button
           onClick={go}
-          className="rounded-xl bg-white/10 px-3 py-2 text-sm font-semibold text-white"
-        >
+         className={[
+  "rounded-xl px-3 py-2 text-sm font-semibold active:scale-[0.98] transition-transform",
+  // light
+  "bg-white border border-[#e5e7eb] text-[#111]",
+  // dark
+  "data-[theme=dark]:bg-white/10 data-[theme=dark]:border-transparent data-[theme=dark]:text-white",
+].join(" ")}
+>
           Buscar
         </button>
       </div>
@@ -77,7 +87,14 @@ export default function SearchBar({
             key={c.label}
             type="button"
             onClick={() => router.push(c.href)}
-            className="shrink-0 rounded-full bg-white/10 px-3 py-1.5 text-xs text-white/90"
+            className={[
+  "shrink-0 rounded-full px-3 py-1.5 text-xs font-medium active:scale-[0.98] transition-transform",
+  // light
+  "bg-white border border-[#e5e7eb] text-[#111]",
+  // dark
+  "data-[theme=dark]:bg-white/10 data-[theme=dark]:border-transparent data-[theme=dark]:text-white/90",
+].join(" ")}
+
           >
             {c.label}
           </button>

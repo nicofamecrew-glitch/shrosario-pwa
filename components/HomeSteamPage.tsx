@@ -291,15 +291,16 @@ export default function HomeSteamPage({ products }: { products: Product[] }) {
     .slice(0, 10);
 
   return (
-    <main className="px-4 pb-10 pt-16">
+    <main className="min-h-screen bg-white px-4 pb-24 pt-16 text-[#111] data-[theme=dark]:bg-black data-[theme=dark]:text-white">
+
       <SearchBar className="mt-3" />
 
       {/* ✅ Título (cambiado) */}
       <section className="pt-4 pb-4">
-        <h1 className="text-2xl font-black tracking-tight text-white">
+      <h1 className="text-2xl font-black tracking-tight text-[#111] data-[theme=dark]:text-white">
           ¿Qué querés pedir hoy?
         </h1>
-        <p className="mt-2 text-sm text-white/60">
+        <p className="mt-2 text-sm text-[#6b7280] data-[theme=dark]:text-white/60">
           Entrás, elegís, mandás el pedido. Listo.
         </p>
       </section>
