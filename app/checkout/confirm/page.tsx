@@ -103,45 +103,50 @@ dark:focus:border-white/20 dark:focus:ring-[#ee078e]/25"
           />
         </div>
 
+      <div>
+  <label className="text-xs text-black/60 dark:text-white/60">Ciudad *</label>
+  <input
+    className="mt-1 w-full rounded-xl border p-3 text-sm
+      border-black/10 bg-white text-black placeholder:text-black/40
+      outline-none focus:border-black/20 focus:ring-2 focus:ring-[#ee078e]/30
+      dark:border-white/10 dark:bg-black dark:text-white dark:placeholder:text-white/30
+      dark:focus:border-white/20 dark:focus:ring-[#ee078e]/25"
+    placeholder="Rosario"
+    value={city}
+    onChange={(e) => setCity(e.target.value)}
+  />
+</div>
+
+
+       <div>
+  <label className="text-xs text-black/60 dark:text-white/60">Dirección / zona *</label>
+  <input
+    className="mt-1 w-full rounded-xl border p-3 text-sm
+      border-black/10 bg-white text-black placeholder:text-black/40
+      outline-none focus:border-black/20 focus:ring-2 focus:ring-[#ee078e]/30
+      dark:border-white/10 dark:bg-black dark:text-white dark:placeholder:text-white/30
+      dark:focus:border-white/20 dark:focus:ring-[#ee078e]/25"
+    placeholder="San Martín 1234, barrio centro"
+    value={address}
+    onChange={(e) => setAddress(e.target.value)}
+  />
+</div>
+
+
         <div>
-          <label className="text-xs text-white/60">Ciudad *</label>
-          <input
-           className="mt-1 w-full min-h-[90px] rounded-xl border p-3 text-sm
-border-black/10 bg-white text-black placeholder:text-black/40
-outline-none focus:border-black/20 focus:ring-2 focus:ring-[#ee078e]/30
-dark:border-white/10 dark:bg-black dark:text-white dark:placeholder:text-white/30
-dark:focus:border-white/20 dark:focus:ring-[#ee078e]/25"
+  <label className="text-xs text-black/60 dark:text-white/60">Observaciones</label>
+  <textarea
+    className="mt-1 w-full min-h-[90px] rounded-xl border p-3 text-sm
+      border-black/10 bg-white text-black placeholder:text-black/40
+      outline-none focus:border-black/20 focus:ring-2 focus:ring-[#ee078e]/30
+      dark:border-white/10 dark:bg-black dark:text-white dark:placeholder:text-white/30
+      dark:focus:border-white/20 dark:focus:ring-[#ee078e]/25"
+    placeholder="Horarios, referencias, transporte preferido, etc."
+    value={notes}
+    onChange={(e) => setNotes(e.target.value)}
+  />
+</div>
 
-            placeholder="Rosario"
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
-          />
-        </div>
-
-        <div>
-          <label className="text-xs text-white/60">Dirección / zona *</label>
-          <input
-           className="mt-1 w-full min-h-[90px] rounded-xl border p-3 text-sm
-border-black/10 bg-white text-black placeholder:text-black/40
-outline-none focus:border-black/20 focus:ring-2 focus:ring-[#ee078e]/30
-dark:border-white/10 dark:bg-black dark:text-white dark:placeholder:text-white/30
-dark:focus:border-white/20 dark:focus:ring-[#ee078e]/25"
-
-            placeholder="San Martín 1234, barrio centro"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-          />
-        </div>
-
-        <div>
-          <label className="text-xs text-white/60">Observaciones</label>
-          <textarea
-            className="mt-1 w-full min-h-[90px] rounded-xl bg-black border border-white/10 p-3 text-white placeholder:text-white/30 outline-none focus:border-white/20"
-            placeholder="Horarios, referencias, transporte preferido, etc."
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-          />
-        </div>
       </div>
 
       {/* CTA — EN EL FLUJO, NO FIXED */}
