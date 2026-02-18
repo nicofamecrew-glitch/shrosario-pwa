@@ -1,4 +1,4 @@
-
+"use client";
 
 import type { Product } from "@/lib/types";
 import { useState } from "react";
@@ -15,7 +15,7 @@ export default function Filters({
   onSize,
   type,
   onType,
-  isWholesale
+  isWholesale,
 }: {
   products: Product[];
   search: string;
@@ -32,130 +32,148 @@ export default function Filters({
 }) {
   const [open, setOpen] = useState(false);
 
-  const brands = Array.from(new Set(products.map((product) => product.brand)));
-  const categories = Array.from(new Set(products.map((product) => product.category))).filter((cat) =>
-    isWholesale ? true : cat.toLowerCase() !== "mayoristas"
-  );
-  const sizes = Array.from(
-    new Set(products.flatMap((product) => product.variants.map((variant) => variant.size)))
-  );
-  const types = Array.from(
-    new Set(
-  products.flatMap((product) =>
-    (product.tags ?? []).map((tag) => tag.toLowerCase())
-  )
-)
+  const brands = Array.from(new Set(products.map((p) => p.brand)));
 
+  const categories = Array.from(new Set(products.map((p) => p.category))).filter(
+    (cat) => (isWholesale ? true : cat.toLowerCase() !== "mayoristas")
   );
+
+  const sizes = Array.from(
+    new Set(products.flatMap((p) => p.variants.map((v) => v.size)))
+  );
+
+  const types = Array.from(
+    new Set(products.flatMap((p) => (p.tags ?? []).map((t) => String(t).toLowerCase())))
+  );
+
+  const controlClass =
+    "mt-2 w-full rounded-2xl " +
+    "border border-gray-200 dark:border-white/10 " +
+    "bg-white dark:bg-black " +
+    "px-4 py-3 text-sm " +
+    "text-black dark:text-white " +
+    "shadow-sm outline-none " +
+    "focus:ring-2 focus:ring-[#ee078e]/40 " +
+    "transition";
 
   return (
-   
-  <section
-    id="catalogo"
-    className="mt-4 rounded-3xl border border-panel bg-surface overflow-hidden"
-  >
-    {/* HEADER COLAPSABLE */}
-    <button
-      onClick={() => setOpen(!open)}
-      className="w-full flex items-center justify-between px-4 py-3 text-left"
+    <section
+      id="catalogo"
+      className="mt-4 rounded-3xl border border-gray-200 bg-white dark:border-white/10 dark:bg-black overflow-hidden"
     >
-      <span className="text-sm font-medium">Filtrar productos</span>
-      <span className="text-xs text-muted">
-        {open ? "Ocultar" : "Mostrar"}
-      </span>
-    </button>
+      {/* HEADER COLAPSABLE */}
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between px-4 py-3 text-left"
+      >
+        <span className="text-sm font-medium text-black dark:text-white">
+          Filtrar productos
+        </span>
 
-    {/* CONTENIDO DE FILTROS */}
-    {open && (
-      <div className="p-4 pt-0 md:p-6">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
-          <div className="md:col-span-2">
-            <label className="text-xs uppercase tracking-wide text-muted">
-              Buscador
-            </label>
-            <input
-              value={search}
-              onChange={(event) => onSearch(event.target.value)}
-             className="mt-4 rounded-3xl border border-[hsl(var(--app-border))] bg-[hsl(var(--app-surface))] overflow-hidden"
+        <span className="text-xs text-black/60 dark:text-white/60">
+          {open ? "Ocultar" : "Mostrar"}
+        </span>
+      </button>
 
-              placeholder="Buscar por marca, linea o producto"
-            />
-          </div>
+      {/* CONTENIDO DE FILTROS */}
+      {open && (
+        <div className="p-4 pt-0 md:p-6">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
+            <div className="md:col-span-2">
+              <label className="text-xs uppercase tracking-wide text-black/60 dark:text-white/60">
+                Buscador
+              </label>
 
-          <div>
-            <label className="text-xs uppercase tracking-wide text-muted">
-              Marca
-            </label>
-            <select
-              value={brand}
-              onChange={(event) => onBrand(event.target.value)}
-             className="mt-2 w-full rounded-xl border border-[hsl(var(--app-border))] bg-[hsl(var(--app-surface))] px-3 py-2 text-sm"
-            >
-              <option value="all">Todas</option>
-              {brands.map((entry) => (
-                <option key={entry} value={entry}>
-                  {entry}
-                </option>
-              ))}
-            </select>
-          </div>
+              <input
+                value={search}
+                onChange={(e) => onSearch(e.target.value)}
+                className={
+                  controlClass +
+                  " placeholder:text-gray-400 dark:placeholder:text-white/40"
+                }
+                placeholder="Buscar por marca, linea o producto"
+              />
+            </div>
 
-          <div>
-            <label className="text-xs uppercase tracking-wide text-muted">
-              Categoria
-            </label>
-            <select
-              value={category}
-              onChange={(event) => onCategory(event.target.value)}
-              className="mt-2 w-full rounded-xl border border-[hsl(var(--app-border))] bg-[hsl(var(--app-surface))] px-3 py-2 text-sm"
-            >
-              <option value="all">Todas</option>
-              {categories.map((entry) => (
-                <option key={entry} value={entry}>
-                  {entry}
-                </option>
-              ))}
-            </select>
-          </div>
+            <div>
+              <label className="text-xs uppercase tracking-wide text-black/60 dark:text-white/60">
+                Marca
+              </label>
 
-          <div>
-            <label className="text-xs uppercase tracking-wide text-muted">
-              Tamano
-            </label>
-            <select
-              value={size}
-              onChange={(event) => onSize(event.target.value)}
-              className="mt-2 w-full rounded-xl border border-[hsl(var(--app-border))] bg-[hsl(var(--app-surface))] px-3 py-2 text-sm"
-            >
-              <option value="all">Todos</option>
-              {sizes.map((entry) => (
-                <option key={entry} value={entry}>
-                  {entry}
-                </option>
-              ))}
-            </select>
-          </div>
+              <select
+                value={brand}
+                onChange={(e) => onBrand(e.target.value)}
+                className={controlClass}
+              >
+                <option value="all">Todas</option>
+                {brands.map((entry) => (
+                  <option key={entry} value={entry}>
+                    {entry}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-          <div>
-            <label className="text-xs uppercase tracking-wide text-muted">
-              Tipo
-            </label>
-            <select
-              value={type}
-              onChange={(event) => onType(event.target.value)}
-              className="mt-2 w-full rounded-xl border border-[hsl(var(--app-border))] bg-[hsl(var(--app-surface))] px-3 py-2 text-sm"
-            >
-              <option value="all">Todos</option>
-              {types.map((entry) => (
-                <option key={entry} value={entry}>
-                  {entry}
-                </option>
-              ))}
-            </select>
+            <div>
+              <label className="text-xs uppercase tracking-wide text-black/60 dark:text-white/60">
+                Categoria
+              </label>
+
+              <select
+                value={category}
+                onChange={(e) => onCategory(e.target.value)}
+                className={controlClass}
+              >
+                <option value="all">Todas</option>
+                {categories.map((entry) => (
+                  <option key={entry} value={entry}>
+                    {entry}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="text-xs uppercase tracking-wide text-black/60 dark:text-white/60">
+                Tamano
+              </label>
+
+              <select
+                value={size}
+                onChange={(e) => onSize(e.target.value)}
+                className={controlClass}
+              >
+                <option value="all">Todos</option>
+                {sizes.map((entry) => (
+                  <option key={entry} value={entry}>
+                    {entry}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="text-xs uppercase tracking-wide text-black/60 dark:text-white/60">
+                Tipo
+              </label>
+
+              <select
+                value={type}
+                onChange={(e) => onType(e.target.value)}
+                className={controlClass}
+              >
+                <option value="all">Todos</option>
+                {types.map((entry) => (
+                  <option key={entry} value={entry}>
+                    {entry}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
-      </div>
-    )}
-  </section>
-);
+      )}
+    </section>
+  );
 }
