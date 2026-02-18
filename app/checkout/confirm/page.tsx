@@ -51,29 +51,51 @@ export default function ConfirmOrderPage() {
   }, [loaded, phone, city, address, notes]);
 
   return (
-    <main className="min-h-[calc(100dvh-96px)] px-4 pt-16 pb-6 flex flex-col">
+  <main
+  className={[
+    "min-h-[calc(100dvh-96px)] px-4 pt-16 pb-6 flex flex-col",
+    // light
+    "bg-[#f6f7f8] text-black",
+    // dark
+    "dark:bg-black dark:text-white",
+  ].join(" ")}
+>
+
       {/* HEADER */}
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold">Confirmar pedido</h1>
         <button
           type="button"
           onClick={() => router.back()}
-          className="text-sm text-white/60 hover:text-white"
+          className="text-sm text-black/60 hover:text-black dark:text-white/60 dark:hover:text-white"
+
         >
           Volver
         </button>
       </div>
 
-      <p className="mt-1 text-sm text-white/60">
+      <p className="mt-1 text-sm text-black/60 dark:text-white/60">
+
         Usamos estos datos solo para coordinar la entrega.
       </p>
 
       {/* FORM (solo scrollea si no entra en pantalla) */}
-      <div className="mt-6 flex-1 overflow-y-auto space-y-4 pr-1">
+     <div
+  className="mt-6 flex-1 overflow-y-auto space-y-4 pr-1 rounded-2xl border p-4
+             border-black/10 bg-white shadow-sm
+             dark:border-white/10 dark:bg-white/5 dark:shadow-none"
+>
+
         <div>
-          <label className="text-xs text-white/60">Teléfono *</label>
+        <label className="text-xs text-black/60 dark:text-white/60">
+Teléfono *</label>
           <input
-            className="mt-1 w-full rounded-xl bg-black border border-white/10 p-3 text-white placeholder:text-white/30 outline-none focus:border-white/20"
+           className="mt-1 w-full rounded-xl border p-3 text-sm
+border-black/10 bg-white text-black placeholder:text-black/40
+outline-none focus:border-black/20 focus:ring-2 focus:ring-[#ee078e]/30
+dark:border-white/10 dark:bg-black dark:text-white dark:placeholder:text-white/30
+dark:focus:border-white/20 dark:focus:ring-[#ee078e]/25"
+
             placeholder="341 555 1234"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
@@ -84,7 +106,12 @@ export default function ConfirmOrderPage() {
         <div>
           <label className="text-xs text-white/60">Ciudad *</label>
           <input
-            className="mt-1 w-full rounded-xl bg-black border border-white/10 p-3 text-white placeholder:text-white/30 outline-none focus:border-white/20"
+           className="mt-1 w-full min-h-[90px] rounded-xl border p-3 text-sm
+border-black/10 bg-white text-black placeholder:text-black/40
+outline-none focus:border-black/20 focus:ring-2 focus:ring-[#ee078e]/30
+dark:border-white/10 dark:bg-black dark:text-white dark:placeholder:text-white/30
+dark:focus:border-white/20 dark:focus:ring-[#ee078e]/25"
+
             placeholder="Rosario"
             value={city}
             onChange={(e) => setCity(e.target.value)}
@@ -94,7 +121,12 @@ export default function ConfirmOrderPage() {
         <div>
           <label className="text-xs text-white/60">Dirección / zona *</label>
           <input
-            className="mt-1 w-full rounded-xl bg-black border border-white/10 p-3 text-white placeholder:text-white/30 outline-none focus:border-white/20"
+           className="mt-1 w-full min-h-[90px] rounded-xl border p-3 text-sm
+border-black/10 bg-white text-black placeholder:text-black/40
+outline-none focus:border-black/20 focus:ring-2 focus:ring-[#ee078e]/30
+dark:border-white/10 dark:bg-black dark:text-white dark:placeholder:text-white/30
+dark:focus:border-white/20 dark:focus:ring-[#ee078e]/25"
+
             placeholder="San Martín 1234, barrio centro"
             value={address}
             onChange={(e) => setAddress(e.target.value)}
