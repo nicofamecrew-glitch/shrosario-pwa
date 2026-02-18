@@ -76,7 +76,8 @@ export default function Filters({
             <input
               value={search}
               onChange={(event) => onSearch(event.target.value)}
-              className="mt-2 w-full rounded-xl border border-panel bg-ink px-3 py-2 text-sm"
+             className="mt-4 rounded-3xl border border-[hsl(var(--app-border))] bg-[hsl(var(--app-surface))] overflow-hidden"
+
               placeholder="Buscar por marca, linea o producto"
             />
           </div>
@@ -88,7 +89,7 @@ export default function Filters({
             <select
               value={brand}
               onChange={(event) => onBrand(event.target.value)}
-              className="mt-2 w-full rounded-xl border border-panel bg-ink px-3 py-2 text-sm"
+             className="mt-2 w-full rounded-xl border border-[hsl(var(--app-border))] bg-[hsl(var(--app-surface))] px-3 py-2 text-sm"
             >
               <option value="all">Todas</option>
               {brands.map((entry) => (
@@ -106,7 +107,7 @@ export default function Filters({
             <select
               value={category}
               onChange={(event) => onCategory(event.target.value)}
-              className="mt-2 w-full rounded-xl border border-panel bg-ink px-3 py-2 text-sm"
+              className="mt-2 w-full rounded-xl border border-[hsl(var(--app-border))] bg-[hsl(var(--app-surface))] px-3 py-2 text-sm"
             >
               <option value="all">Todas</option>
               {categories.map((entry) => (
@@ -124,7 +125,7 @@ export default function Filters({
             <select
               value={size}
               onChange={(event) => onSize(event.target.value)}
-              className="mt-2 w-full rounded-xl border border-panel bg-ink px-3 py-2 text-sm"
+              className="mt-2 w-full rounded-xl border border-[hsl(var(--app-border))] bg-[hsl(var(--app-surface))] px-3 py-2 text-sm"
             >
               <option value="all">Todos</option>
               {sizes.map((entry) => (
@@ -142,7 +143,7 @@ export default function Filters({
             <select
               value={type}
               onChange={(event) => onType(event.target.value)}
-              className="mt-2 w-full rounded-xl border border-panel bg-ink px-3 py-2 text-sm"
+              className="mt-2 w-full rounded-xl border border-[hsl(var(--app-border))] bg-[hsl(var(--app-surface))] px-3 py-2 text-sm"
             >
               <option value="all">Todos</option>
               {types.map((entry) => (
