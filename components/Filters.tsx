@@ -46,35 +46,41 @@ export default function Filters({
     new Set(products.flatMap((p) => (p.tags ?? []).map((t) => String(t).toLowerCase())))
   );
 
-  const controlClass =
-    "mt-2 w-full rounded-2xl " +
-    "border border-gray-200 dark:border-white/10 " +
-    "bg-white dark:bg-black " +
-    "px-4 py-3 text-sm " +
-    "text-black dark:text-white " +
-    "shadow-sm outline-none " +
-    "focus:ring-2 focus:ring-[#ee078e]/40 " +
-    "transition";
+const controlClass =
+  "mt-2 w-full rounded-xl " +
+  "border border-black/10 dark:border-white/10 " +
+  "bg-white dark:bg-black/30 " +
+  "px-3 py-2 text-sm " +
+  "text-black dark:text-white " +
+  "shadow-sm outline-none " +
+  "focus:ring-2 focus:ring-[#ee078e]/40 " +
+  "transition";
 
   return (
     <section
-      id="catalogo"
-      className="mt-4 rounded-3xl border border-gray-200 bg-white dark:border-white/10 dark:bg-black overflow-hidden"
-    >
+  id="catalogo"
+  className="
+    mt-4 rounded-3xl overflow-hidden
+    border border-black/10 bg-white
+    dark:border-white/10 dark:bg-black/40
+    backdrop-blur
+  "
+>
+
       {/* HEADER COLAPSABLE */}
       <button
-        type="button"
-        onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between px-4 py-3 text-left"
-      >
-        <span className="text-sm font-medium text-black dark:text-white">
-          Filtrar productos
-        </span>
+  type="button"
+  onClick={() => setOpen(!open)}
+  className="w-full flex items-center justify-between px-4 py-3 text-left"
+>
+  <span className="text-sm font-medium text-black dark:text-white">
+    Filtrar productos
+  </span>
 
-        <span className="text-xs text-black/60 dark:text-white/60">
-          {open ? "Ocultar" : "Mostrar"}
-        </span>
-      </button>
+  <span className="text-xs text-black/60 dark:text-white/60">
+    {open ? "Ocultar" : "Mostrar"}
+  </span>
+</button>
 
       {/* CONTENIDO DE FILTROS */}
       {open && (
@@ -86,14 +92,12 @@ export default function Filters({
               </label>
 
               <input
-                value={search}
-                onChange={(e) => onSearch(e.target.value)}
-                className={
-                  controlClass +
-                  " placeholder:text-gray-400 dark:placeholder:text-white/40"
-                }
-                placeholder="Buscar por marca, linea o producto"
-              />
+  value={search}
+  onChange={(e) => onSearch(e.target.value)}
+  className={controlClass + " placeholder:text-black/40 dark:placeholder:text-white/40"}
+  placeholder="Buscar por marca, linea o producto"
+/>
+
             </div>
 
             <div>
