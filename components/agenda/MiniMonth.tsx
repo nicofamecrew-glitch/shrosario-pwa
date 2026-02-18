@@ -38,10 +38,13 @@ export default function MiniMonth(props: {
   return (
     <div>
       <div className="flex items-center justify-between">
-        <div className="text-sm font-black">{capTitle}</div>
-      </div>
+        <div className="text-sm font-black text-black dark:text-white">
+  {capTitle}
+</div>
 
-      <div className="mt-2 grid grid-cols-7 gap-1 text-[11px] text-white/60">
+
+     <div className="mt-2 grid grid-cols-7 gap-1 text-[11px] text-black/60 dark:text-white/60">
+
         {["Lu", "Ma", "Mi", "Ju", "Vi", "Sa", "Do"].map((d) => (
           <div key={d} className="px-1 py-1 text-center font-semibold">
             {d}
@@ -61,17 +64,21 @@ export default function MiniMonth(props: {
               disabled={!d}
               onClick={() => d && onChange(d)}
               className={[
-                "h-8 rounded-lg text-xs font-semibold",
-                !d ? "opacity-0" : "hover:bg-white/10",
-                isToday ? "border border-white/20" : "border border-transparent",
-                isSelected ? "bg-[#dd1d03] text-white" : "bg-black/20 text-white/80",
-              ].join(" ")}
+  "h-8 rounded-lg text-xs font-semibold transition",
+  !d ? "opacity-0" : "hover:bg-black/5 dark:hover:bg-white/10",
+  isToday ? "border border-black/20 dark:border-white/20" : "border border-transparent",
+  isSelected
+    ? "bg-[#dd1d03] text-white"
+    : "bg-black/5 text-black/80 dark:bg-white/10 dark:text-white/80",
+].join(" ")}
+
             >
               {d ? d.getDate() : ""}
             </button>
           );
         })}
       </div>
+    </div>
     </div>
   );
 }
