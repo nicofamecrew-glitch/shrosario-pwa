@@ -65,13 +65,28 @@ export default function LocationAutocomplete(props: {
         onChange={(e) => onChange(e.target.value)}
         onFocus={() => value.trim().length >= 2 && setOpen(true)}
         placeholder={placeholder ?? "Buscar por localidad o CP"}
-        className="mt-2 w-full rounded-xl bg-black/40 p-3 text-white outline-none"
+       className={[
+  "mt-2 w-full h-12 rounded-xl border px-3 text-sm",
+  "border-black/10 bg-white text-black placeholder:text-black/40",
+  "outline-none focus:border-black/20 focus:ring-2 focus:ring-[#ee078e]/30",
+  "dark:border-white/10 dark:bg-black dark:text-white dark:placeholder:text-white/30",
+  "dark:focus:border-white/20 dark:focus:ring-[#ee078e]/25",
+].join(" ")}
+
       />
 
       {open && (loading || results.length > 0) && (
-        <div className="absolute z-50 mt-2 w-full rounded-xl border border-white/10 bg-[#0b0b0b] shadow max-h-64 overflow-auto">
+       <div
+  className={[
+    "absolute z-50 mt-2 w-full rounded-xl border shadow max-h-64 overflow-auto",
+    "border-black/10 bg-white",
+    "dark:border-white/10 dark:bg-[#0b0b0b]",
+  ].join(" ")}
+>
+
           {loading && (
-            <div className="px-3 py-2 text-sm text-white/70">Buscando…</div>
+            <div className="px-3 py-2 text-sm text-black/70 dark:text-white/70">Buscando…</div>
+
           )}
 
           {!loading &&
@@ -83,12 +98,13 @@ export default function LocationAutocomplete(props: {
                   onSelect(r);
                   setOpen(false);
                 }}
-                className="w-full text-left px-3 py-2 hover:bg-white/5"
+               className="w-full text-left px-3 py-2 hover:bg-black/5 dark:hover:bg-white/5"
+
               >
-                <div className="font-semibold text-white">{r.city}</div>
-                <div className="text-xs text-white/60">
-                  {r.state} · CP {r.zipcode}
-                </div>
+                <div className="font-semibold text-black dark:text-white">{r.city}</div>
+<div className="text-xs text-black/60 dark:text-white/60">{r.state} · CP {r.zipcode}</div>
+
+                
               </button>
             ))}
 
