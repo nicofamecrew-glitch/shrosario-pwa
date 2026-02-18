@@ -30,6 +30,25 @@ export default function PaymentPage() {
   const items = useCartStore((s) => s.items);
   const isWholesale = useCartStore((s) => s.isWholesale);
   const byId = useCatalogStore((s) => s.byId);
+  const pageBg = "bg-[#f6f7f8] text-black dark:bg-black dark:text-white";
+
+const card =
+  "rounded-2xl border p-4 shadow-sm " +
+  "border-black/10 bg-white " +
+  "dark:border-white/10 dark:bg-white/5 dark:shadow-none";
+
+const muted = "text-black/60 dark:text-white/60";
+const label = "font-bold text-black dark:text-white";
+
+const btnGhost =
+  "rounded-xl px-4 py-3 font-bold transition active:scale-[0.98] " +
+  "bg-black/5 text-black hover:bg-black/10 " +
+  "dark:bg-white/10 dark:text-white dark:hover:bg-white/15";
+
+const btnPrimary =
+  "rounded-xl px-4 py-3 font-bold transition active:scale-[0.98] disabled:opacity-50 " +
+  "bg-[#ee078e] text-white";
+
 
   const [shipping, setShipping] = useState<ShippingSelection | null>(null);
   const [loaded, setLoaded] = useState(false);
@@ -98,8 +117,10 @@ export default function PaymentPage() {
   // Carrito vacío
   if (!items?.length) {
     return (
-      <main className="p-4">
-        <h1 className="text-xl font-bold text-white">Pago</h1>
+      <main className={`p-4 ${pageBg}`}>
+
+       <h1 className="text-xl font-bold">Pago</h1>
+
         <p className="mt-2 text-gray-300">Tu carrito está vacío.</p>
         <button
           onClick={() => router.push("/")}
@@ -200,43 +221,52 @@ export default function PaymentPage() {
   }
 
   return (
-    <main className="p-4">
-      <h1 className="text-xl font-bold text-white">Pago</h1>
+  <main className={`p-4 ${pageBg}`}>
+
+      <h1 className="text-xl font-bold">Pago</h1>
+
 
       {/* Resumen */}
-      <div className="mt-3 rounded-2xl bg-white/5 p-4">
+      <div className={`mt-3 ${card}`}>
+
         <div className="flex items-center justify-between">
-          <span className="text-gray-300">Productos</span>
-          <span className="font-bold text-white">{formatARS(cartTotal)}</span>
+          <span className={muted}>Productos</span>
+          <span className={label}>{formatARS(cartTotal)}</span>
         </div>
 
         <div className="mt-2 flex items-center justify-between">
-          <span className="text-gray-300">Envío</span>
-          <span className="font-bold text-white">{formatARS(shippingCost)}</span>
+          <span className={muted}>Envío</span>
+          <span className={label}>{formatARS(shippingCost)}</span>
         </div>
 
-        <div className="mt-3 h-px bg-white/10" />
+        <div className="mt-3 h-px bg-black/10 dark:bg-white/10" />
+
 
         <div className="mt-3 flex items-center justify-between">
-          <span className="text-gray-200 font-bold">Total</span>
-          <span className="font-bold text-white">{formatARS(grandTotal)}</span>
+          <span className={muted}>Total</span>
+          <span className={label}>{formatARS(grandTotal)}</span>
         </div>
 
-        {shipping?.label && <div className="mt-2 text-sm text-gray-400">{shipping.label}</div>}
+       {shipping?.label && <div className={`mt-2 text-sm ${muted}`}>{shipping.label}</div>}
+
       </div>
 
       {/* Método de pago */}
-      <div className="mt-4 rounded-2xl bg-white/5 p-4">
-        <div className="font-bold text-white">Mercado Pago</div>
-        <div className="mt-1 text-sm text-gray-300">Tarjeta, débito o dinero en cuenta.</div>
+      <div className={`mt-4 ${card}`}>
+
+        <div className={label}>Mercado Pago</div>
+<div className={`mt-1 text-sm ${muted}`}>Tarjeta, débito o dinero en cuenta.</div>
+
       </div>
 
       {/* Botones */}
-      <div className="mt-4 rounded-2xl bg-white/5 p-4">
+      <div className={`mt-4 ${card}`}>
+
         <div className="grid grid-cols-2 gap-3">
           <button
             onClick={() => router.push("/checkout/shipping")}
-            className="rounded-xl bg-white/10 px-4 py-3 font-bold text-white transition active:scale-[0.98]"
+            className={btnGhost}
+
           >
             Volver
           </button>
@@ -244,7 +274,8 @@ export default function PaymentPage() {
           <button
             onClick={goToMercadoPago}
             disabled={submitting}
-            className="rounded-xl bg-white px-4 py-3 font-bold text-black transition active:scale-[0.98] disabled:opacity-50"
+           className={btnPrimary}
+
           >
             {submitting ? "Redirigiendo..." : "Pagar con Mercado Pago"}
           </button>
