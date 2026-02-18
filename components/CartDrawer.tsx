@@ -92,7 +92,8 @@ return sum + getVariantPrice(variant as any, isWholesale) * item.quantity;
         type="button"
         aria-label="Cerrar carrito"
         onClick={close}
-        className="absolute inset-0 bg-black/60"
+        className="absolute inset-0 bg-black/40 dark:bg-black/60"
+
       />
 
       {/* panel */}
@@ -103,7 +104,7 @@ return sum + getVariantPrice(variant as any, isWholesale) * item.quantity;
     // light
     "bg-white text-black border-black/10",
     // dark
-    "dark:bg-black dark:text-white dark:border-white/10",
+    "dark:bg-[#0b0b0b] dark:text-white dark:border-white/10",
   ].join(" ")}
 >
 
@@ -188,7 +189,8 @@ const price = getVariantPrice(variant, isWholesale);
                       <span className="text-sm">{item.quantity}</span>
 
                       <button
-                        className="h-8 w-8 rounded-full border border-panel"
+                       className="h-8 w-8 rounded-full border border-black/10 bg-white text-black hover:bg-black/5 dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10"
+
                         onClick={() =>
                           updateQuantity(item.productId, item.variantSku, item.quantity + 1)
                         }
