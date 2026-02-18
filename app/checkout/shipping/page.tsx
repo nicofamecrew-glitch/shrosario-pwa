@@ -35,6 +35,36 @@ export default function ShippingPage() {
   const items = useCartStore((s) => s.items);
   const isWholesale = useCartStore((s) => s.isWholesale);
   const byId = useCatalogStore((s) => s.byId);
+    const pageBg = "bg-[#f6f7f8] text-black dark:bg-black dark:text-white";
+
+  const card =
+    "rounded-2xl border p-4 shadow-sm " +
+    "border-black/10 bg-white " +
+    "dark:border-white/10 dark:bg-white/5 dark:shadow-none";
+
+  const label = "text-sm font-bold text-black dark:text-white";
+
+  const muted = "text-sm text-black/60 dark:text-white/60";
+  const muted2 = "text-black/60 dark:text-white/60";
+
+  const field =
+    "mt-2 w-full h-12 rounded-xl border px-3 text-sm " +
+    "border-black/10 bg-white text-black placeholder:text-black/40 " +
+    "outline-none focus:border-black/20 focus:ring-2 focus:ring-[#ee078e]/30 " +
+    "dark:border-white/10 dark:bg-black dark:text-white dark:placeholder:text-white/30 " +
+    "dark:focus:border-white/20 dark:focus:ring-[#ee078e]/25";
+
+  const textarea =
+    "mt-2 w-full rounded-xl border p-3 text-sm " +
+    "border-black/10 bg-white text-black placeholder:text-black/40 " +
+    "outline-none focus:border-black/20 focus:ring-2 focus:ring-[#ee078e]/30 " +
+    "dark:border-white/10 dark:bg-black dark:text-white dark:placeholder:text-white/30 " +
+    "dark:focus:border-white/20 dark:focus:ring-[#ee078e]/25";
+
+  const btn =
+    "w-full rounded-xl px-4 py-3 font-bold transition active:scale-[0.99] " +
+    "bg-black/5 text-black hover:bg-black/10 disabled:opacity-40 " +
+    "dark:bg-white/10 dark:text-white dark:hover:bg-white/15";
 
   const cartTotal = useMemo(() => {
     return items.reduce((acc: number, it: any) => {
@@ -132,8 +162,10 @@ if (process.env.NODE_ENV === "development") {
 
   if (!items?.length) {
     return (
-      <main className="p-4">
-        <h1 className="text-xl font-bold text-white">Envíos</h1>
+  <main className={`p-4 ${pageBg}`}>
+
+       <h1 className="text-xl font-bold">Envío</h1>
+
         <p className="mt-2 text-gray-300">Tu carrito está vacío.</p>
         <button
           onClick={() => router.push("/")}
@@ -146,21 +178,25 @@ if (process.env.NODE_ENV === "development") {
   }
 
   return (
-    <main className="p-4">
+  <main className={`p-4 ${pageBg}`}>
+
       <h1 className="text-xl font-bold text-white">Envío</h1>
 
-      <div className="mt-3 rounded-2xl bg-white/5 p-4">
-        <div className="flex items-center justify-between">
-          <div className="text-gray-300">Total del carrito</div>
-          <div className="font-bold text-white">{formatARS(cartTotal)}</div>
-        </div>
-        <div className="mt-2 text-sm text-gray-400">
-          Envío gratis desde {formatARS(freeShippingThreshold)} (no aplica a retiro).
-        </div>
-      </div>
+      <div className={`mt-3 ${card}`}>
+  <div className="flex items-center justify-between">
+    <div className={muted2}>Total del carrito</div>
+    <div className="font-bold">{formatARS(cartTotal)}</div>
+  </div>
+
+  <div className={`mt-2 ${muted}`}>
+    Envío gratis desde {formatARS(freeShippingThreshold)} (no aplica a retiro).
+  </div>
+</div>
+
 {/* DESTINO (autocomplete) */}
-<div className="mt-4 rounded-2xl bg-white/5 p-4">
-  <label className="text-sm font-bold text-white">Destino</label>
+<div className={`mt-4 ${card}`}>
+  <label className={label}>Destino</label>
+
 
   <LocationAutocomplete
     value={locationQuery}
@@ -180,16 +216,18 @@ if (process.env.NODE_ENV === "development") {
   />
 
   {picked && (
-    <div className="mt-2 text-xs text-white/70">
-      Seleccionado: <span className="text-white font-semibold">{picked.city}</span>,{" "}
-      {picked.state} — CP <span className="text-white font-semibold">{picked.zipcode}</span>
-    </div>
+ <div className="mt-2 text-xs text-black/60 dark:text-white/70">
+  Seleccionado: <span className="font-semibold text-black dark:text-white">{picked.city}</span>,{" "}
+  {picked.state} — CP <span className="font-semibold text-black dark:text-white">{picked.zipcode}</span>
+</div>
+
   )}
 
   <button
     onClick={fetchZipnovaOptions}
     disabled={!zipcode.trim()}
-    className="mt-3 w-full rounded-xl bg-white/10 px-4 py-3 font-bold text-white disabled:opacity-40"
+    className={`mt-3 ${btn}`}
+
   >
     Cotizar envíos
   </button>
@@ -205,12 +243,17 @@ if (process.env.NODE_ENV === "development") {
             key={opt.id}
             type="button"
             onClick={() => setSelected(opt)}
-            className={`w-full rounded-2xl p-4 text-left transition active:scale-[0.98] hover:bg-white/10 ${
-              selected?.id === opt.id ? "bg-white/10" : "bg-white/5"
-            }`}
+          className={[
+  "w-full rounded-2xl border p-4 text-left transition active:scale-[0.98]",
+  "border-black/10 bg-white hover:bg-black/5",
+  "dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10",
+  selected?.id === opt.id ? "ring-2 ring-[#ee078e]/30" : "",
+].join(" ")}
+
           >
-            <div className="font-bold text-white">{opt.label}</div>
-            <div className="text-sm text-gray-300">
+            <div className="font-bold text-black dark:text-white">{opt.label}</div>
+<div className="text-sm text-black/60 dark:text-white/70">
+
               {cartTotal >= freeShippingThreshold ? formatARS(0) : formatARS(opt.cost)}
             </div>
           </button>
@@ -218,42 +261,42 @@ if (process.env.NODE_ENV === "development") {
       </div>
 
       {/* Observaciones */}
-      <div className="mt-4 rounded-2xl bg-white/5 p-4">
-        <label className="text-sm font-bold text-white">Observaciones (opcional)</label>
-        <textarea
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          placeholder="Ej: Entregar de 9 a 18 / Dejar en mostrador / Llamar antes"
-          className="mt-2 w-full rounded-xl bg-black/40 p-3 text-white outline-none"
-          rows={3}
-        />
-      </div>
+      <div className={`mt-4 ${card}`}>
+  <label className={label}>Observaciones (opcional)</label>
+  <textarea
+    value={notes}
+    onChange={(e) => setNotes(e.target.value)}
+    placeholder="Ej: Entregar de 9 a 18 / Dejar en mostrador / Llamar antes"
+    className={textarea}
+    rows={3}
+  />
+</div>
+
 
       {/* Resumen y continuar */}
-      <div className="mt-4 rounded-2xl bg-white/5 p-4">
-        <div className="flex items-center justify-between">
-          <div className="text-gray-300">Envío</div>
-          <div className="font-bold text-white">
-            {selected ? formatARS(finalCost) : "-"}
-          </div>
-        </div>
+     <div className={`mt-4 ${card}`}>
+  <div className="flex items-center justify-between">
+    <div className={muted2}>Envío</div>
+    <div className="font-bold">
+      {selected ? formatARS(finalCost) : "-"}
+    </div>
+  </div>
 
-        <div className="mt-4 grid grid-cols-2 gap-3">
-          <button
-            onClick={() => router.push("/cart")}
-            className="rounded-xl bg-white/10 px-4 py-3 font-bold text-white"
-          >
-            Volver
-          </button>
-          <button
-            onClick={saveAndContinue}
-            disabled={!selected}
-            className="rounded-xl bg-white/10 px-4 py-3 font-bold text-white"
-          >
-            Continuar
-          </button>
-        </div>
-      </div>
+  <div className="mt-4 grid grid-cols-2 gap-3">
+    <button onClick={() => router.push("/cart")} className={btn}>
+      Volver
+    </button>
+
+    <button
+      onClick={saveAndContinue}
+      disabled={!selected}
+      className={btn}
+    >
+      Continuar
+    </button>
+  </div>
+</div>
+
     </main>
   );
 }
