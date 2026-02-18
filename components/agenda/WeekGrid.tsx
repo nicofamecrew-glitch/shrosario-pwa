@@ -73,21 +73,26 @@ const { currentDate, view, events, onEventClick, onDoubleClickEmpty } = props;
                   type="button"
                   
                   className={[
-                    "h-10 border-l border-white/10 px-2 text-left",
-                    "hover:bg-white/5",
-                    isActive ? "bg-white/5" : "bg-transparent",
-                  ].join(" ")}
+  "h-10 border-l border-black/10 dark:border-white/10 px-2 text-left",
+  "hover:bg-black/5 dark:hover:bg-white/5",
+  isActive ? "bg-black/5 dark:bg-white/5" : "bg-transparent",
+].join(" ")}
+
                 >
                   <div className="flex items-center gap-2">
-                    <div className="text-[12px] font-semibold text-white/70">
+                   <div className="text-[12px] font-semibold text-black/70 dark:text-white/70">
+
                       {dayLabel(d)}
                     </div>
                     <div
                       className={[
-                        "flex h-6 min-w-6 items-center justify-center rounded-full px-2 text-[12px] font-black",
-                        isActive ? "bg-[#dd1d03] text-white" : "bg-black/30 text-white/80",
-                        isToday ? "ring-1 ring-white/20" : "",
-                      ].join(" ")}
+  "flex h-6 min-w-6 items-center justify-center rounded-full px-2 text-[12px] font-black",
+  isActive
+    ? "bg-[#dd1d03] text-white"
+    : "bg-black/10 text-black/80 dark:bg-white/10 dark:text-white/80",
+  isToday ? "ring-1 ring-black/20 dark:ring-white/20" : "",
+].join(" ")}
+
                     >
                       {dayNum(d)}
                     </div>
@@ -127,7 +132,8 @@ const { currentDate, view, events, onEventClick, onDoubleClickEmpty } = props;
         </div>
 
         {/* Footer hint */}
-        <div className="mt-2 flex items-center justify-between px-1 text-[11px] text-white/50">
+        <div className="mt-2 flex items-center justify-between px-1 text-[11px] text-black/50 dark:text-white/50">
+
           <div>
             Horario {String(START_HOUR).padStart(2, "0")}:00–{String(END_HOUR).padStart(2, "0")}:00 ·
             paso {STEP_MIN} min
