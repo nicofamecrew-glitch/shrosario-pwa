@@ -105,7 +105,8 @@ export default function DayColumn(props: {
 
   return (
   <div
-    className="relative h-full border-l border-white/10"
+  className="relative h-full border-l border-black/10 dark:border-white/10"
+
    onDoubleClick={(ev: React.MouseEvent<HTMLDivElement>) => {
   const rect = ev.currentTarget.getBoundingClientRect();
   const y = ev.clientY - rect.top;
