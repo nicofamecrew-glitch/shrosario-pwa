@@ -220,8 +220,27 @@ export default function AgendaClient() {
     setEditingEvent(null);
   }
 
+  const panel =
+  "rounded-2xl border border-black/10 bg-white p-3 shadow-sm " +
+  "dark:border-white/10 dark:bg-white/5 dark:shadow-none";
+
+const softPanel =
+  "rounded-2xl border border-black/10 bg-white p-3 " +
+  "dark:border-white/10 dark:bg-white/5";
+
+const btn =
+  "rounded-xl border border-black/10 bg-white px-3 py-2 text-sm font-semibold " +
+  "hover:bg-black/5 active:scale-[0.99] transition " +
+  "dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10";
+
+const btnPrimary =
+  "rounded-xl bg-[#ee078e] px-3 py-2 text-xs font-black text-white " +
+  "hover:brightness-110 active:scale-[0.99] transition";
+
+
   return (
-    <div className="min-h-[100svh] bg-[hsl(var(--app-bg))] text-[hsl(var(--app-fg))]">
+   <div className="min-h-[100svh] bg-white text-black dark:bg-black dark:text-white">
+
 
       <div className="mx-auto max-w-[1200px] px-3 py-4">
         <AgendaHeader
@@ -243,7 +262,8 @@ export default function AgendaClient() {
 
         <div className="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-[280px_1fr]">
           {/* SIDEBAR (MiniMonth solo desktop para evitar "doble calendario" en mobile) */}
-          <div className="rounded-2xl border border-black/10 bg-black/5 p-3">
+         <div className={panel}>
+
 
             <div className="hidden lg:block">
               <MiniMonth value={currentDate} onChange={setCurrentDate} />
@@ -273,7 +293,8 @@ export default function AgendaClient() {
                   setDriveBusy(false);
                 }
               }}
-              className="mt-3 w-full rounded-xl border border-white/10 bg-white/10 px-3 py-2 text-sm font-semibold hover:bg-white/15 disabled:opacity-50 disabled:cursor-wait"
+              className={`mt-3 w-full ${btn} disabled:opacity-50 disabled:cursor-wait`}
+
             >
               <div className="flex items-center justify-center gap-2">
                 <img
@@ -312,12 +333,14 @@ export default function AgendaClient() {
                   setDriveBusy(false);
                 }
               }}
-              className="mt-2 w-full rounded-xl border border-white/10 bg-white/10 px-3 py-2 text-sm font-semibold hover:bg-white/15 disabled:opacity-50 disabled:cursor-wait"
+             className={`mt-2 w-full ${btn} disabled:opacity-50 disabled:cursor-wait`}
+
             >
               Guardar agenda en Drive
             </button>
 
-            <div className="mt-3 border-t border-white/10 pt-3 text-xs text-white/60">
+            <div className="mt-3 border-t border-black/10 dark:border-white/10 pt-3 text-xs text-black/60 dark:text-white/60"
+>
               MVP: vista + eventos. Edición lista.
             </div>
           </div>
@@ -325,25 +348,28 @@ export default function AgendaClient() {
           {/* MAIN */}
           <div>
             <div className="flex items-center justify-between px-2 pb-2">
-              <div className="text-sm font-semibold text-black/70">Turnos</div>
+             <div className="text-sm font-semibold text-black/70 dark:text-white/70">Turnos</div>
+
               <button
                 type="button"
                 onClick={openNewTurno}
-                className="rounded-xl border border-white/10 bg-white/10 px-3 py-2 text-xs font-semibold hover:bg-white/15"
+                className={btnPrimary}
+
               >
                 + Turno
               </button>
             </div>
 
-            <div className="rounded-2xl border border-black/10 bg-black/5 p-3">
-              <WeekGrid
-                currentDate={currentDate}
-                view={view}
-                events={events}
-                onSelectDate={setCurrentDate}
-                onEventClick={openEditTurno}
-              />
-            </div>
+            <div className={softPanel}>
+  <WeekGrid
+    currentDate={currentDate}
+    view={view}
+    events={events}
+    onSelectDate={setCurrentDate}
+    onEventClick={openEditTurno}
+  />
+</div>
+
           </div>
         </div>
 
