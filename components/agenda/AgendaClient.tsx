@@ -238,9 +238,12 @@ const btnPrimary =
   "hover:brightness-110 active:scale-[0.99] transition";
 
 
+
   return (
    <div className="min-h-[100svh] bg-white text-black dark:bg-black dark:text-white">
-
+   <div className="mb-2 text-[10px] opacity-40">
+  BUILD: 03fc24c
+</div>
 
       <div className="mx-auto max-w-[1200px] px-3 py-4">
         <AgendaHeader
