@@ -96,24 +96,39 @@ return sum + getVariantPrice(variant as any, isWholesale) * item.quantity;
       />
 
       {/* panel */}
-      <div className="absolute bottom-0 left-0 right-0 mx-auto h-[85vh] w-full max-w-md rounded-t-3xl border border-panel bg-surface shadow-xl flex flex-col">
+      <div
+  className={[
+    "absolute bottom-0 left-0 right-0 mx-auto h-[85vh] w-full max-w-md",
+    "rounded-t-3xl border shadow-xl flex flex-col overflow-hidden",
+    // light
+    "bg-white text-black border-black/10",
+    // dark
+    "dark:bg-black dark:text-white dark:border-white/10",
+  ].join(" ")}
+>
+
         {/* Header fijo */}
         <div className="shrink-0 p-6 pb-4">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-semibold">Tu pedido</h2>
-            <button className="text-sm text-muted" onClick={close}>
+            <button
+  onClick={close}
+  className="text-sm text-black/60 hover:text-black dark:text-white/60 dark:hover:text-white"
+>
+
               Cerrar
             </button>
           </div>
 
           {items.length === 0 && (
-            <div className="mt-4 rounded-xl border border-panel bg-panel p-4 text-sm text-muted">
+            <div className="mt-4 rounded-xl border border-black/10 bg-black/5 p-4 text-sm text-black/60 dark:border-white/10 dark:bg-white/5 dark:text-white/60"
+>
               Todavía no agregaste productos.
             </div>
           )}
 
           {!hasCatalog && items.length > 0 && (
-            <div className="mt-4 rounded-xl border border-panel bg-panel p-4 text-sm text-muted">
+            <div className="mt-4 rounded-xl border border-black/10 bg-black/5 p-4 text-sm text-black/60 dark:border-white/10 dark:bg-white/5 dark:text-white/60">
               El catálogo todavía no cargó. Abrí “Categorías” una vez y volvé.
             </div>
           )}
@@ -127,35 +142,30 @@ return sum + getVariantPrice(variant as any, isWholesale) * item.quantity;
               if (!product) return null;
 
               const variant = findVariant(product, item.variantSku);
-              if (!variant) {
-  console.warn("[CART_MISSING_VARIANT]", {
-    product_id: product?.id,
-    name: (product as any)?.name,
-    variantSku: item.variantSku,
-    variants: product?.variants,
-  });
-  // fallback: no rompas el render
-  // podés returnear null en esa fila o mostrar "Consultar"
-}
-              const price = getVariantPrice(variant, isWholesale);
+if (!variant) return null;
+const price = getVariantPrice(variant, isWholesale);
+
 
               return (
                 <div
                   key={`${item.productId}-${item.variantSku}`}
-                  className="rounded-xl border border-panel bg-panel p-4"
+                 className="rounded-xl border border-black/10 bg-black/5 p-4 dark:border-white/10 dark:bg-white/5"
+
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="text-sm font-semibold">
                         {product.brand} {product.name}
                       </p>
-                      <p className="text-xs text-muted">
+                      <p className="text-xs text-black/60 dark:text-white/60">
+
                         {variant?.size ?? ""} - {product.line}
                       </p>
                     </div>
 
                     <button
-                      className="text-xs text-muted"
+                     className="text-xs text-black/60 hover:text-black dark:text-white/60 dark:hover:text-white"
+
                       onClick={() => removeItem(item.productId, item.variantSku)}
                     >
                       Quitar
@@ -165,7 +175,8 @@ return sum + getVariantPrice(variant as any, isWholesale) * item.quantity;
                   <div className="mt-3 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <button
-                        className="h-8 w-8 rounded-full border border-panel"
+                       className="h-8 w-8 rounded-full border border-black/10 bg-white text-black hover:bg-black/5 disabled:opacity-50 dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10"
+
                         onClick={() =>
                           updateQuantity(item.productId, item.variantSku, item.quantity - 1)
                         }
@@ -198,13 +209,15 @@ return sum + getVariantPrice(variant as any, isWholesale) * item.quantity;
 
         {/* Footer fijo */}
         <div
-          className="shrink-0 border-t border-panel bg-surface p-6 pt-4"
+          className="shrink-0 border-t border-black/10 bg-white p-6 pt-4 dark:border-white/10 dark:bg-black"
           style={{ paddingBottom: "calc(110px + env(safe-area-inset-bottom))" }}
         >
           {/* TOTAL */}
-          <div className="rounded-xl border border-panel bg-panel p-4">
+          <div className="rounded-xl border border-black/10 bg-black/5 p-4 dark:border-white/10 dark:bg-white/5"
+>
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted">Total estimado</span>
+             <span className="text-sm text-black/60 dark:text-white/60">
+Total estimado</span>
               <span className="text-lg font-semibold">{formatPrice(total)}</span>
             </div>
           </div>
@@ -226,12 +239,14 @@ return sum + getVariantPrice(variant as any, isWholesale) * item.quantity;
             <button
               onClick={clearCart}
               disabled={!hasItems}
-              className="rounded-full border border-panel px-4 py-3 text-sm"
+             className="rounded-full border border-black/10 bg-white px-4 py-3 text-sm text-black hover:bg-black/5 disabled:opacity-50 dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10"
+
             >
               Vaciar carrito
             </button>
 
-            <div className="text-xs text-white/40">
+            <div className="text-xs text-black/50 dark:text-white/40">
+
               El pedido se confirma en el siguiente paso (datos de entrega).
             </div>
           </div>

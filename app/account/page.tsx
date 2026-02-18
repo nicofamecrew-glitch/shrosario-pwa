@@ -15,23 +15,21 @@ const items = [
 export default function AccountPage() {
   const { data: session, status } = useSession();
 
-  const pageBg = "bg-[#f6f7f8] text-black dark:bg-black dark:text-white";
-  const muted = "text-black/60 dark:text-white/60";
-  const muted2 = "text-black/70 dark:text-white/70";
+  const page = "min-h-[100svh] bg-[hsl(var(--app-bg))] text-[hsl(var(--app-fg))] px-4 pt-16 pb-24";
+  const muted = "text-[hsl(var(--app-muted))]";
+  const muted2 = "text-[hsl(var(--app-muted-2))]";
 
   const card =
-    "rounded-2xl border border-black/10 bg-white shadow-sm " +
-    "dark:border-white/10 dark:bg-white/5 dark:shadow-none";
+    "rounded-2xl border border-[hsl(var(--app-border))] bg-[hsl(var(--app-surface))] shadow-sm";
 
   const row =
-    "flex items-center justify-between " +
-    "rounded-2xl border border-black/10 bg-white p-4 shadow-sm " +
-    "dark:border-white/10 dark:bg-white/5 dark:shadow-none";
+    "flex items-center justify-between rounded-2xl border border-[hsl(var(--app-border))] " +
+    "bg-[hsl(var(--app-surface))] p-4 shadow-sm hover:brightness-[1.03] transition";
 
-  const chevron = "text-black/35 dark:text-white/40";
+  const chevron = "text-[hsl(var(--app-muted))] opacity-70";
 
   return (
-    <main className={`min-h-[100svh] px-4 pt-16 pb-24 ${pageBg}`}>
+    <main className={page}>
       <h1 className="text-xl font-bold">Cuenta</h1>
       <p className={`mt-1 text-sm ${muted}`}>Tu información y tu actividad.</p>
 
@@ -41,6 +39,7 @@ export default function AccountPage() {
           <p className={`text-sm ${muted2}`}>
             Iniciá sesión para ver tus pedidos y guardar tus datos.
           </p>
+
           <div className={card}>
             <div className="p-3">
               <GoogleButton />
@@ -60,7 +59,7 @@ export default function AccountPage() {
           <button
             type="button"
             onClick={() => signOut()}
-            className="text-xs font-semibold text-black/70 hover:text-black dark:text-white/70 dark:hover:text-white"
+            className="text-xs font-semibold hover:opacity-80"
           >
             Cerrar sesión
           </button>
@@ -70,12 +69,7 @@ export default function AccountPage() {
       {/* BLOQUE LINKS */}
       <div className="mt-8 space-y-4">
         {items.map((it) => (
-          <Link
-            key={it.href}
-            href={it.href}
-            prefetch={false}
-            className={row}
-          >
+          <Link key={it.href} href={it.href} prefetch={false} className={row}>
             <div>
               <div className="font-semibold">{it.title}</div>
               <div className={`text-sm ${muted}`}>{it.subtitle}</div>
