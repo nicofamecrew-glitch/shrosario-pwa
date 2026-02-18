@@ -93,31 +93,48 @@ export default function AgendaCarousel({
   });
  
   return (
-    <div className="mt-3">
-      <div className="mb-2 flex items-center justify-between">
-        <div className="text-xs font-semibold text-white/60">Resumen</div>
-        <div className="text-[11px] text-white/40">{currentDate.toLocaleDateString("es-AR")}</div>
+  <div className="mt-3">
+    <div className="mb-2 flex items-center justify-between">
+      <div className="text-xs font-semibold text-black/60 dark:text-white/60">
+        Resumen
       </div>
-
-      <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        {cards.map((c) => (
-          <button
-            key={c.key}
-            type="button"
-            onClick={c.onClick}
-            disabled={!c.onClick}
-            className={[
-              "min-w-[240px] snap-start rounded-2xl border border-white/10 bg-white/5 p-3 text-left",
-              "hover:bg-white/10 transition",
-              !c.onClick ? "opacity-90" : "",
-            ].join(" ")}
-          >
-            <div className="text-sm font-black">{c.title}</div>
-            <div className="mt-1 text-sm font-semibold text-white/80">{c.subtitle}</div>
-            {c.meta ? <div className="mt-1 text-[11px] text-white/55">{c.meta}</div> : null}
-          </button>
-        ))}
+      <div className="text-[11px] text-black/40 dark:text-white/40">
+        {currentDate.toLocaleDateString("es-AR")}
       </div>
     </div>
-  );
+
+    <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      {cards.map((c) => (
+        <button
+          key={c.key}
+          type="button"
+          onClick={c.onClick}
+          disabled={!c.onClick}
+          className={[
+            "min-w-[240px] snap-start rounded-2xl border p-3 text-left transition",
+            // Light
+            "border-black/10 bg-white shadow-sm hover:bg-black/5",
+            // Dark
+            "dark:border-white/10 dark:bg-white/5 dark:shadow-none dark:hover:bg-white/10",
+            !c.onClick ? "opacity-90" : "",
+          ].join(" ")}
+        >
+          <div className="text-sm font-black text-black dark:text-white">
+            {c.title}
+          </div>
+
+          <div className="mt-1 text-sm font-semibold text-black/80 dark:text-white/80">
+            {c.subtitle}
+          </div>
+
+          {c.meta ? (
+            <div className="mt-1 text-[11px] text-black/55 dark:text-white/55">
+              {c.meta}
+            </div>
+          ) : null}
+        </button>
+      ))}
+    </div>
+  </div>
+);
 }
