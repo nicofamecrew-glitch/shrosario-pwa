@@ -6,7 +6,7 @@ import { Poppins } from "next/font/google";
 import NextTopLoader from "nextjs-toploader";
 import AppTransitions from "@/components/AppTransitions";
 import NavDebug from "@/components/dev/NavDebug";
-
+import AppBootSplash from "@/components/AppBootSplash";
 import ThemeToggle from "@/components/ThemeToggle";
 
 const inter = Poppins({
@@ -14,6 +14,8 @@ const inter = Poppins({
   weight: ["400", "500", "600", "700", "800", "900"],
   display: "swap",
 });
+
+
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const isProd = process.env.NODE_ENV === "production";
@@ -28,7 +30,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <ClientShell>
             {isProd ? <NextTopLoader showSpinner={false} /> : null}
           <ThemeToggle />
-
+            <AppBootSplash logoSrc="/brand/sh-logo.png" />
 
             <AppTransitions>{children}</AppTransitions>
 
