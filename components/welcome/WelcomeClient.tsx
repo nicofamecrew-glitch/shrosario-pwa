@@ -40,12 +40,13 @@ export default function WelcomeClient() {
         </div>
 
         {/* Botón Google */}
-        <button
-          onClick={loginGoogle}
-          className="w-full h-12 rounded-full border border-black/10 bg-white text-black font-semibold shadow-sm active:scale-[0.99] transition"
-        >
-          Continuar con Google
-        </button>
+       <button
+  onClick={loginGoogle}
+  className="w-full h-12 rounded-full border border-black/10 bg-white text-black font-semibold shadow-sm flex items-center justify-center gap-3"
+>
+  <img src="/icons/google-g.svg" alt="" className="h-5 w-5" />
+  Continuar con Google
+</button>
 
         {/* Entrada sin cuenta (opcional, tradicional) */}
         <Link
@@ -58,3 +59,4 @@ export default function WelcomeClient() {
     </main>
   );
 }
+
