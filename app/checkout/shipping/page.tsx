@@ -93,6 +93,13 @@ export default function ShippingPage() {
   const [notes, setNotes] = useState("");
   const [locationQuery, setLocationQuery] = useState("");
   const [picked, setPicked] = useState<ZipRow | null>(null);
+   
+  function addTestOption() {
+  const opt: ShippingOption = { id: "test_1peso", label: "Envío Test $1", cost: 1 };
+  setOptions([opt]);
+  setSelected(opt);
+}
+
 
   const finalCost = useMemo(() => {
   if (!selected) return 0;
@@ -231,6 +238,15 @@ if (process.env.NODE_ENV === "development") {
   >
     Cotizar envíos
   </button>
+  {process.env.NODE_ENV === "development" && (
+  <button
+    type="button"
+    onClick={addTestOption}
+    className={`mt-2 ${btn}`}
+  >
+    Usar envío test ($1)
+    </button>
+  )}
 </div>
 
       {/* Opciones dinámicas */}
