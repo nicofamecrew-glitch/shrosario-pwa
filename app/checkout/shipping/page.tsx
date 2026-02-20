@@ -31,10 +31,12 @@ function formatARS(n: number) {
 
 export default function ShippingPage() {
   const router = useRouter();
-  const isTest = useMemo(() => {
-  if (typeof window === "undefined") return false;
-  return new URLSearchParams(window.location.search).get("test") === "1";
+const [isTest, setIsTest] = useState(false);
+
+useEffect(() => {
+  setIsTest(new URLSearchParams(window.location.search).get("test") === "1");
 }, []);
+
 
   const items = useCartStore((s) => s.items);
   const isWholesale = useCartStore((s) => s.isWholesale);
@@ -98,9 +100,20 @@ export default function ShippingPage() {
   const [locationQuery, setLocationQuery] = useState("");
   const [picked, setPicked] = useState<ZipRow | null>(null);
    
-  function addTestOption() {
-  const opt: ShippingOption = { id: "test_1peso", label: "Envío Test $1", cost: 1 };
-  setOptions([opt]);
+ function addTestOption() {
+  const opt: ShippingOption = {
+    id: "test_1peso",
+    label: "Envío Test $1",
+    cost: 1,
+  };
+
+  setOptions((prev) => {
+    // si ya existe, no lo agregamos
+    if (prev.some((x) => x.id === opt.id)) return prev;
+    // lo ponemos arriba de todo
+    return [opt, ...prev];
+  });
+
   setSelected(opt);
 }
 
@@ -141,14 +154,17 @@ if (process.env.NODE_ENV === "development") {
     const data = await res.json();
     console.log("Respuesta Zipnova:", data);
 
-    const opts = (data?.options ?? []).map((o: any, idx: number) => ({
-      id: o.id ?? `opt-${idx}`,
-      label: o.name ?? "Opción de envío",
-      cost: Number(o.price ?? 0),
-    }));
+   const opts = (data?.options ?? []).map((o: any, idx: number) => ({
+  id: o.id ?? `opt-${idx}`,
+  label: o.name ?? "Opción de envío",
+  cost: Number(o.price ?? 0),
+}));
 
-    setOptions(opts);
-    setSelected(opts[0] ?? null);
+const testOpt: ShippingOption = { id: "test_1peso", label: "Envío Test $1", cost: 1 };
+const finalOpts = isTest ? [testOpt, ...opts] : opts;
+
+setOptions(finalOpts);
+setSelected(finalOpts[0] ?? null);;
   } catch (err) {
     console.error("Error cotizando Zipnova:", err);
     setOptions([]);
@@ -242,15 +258,7 @@ if (process.env.NODE_ENV === "development") {
   >
     Cotizar envíos
   </button>
-  {isTest && (
-  <button
-    type="button"
-    onClick={addTestOption}
-    className={`mt-2 ${btn}`}
-  >
-    Usar envío test ($1)
-  </button>
-)}
+  
 
 </div>
 
