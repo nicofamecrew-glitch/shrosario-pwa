@@ -31,6 +31,10 @@ function formatARS(n: number) {
 
 export default function ShippingPage() {
   const router = useRouter();
+  const isTest = useMemo(() => {
+  if (typeof window === "undefined") return false;
+  return new URLSearchParams(window.location.search).get("test") === "1";
+}, []);
 
   const items = useCartStore((s) => s.items);
   const isWholesale = useCartStore((s) => s.isWholesale);
@@ -238,15 +242,16 @@ if (process.env.NODE_ENV === "development") {
   >
     Cotizar envíos
   </button>
-  {process.env.NODE_ENV === "development" && (
+  {isTest && (
   <button
     type="button"
     onClick={addTestOption}
     className={`mt-2 ${btn}`}
   >
     Usar envío test ($1)
-    </button>
-  )}
+  </button>
+)}
+
 </div>
 
       {/* Opciones dinámicas */}
