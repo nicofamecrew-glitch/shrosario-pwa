@@ -171,7 +171,29 @@ export default function ShippingPage() {
   return (
     <main className={`p-4 ${pageBg}`}>
       <h1 className="text-xl font-bold">Envío</h1>
+    {/* OPCIÓN RÁPIDA */}
+<div className={`mt-4 ${card}`}>
+  <div className="flex items-center justify-between">
+    <div className="font-bold">Opción rápida</div>
+    <div className="text-sm text-white/60">sin cotizar</div>
+  </div>
 
+  <button
+    type="button"
+    onClick={() => setSelected({ id: "promo_1peso", label: "Envío $1", cost: onePesoShippingCost })}
+    className={[
+      "mt-3 w-full rounded-2xl border p-4 text-left transition active:scale-[0.98]",
+      "border-black/10 bg-white hover:bg-black/5",
+      "dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10",
+      selected?.id === "promo_1peso" ? "ring-2 ring-[#ee078e]/30" : "",
+    ].join(" ")}
+  >
+    <div className="font-bold text-black dark:text-white">Envío $1</div>
+    <div className="text-sm text-black/60 dark:text-white/70">
+      {cartTotal >= freeShippingThreshold ? formatARS(0) : formatARS(onePesoShippingCost)}
+    </div>
+  </button>
+</div>
       {/* TOTAL */}
       <div className={`mt-3 ${card}`}>
         <div className="flex items-center justify-between">
