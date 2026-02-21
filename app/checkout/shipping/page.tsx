@@ -34,7 +34,10 @@ export default function ShippingPage() {
 const [isTest, setIsTest] = useState(false);
 
 useEffect(() => {
-  setIsTest(new URLSearchParams(window.location.search).get("test") === "1");
+  const qs = new URLSearchParams(window.location.search);
+  const qTest = qs.get("test") === "1";
+  const lsTest = localStorage.getItem("sh_test_mode") === "1";
+  setIsTest(qTest || lsTest);
 }, []);
 
 
@@ -92,7 +95,7 @@ useEffect(() => {
   }, [items, byId, isWholesale]);
 
   const freeShippingThreshold = 80000;
-
+  const onePesoShippingCost = 1;
   const [zipcode, setZipcode] = useState("");
   const [options, setOptions] = useState<ShippingOption[]>([]);
   const [selected, setSelected] = useState<ShippingOption | null>(null);
@@ -219,7 +222,9 @@ setSelected(finalOpts[0] ?? null);;
     Envío gratis desde {formatARS(freeShippingThreshold)} (no aplica a retiro).
   </div>
 </div>
-
+ <div className={`mt-1 ${muted}`}>
+  Envío promo: {formatARS(onePesoShippingCost)} (opción disponible).
+</div>
 {/* DESTINO (autocomplete) */}
 <div className={`mt-4 ${card}`}>
   <label className={label}>Destino</label>
@@ -282,7 +287,21 @@ setSelected(finalOpts[0] ?? null);;
           >
             <div className="font-bold text-black dark:text-white">{opt.label}</div>
 <div className="text-sm text-black/60 dark:text-white/70">
-
+<button
+  type="button"
+  onClick={() => setSelected({ id: "promo_1peso", label: "Envío $1", cost: onePesoShippingCost })}
+  className={[
+    "w-full rounded-2xl border p-4 text-left transition active:scale-[0.98]",
+    "border-black/10 bg-white hover:bg-black/5",
+    "dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10",
+    selected?.id === "promo_1peso" ? "ring-2 ring-[#ee078e]/30" : "",
+  ].join(" ")}
+>
+  <div className="font-bold text-black dark:text-white">Envío $1</div>
+  <div className="text-sm text-black/60 dark:text-white/70">
+    {cartTotal >= freeShippingThreshold ? formatARS(0) : formatARS(onePesoShippingCost)}
+  </div>
+</button>
               {cartTotal >= freeShippingThreshold ? formatARS(0) : formatARS(opt.cost)}
             </div>
           </button>
