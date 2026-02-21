@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { MercadoPagoConfig, Preference } from "mercadopago";
 
 export const runtime = "nodejs";
@@ -13,7 +13,24 @@ type CartItem = {
   name?: string;
 };
 
-export async function POST(req: Request) {
+function getBaseUrl(req: NextRequest) {
+  // 1) PRIORIDAD: URL fija por ENV (producción)
+  const envBase =
+    process.env.APP_BASE_URL ||
+    process.env.SITE_URL ||
+    process.env.NEXT_PUBLIC_SITE_URL;
+
+  if (envBase && /^https?:\/\//.test(envBase)) return envBase.replace(/\/$/, "");
+
+  // 2) fallback: detectar host real (Vercel / proxy)
+  const proto = req.headers.get("x-forwarded-proto") || "https";
+  const host = req.headers.get("x-forwarded-host") || req.headers.get("host");
+  if (!host) throw new Error("Missing host headers");
+
+  return `${proto}://${host}`.replace(/\/$/, "");
+}
+
+export async function POST(req: NextRequest) {
   try {
     const accessToken = process.env.MP_ACCESS_TOKEN;
     if (!accessToken) {
@@ -31,13 +48,10 @@ export async function POST(req: Request) {
       );
     }
 
-    const client = new MercadoPagoConfig({ accessToken });
-    const preferenceClient = new Preference(client);
-
-    const base = (process.env.APP_BASE_URL || new URL(req.url).origin).replace(/\/$/, "");
+    const base = getBaseUrl(req);
 
     const body = await req.json();
-console.log("MP /preference body:", body);
+    console.log("MP /preference body:", body);
 
     if (!Array.isArray(body.items)) {
       return NextResponse.json(
@@ -49,7 +63,7 @@ console.log("MP /preference body:", body);
     const items = body.items
       .map((it: CartItem) => {
         const unit = Number(it.unit_price ?? it.unitPrice ?? it.price ?? 0);
-        if (unit <= 0) return null;
+        if (!Number.isFinite(unit) || unit <= 0) return null;
 
         return {
           title: it.title || it.name || it.productId,
@@ -58,7 +72,7 @@ console.log("MP /preference body:", body);
           currency_id: "ARS",
         };
       })
-      .filter(Boolean);
+      .filter(Boolean) as any[];
 
     if (!items.length) {
       return NextResponse.json(
@@ -66,6 +80,9 @@ console.log("MP /preference body:", body);
         { status: 400 }
       );
     }
+
+    const client = new MercadoPagoConfig({ accessToken });
+    const preferenceClient = new Preference(client);
 
     const preference = {
       items,
@@ -82,17 +99,17 @@ console.log("MP /preference body:", body);
 
     const res = await preferenceClient.create({ body: preference });
 
-return NextResponse.json({
-  debug: "PREFERENCE_ROUTE_V2",
-  init_point: res.init_point,
-  id: res.id,
-  installments: [],
-});
-
+    return NextResponse.json({
+      ok: true,
+      debug: "PREFERENCE_ROUTE_V3",
+      base,
+      init_point: res.init_point,
+      id: res.id,
+    });
   } catch (err: any) {
     console.error("MP ERROR:", err);
     return NextResponse.json(
-      { ok: false, error: err.message ?? "MP error" },
+      { ok: false, error: err?.message ?? "MP error" },
       { status: 500 }
     );
   }
