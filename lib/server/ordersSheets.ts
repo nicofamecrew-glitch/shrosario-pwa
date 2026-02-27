@@ -178,3 +178,48 @@ export async function updateOrderStatusInSheets(args: UpdateArgs) {
 
   return { ok: true, rowNumber };
 }
+
+export async function getOrderById(orderId: string) {
+  const sheetId = process.env.GOOGLE_SHEETS_SHEET_ID;
+  if (!sheetId) throw new Error("Falta GOOGLE_SHEETS_SHEET_ID");
+
+  const auth = getGoogleClient();
+  const sheets = google.sheets({ version: "v4", auth });
+
+  const res = await sheets.spreadsheets.values.get({
+    spreadsheetId: sheetId,
+    range: `${TAB}!A:Z`,
+  });
+
+  const rows = res.data.values ?? [];
+  if (rows.length < 2) return null;
+
+  const header = rows[0];
+  const orderIdx = header.findIndex((h: string) =>
+    String(h).toLowerCase() === "numero de orden"
+  );
+
+  if (orderIdx === -1) return null;
+
+  const row = rows.find((r: any, i: number) =>
+    i > 0 && String(r?.[orderIdx] ?? "") === orderId
+  );
+
+  return row ?? null;
+}
+
+export async function updateOrderWithShipment(args: any) {
+  return updateOrderStatusInSheets({
+    orderId: args.orderId,
+    status: "Pagado",
+    shipmentId: args.shipmentId,
+    shipmentStatus: args.shipmentStatus,
+    shippingCost: args.shippingCost,
+    shippingProvider: args.shippingProvider,
+    shippingOptionId: args.shippingOptionId,
+    shippingOptionName: args.shippingOptionName,
+    shippingPrice: args.shippingPrice,
+    shippingEta: args.shippingEta,
+    shippingMeta: args.shippingMeta,
+  });
+}
