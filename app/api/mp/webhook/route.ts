@@ -183,12 +183,13 @@ export async function POST(req: Request) {
   try {
     const orderRef = String(real.payment.external_reference ?? externalRef ?? "");
     if (orderRef) {
-      await updateOrderStatusInSheets({
-        orderId: orderRef,
-        status: "Pagado",
-        paymentId: String(paymentId),
-        paymentStatus: String(real.payment.status),
-      });
+    await updateOrderStatusInSheets({
+  orderId: orderRef,
+  status: "Pagado",
+  paymentId: String(paymentId),
+  paymentStatus: String(real.payment.status),
+  externalReference: String(real.payment.external_reference ?? ""),
+});
       console.log("Pedido marcado como PAGADO ✅", { orderId: orderRef });
     } else {
       console.warn("Pago aprobado pero sin external_reference", { paymentId });

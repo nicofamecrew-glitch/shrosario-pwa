@@ -40,7 +40,7 @@ export type OrderRow = {
 type UpdateArgs = {
   orderId: string;
   status: string;
-
+  externalReference?: string;
   paymentId?: string;
   paymentStatus?: string;
 
@@ -66,144 +66,115 @@ export async function updateOrderStatusInSheets(args: UpdateArgs) {
   const auth = getGoogleClient();
   const sheets = google.sheets({ version: "v4", auth });
 
-  // Buscar fila por Col B (Numero de orden)
-  const colB = await sheets.spreadsheets.values.get({
+  // Traer toda la hoja
+  const res = await sheets.spreadsheets.values.get({
     spreadsheetId: sheetId,
-    range: `${TAB}!B:B`,
+    range: `${TAB}!A:Z`,
   });
 
-  const values = colB.data.values ?? [];
-  const idx = values.findIndex((row, i) => i > 0 && String(row?.[0] ?? "").trim() === String(args.orderId).trim());
+  const rows = res.data.values ?? [];
+  if (rows.length < 2) throw new Error("Orders sin headers o sin filas");
 
-  if (idx === -1) {
-    throw new Error(`No encontré orderId=${args.orderId} en ${TAB}!B:B`);
+  const header = rows[0].map((h: any) => String(h ?? "").trim());
+
+  const colIndex = (name: string) => {
+    const idx = header.findIndex(
+      (h) => h.toLowerCase() === name.toLowerCase()
+    );
+    if (idx === -1) throw new Error(`No existe columna '${name}' en Orders`);
+    return idx;
+  };
+
+  const q = String(args.orderId ?? "").trim();
+
+  // Buscar por DRAFT o por ORD
+  const keyCol =
+    q.startsWith("DRAFT-") ? "external_reference" : "Numero de orden";
+
+  const keyIdx = colIndex(keyCol);
+
+  const rowIdx = rows.findIndex((r: any, i: number) => {
+    if (i === 0) return false;
+    return String(r?.[keyIdx] ?? "").trim() === q;
+  });
+
+  if (rowIdx === -1) {
+    throw new Error(`No encontré ${keyCol}=${q} en Orders`);
   }
 
-  const rowNumber = idx + 1; // 1-indexed
+  const set: Array<{ col: string; value: any }> = [];
 
-  // C = estado
-  // M = payment_id
-  // N = payment_status
-  // O = shipment_id
-  // P = shipment_status
-  // Q = shipping_cost
-  const updates: Array<{ range: string; value: any }> = [
-    { range: `${TAB}!C${rowNumber}`, value: args.status },
-  ];
+  set.push({ col: "estado", value: args.status });
 
-  if (args.paymentId != null) updates.push({ range: `${TAB}!M${rowNumber}`, value: args.paymentId });
-  if (args.paymentStatus != null) updates.push({ range: `${TAB}!N${rowNumber}`, value: args.paymentStatus });
-  if (args.shipmentId != null) updates.push({ range: `${TAB}!O${rowNumber}`, value: args.shipmentId });
-  if (args.shipmentStatus != null) updates.push({ range: `${TAB}!P${rowNumber}`, value: args.shipmentStatus });
-  if (args.shippingCost != null) updates.push({ range: `${TAB}!Q${rowNumber}`, value: args.shippingCost });
-// R = shipping_provider
-if (args.shippingProvider != null) updates.push({ range: `${TAB}!R${rowNumber}`, value: args.shippingProvider });
-// S = shipping_option_id
-if (args.shippingOptionId != null) updates.push({ range: `${TAB}!S${rowNumber}`, value: args.shippingOptionId });
-// T = shipping_option_name
-if (args.shippingOptionName != null) updates.push({ range: `${TAB}!T${rowNumber}`, value: args.shippingOptionName });
-// U = shipping_price
-if (args.shippingPrice != null) updates.push({ range: `${TAB}!U${rowNumber}`, value: args.shippingPrice });
-// V = shipping_eta
-if (args.shippingEta != null) updates.push({ range: `${TAB}!V${rowNumber}`, value: args.shippingEta });
-// W = shipping_meta (JSON)
-if (args.shippingMeta != null) {
-  updates.push({
-    range: `${TAB}!W${rowNumber}`,
-    value: typeof args.shippingMeta === "string" ? args.shippingMeta : JSON.stringify(args.shippingMeta),
+  if (args.externalReference != null) {
+    set.push({ col: "external_reference", value: args.externalReference });
+  }
+
+  if (args.paymentId != null)
+    set.push({ col: "payment_id", value: args.paymentId });
+
+  if (args.paymentStatus != null)
+    set.push({ col: "payment_status", value: args.paymentStatus });
+
+  if (args.shipmentId != null)
+    set.push({ col: "shipment_id", value: args.shipmentId });
+
+  if (args.shipmentStatus != null)
+    set.push({ col: "shipment_status", value: args.shipmentStatus });
+
+  if (args.shippingCost != null)
+    set.push({ col: "shipping_cost", value: args.shippingCost });
+
+  if (args.shippingProvider != null)
+    set.push({ col: "shipping_provider", value: args.shippingProvider });
+
+  if (args.shippingOptionId != null)
+    set.push({ col: "shipping_option_id", value: args.shippingOptionId });
+
+  if (args.shippingOptionName != null)
+    set.push({ col: "shipping_option_name", value: args.shippingOptionName });
+
+  if (args.shippingPrice != null)
+    set.push({ col: "shipping_price", value: args.shippingPrice });
+
+  if (args.shippingEta != null)
+    set.push({ col: "shipping_eta", value: args.shippingEta });
+
+  if (args.shippingMeta != null) {
+    set.push({
+      col: "shipping_meta",
+      value:
+        typeof args.shippingMeta === "string"
+          ? args.shippingMeta
+          : JSON.stringify(args.shippingMeta),
+    });
+  }
+
+  const a1 = (row1: number, col0: number) => {
+    let n = col0 + 1;
+    let s = "";
+    while (n > 0) {
+      const r = (n - 1) % 26;
+      s = String.fromCharCode(65 + r) + s;
+      n = Math.floor((n - 1) / 26);
+    }
+    return `${TAB}!${s}${row1}`;
+  };
+
+  const rowNumber = rowIdx + 1;
+
+  const data = set.map((u) => {
+    const cIdx = colIndex(u.col);
+    return { range: a1(rowNumber, cIdx), values: [[u.value]] };
   });
-}
 
   await sheets.spreadsheets.values.batchUpdate({
     spreadsheetId: sheetId,
     requestBody: {
       valueInputOption: "USER_ENTERED",
-      data: updates.map((u) => ({
-        range: u.range,
-        values: [[u.value]],
-      })),
+      data,
     },
   });
 
   return { ok: true, rowNumber };
-}
-
-export async function getOrderById(orderId: string): Promise<OrderRow | null> {
-  const sheetId = process.env.GOOGLE_SHEETS_SHEET_ID;
-  if (!sheetId) throw new Error("Falta GOOGLE_SHEETS_SHEET_ID");
-
-  const auth = getGoogleClient();
-  const sheets = google.sheets({ version: "v4", auth });
-
-  const q = String(orderId || "").trim();
-  if (!q) return null;
-
-  // Traemos A:Q para tener todo (Orders + columnas técnicas)
-  const res = await sheets.spreadsheets.values.get({
-    spreadsheetId: sheetId,
-    range: `${TAB}!A:W`,
-  });
-
-  const rows = res.data.values ?? [];
-  if (rows.length <= 1) return null;
-
-  for (let i = 1; i < rows.length; i++) {
-    const r = rows[i] || [];
-    const colB = String(r[1] ?? "").trim(); // B = Numero de orden
-
-    if (colB === q) {
-      return {
-        orderId: colB,
-        status: String(r[2] ?? "").trim(),      // C
-        concept: String(r[3] ?? "").trim(),     // D
-        total: Number(r[4] ?? 0) || 0,          // E
-        fullName: String(r[5] ?? "").trim(),    // F
-        phone: String(r[6] ?? "").trim(),       // G
-        city: String(r[7] ?? "").trim(),        // H
-        address: String(r[8] ?? "").trim(),     // I
-        cuit: String(r[9] ?? "").trim(),        // J
-        businessType: String(r[10] ?? "").trim(), // K
-        detail: String(r[11] ?? "").trim(),     // L
-
-        paymentId: r[12] != null ? String(r[12]).trim() : null,       // M
-        paymentStatus: r[13] != null ? String(r[13]).trim() : null,   // N
-        shipmentId: r[14] != null ? String(r[14]).trim() : null,      // O
-        shipmentStatus: r[15] != null ? String(r[15]).trim() : null,  // P
-        shippingCost: r[16] != null ? Number(r[16]) || 0 : null,      // Q
-      };
-    }
-  }
-
-  return null;
-}
-
-export async function updateOrderWithShipment(args: {
-  orderId: string;
-  shipmentId: string;
-  shipmentStatus: string;
-  shippingCost?: number;
-
-  // ✅ NUEVO (R–W)
-  shippingProvider?: string;
-  shippingOptionId?: string;
-  shippingOptionName?: string;
-  shippingPrice?: number;
-  shippingEta?: string;
-  shippingMeta?: any;
-
-}) {
-  return updateOrderStatusInSheets({
-    orderId: args.orderId,
-    status: "Pagado",
-    shipmentId: args.shipmentId,
-    shipmentStatus: args.shipmentStatus,
-    shippingCost: args.shippingCost,
-      shippingProvider: args.shippingProvider,
-  shippingOptionId: args.shippingOptionId,
-  shippingOptionName: args.shippingOptionName,
-  shippingPrice: args.shippingPrice,
-  shippingEta: args.shippingEta,
-  shippingMeta: args.shippingMeta,
-
-  });
 }
