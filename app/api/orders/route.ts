@@ -76,7 +76,12 @@ export async function POST(req: Request) {
     const businessType = customer?.businessType ?? "";
 
     const items = Array.isArray(order?.items) ? order.items : [];
+    const externalRef =
+  order?.external_reference ??
+  order?.externalRef ??
+  "";
     const itemsText = items
+    
       .map((it: any) => {
         const brand = it?.brand ? `${it.brand} ` : "";
         const name = it?.name ?? it?.productId ?? "";
@@ -96,6 +101,7 @@ await sheets.spreadsheets.values.append({
     values: [[
       createdAt,
       orderId,
+      externalRef,
       status,
       priceMode,
       total,
