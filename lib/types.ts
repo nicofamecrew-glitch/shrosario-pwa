@@ -12,6 +12,8 @@ export type Product = {
   line?: string;
   category: string;
   variants: ProductVariant[];
+  tags?: string[]; // ✅ opcional si no todos los productos tienen tags
+
 };
 
 export type Variant = {
