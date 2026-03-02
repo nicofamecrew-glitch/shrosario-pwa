@@ -10,7 +10,8 @@ export type Product = {
   name: string;
   brand?: string;
   line?: string;
-
+ category?: string;
+  
 };
 
 export type Variant = {
