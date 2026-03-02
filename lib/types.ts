@@ -10,8 +10,8 @@ export type Product = {
   name: string;
   brand?: string;
   line?: string;
- category?: string;
-  
+  category: string;
+  variants: ProductVariant[];
 };
 
 export type Variant = {
