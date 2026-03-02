@@ -15,16 +15,17 @@ function getGoogleClient() {
     scopes: ["https://www.googleapis.com/auth/spreadsheets"],
   });
 }
+
 async function appendOrderItems(
   sheets: any,
   sheetId: string,
   orderId: string,
-  items: any[]
+  items: OrderItem[]
 ) {
   const TAB_ITEMS = "Order_Items";
 
-  const rows = items.map((it) => {
-    const qty = it.qty ?? it.quantity ?? 1;
+  const rows = items.map((it: OrderItem) => {
+    const qty = it.qty ?? 1;
     const unit = it.unitPrice ?? 0;
 
     return [
@@ -59,89 +60,83 @@ export async function POST(req: Request) {
     const auth = getGoogleClient();
     const sheets = google.sheets({ version: "v4", auth });
 
-    // ⚠️ LA PESTAÑA EN GOOGLE SHEETS DEBE LLAMARSE EXACTO ASÍ:
     const TAB = "Orders";
 
-   const createdAt = order?.createdAt ?? new Date().toISOString();
-const orderId = order?.id ?? "";
-const priceMode = order?.priceMode ?? "";
-const status = order?.status ?? "Pendiente";
+    const createdAt = order?.createdAt ?? new Date().toISOString();
+    const orderId = order?.id ?? "";
+    const priceMode = order?.priceMode ?? "";
+    const status = order?.status ?? "Pendiente";
 
-const customer = order?.customer ?? {};
-const fullName = customer?.fullName ?? "";
-const phone = customer?.phone ?? "";
-const city = customer?.city ?? "";
-const address = customer?.address ?? "";
-const cuit = customer?.cuit ?? "";
-const businessType = customer?.businessType ?? "";
+    const customer = order?.customer ?? {};
+    const fullName = customer?.fullName ?? "";
+    const phone = customer?.phone ?? "";
+    const city = customer?.city ?? "";
+    const address = customer?.address ?? "";
+    const cuit = customer?.cuit ?? "";
+    const businessType = customer?.businessType ?? "";
 
-// ⚠️ Primero definís items
-const items: OrderItem[] = Array.isArray(order?.items) ? order.items : [];
+    // ✅ Items tipados
+    const items: OrderItem[] = Array.isArray(order?.items) ? order.items : [];
 
-// ✅ Después calculás total
-const total = items.reduce((acc, it: OrderItem) => {
-  const qty = it.qty ?? 1;
-  const unit = it.unitPrice ?? 0;
-  return acc + qty * unit;
-}, 0);
+    // ✅ Calcular total
+    const total = items.reduce((acc, it: OrderItem) => {
+      const qty = it.qty ?? 1;
+      const unit = it.unitPrice ?? 0;
+      return acc + qty * unit;
+    }, 0);
 
-// ✅ Armás el detalle con precios y subtotales
-const itemsText = items
-  .map((it: OrderItem) => {
-    const brand = it.brand ? `${it.brand} ` : "";
-    const size = it.size ? ` (${it.size})` : "";
-    const subtotal = it.qty * it.unitPrice;
-    return `${it.qty}x ${brand}${it.name}${size} $${it.unitPrice} (subtotal $${subtotal}) SKU:${it.sku}`;
-  })
-  .join(" | ");
+    // ✅ Armar detalle con precios y subtotales
+    const itemsText = items
+      .map((it: OrderItem) => {
+        const brand = it.brand ? `${it.brand} ` : "";
+        const size = it.size ? ` (${it.size})` : "";
+        const subtotal = it.qty * it.unitPrice;
+        return `${it.qty}x ${brand}${it.name}${size} $${it.unitPrice} (subtotal $${subtotal}) SKU:${it.sku}`;
+      })
+      .join(" | ");
 
-const externalRef =
-  order?.external_reference ??
-  order?.externalRef ??
-  "";
-await sheets.spreadsheets.values.append({
-  spreadsheetId: sheetId,
-  range: `${TAB}!A1`,
-  valueInputOption: "USER_ENTERED",
-  requestBody: {
-    values: [[
-      createdAt,
-      orderId,
-      externalRef,
-      status,
-      priceMode,
-      total,
-      fullName,
-      phone,
-      city,
-      address,
-      cuit,
-      businessType,
-      itemsText,
-    ]],
-  },
-});
-await appendOrderItems(
-  sheets,
-  sheetId,
-  orderId,
-  items
-);
+    const externalRef =
+      order?.external_reference ??
+      order?.externalRef ??
+      "";
+
+    // ✅ Guardar en Orders
+    await sheets.spreadsheets.values.append({
+      spreadsheetId: sheetId,
+      range: `${TAB}!A1`,
+      valueInputOption: "USER_ENTERED",
+      requestBody: {
+        values: [[
+          createdAt,
+          orderId,
+          externalRef,
+          status,
+          priceMode,
+          total,
+          fullName,
+          phone,
+          city,
+          address,
+          cuit,
+          businessType,
+          itemsText,
+        ]],
+      },
+    });
+
+    // ✅ Guardar en Order_Items
+    await appendOrderItems(sheets, sheetId, orderId, items);
 
     return NextResponse.json({ ok: true });
- } catch (e: any) {
-  console.error("API /api/orders ERROR:", e);
-  console.error("MESSAGE:", e?.message);
-  console.error("STACK:", e?.stack);
-  console.error("DETAILS:", e?.response?.data || e?.errors || e);
-
-  return NextResponse.json(
-    {
-      ok: false,
-      error: e?.message || "Error",
-      details: e?.response?.data || null,
-    },
-    { status: 500 }
-  );
-}
+  } catch (e: any) {
+    console.error("API /api/orders ERROR:", e);
+    return NextResponse.json(
+      {
+        ok: false,
+        error: e?.message || "Error",
+        details: e?.response?.data || null,
+      },
+      { status: 500 }
+    );
+  }
 }
