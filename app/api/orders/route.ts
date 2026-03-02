@@ -75,32 +75,25 @@ export async function POST(req: Request) {
     const cuit = customer?.cuit ?? "";
     const businessType = customer?.businessType ?? "";
 
-    // ✅ Items tipados
     const items: OrderItem[] = Array.isArray(order?.items) ? order.items : [];
 
-    // ✅ Calcular total
-    const total = items.reduce((acc, it: OrderItem) => {
-      const qty = it.qty ?? 1;
-      const unit = it.unitPrice ?? 0;
-      return acc + qty * unit;
-    }, 0);
+    const total = items.reduce((acc, it) => acc + (it.qty ?? 1) * (it.unitPrice ?? 0), 0);
 
-    // ✅ Armar detalle con precios y subtotales
     const itemsText = items
-      .map((it: OrderItem) => {
+      .map((it) => {
         const brand = it.brand ? `${it.brand} ` : "";
         const size = it.size ? ` (${it.size})` : "";
-        const subtotal = it.qty * it.unitPrice;
-        return `${it.qty}x ${brand}${it.name}${size} $${it.unitPrice} (subtotal $${subtotal}) SKU:${it.sku}`;
+        const name = it.name ?? it.productId ?? "Sin nombre";
+        const qty = it.qty ?? 1;
+        const unit = it.unitPrice ?? 0;
+        const subtotal = qty * unit;
+        const sku = it.sku ?? "";
+        return `${qty}x ${brand}${name}${size} $${unit} (subtotal $${subtotal}) SKU:${sku}`;
       })
       .join(" | ");
 
-    const externalRef =
-      order?.external_reference ??
-      order?.externalRef ??
-      "";
+    const externalRef = order?.external_reference ?? order?.externalRef ?? "";
 
-    // ✅ Guardar en Orders
     await sheets.spreadsheets.values.append({
       spreadsheetId: sheetId,
       range: `${TAB}!A1`,
@@ -124,7 +117,6 @@ export async function POST(req: Request) {
       },
     });
 
-    // ✅ Guardar en Order_Items
     await appendOrderItems(sheets, sheetId, orderId, items);
 
     return NextResponse.json({ ok: true });
