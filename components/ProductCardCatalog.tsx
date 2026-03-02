@@ -145,10 +145,10 @@ const priceText = price > 0 ? formatPrice(price) : "Consultar";
     );
 
     useCartStore.getState().addItem({
-      productId: (product as any)?.id ?? (product as any)?.product_id ?? "",
-      variantSku: sku,
-      quantity: 1,
-    });
+  productId: (product as any)?.id ?? (product as any)?.product_id ?? "",
+  variant: v0, // ✅ pasás la variante que ya definiste
+  qty: 1,
+});
   }}
   className={[
     "inline-flex h-11 w-full items-center justify-center gap-2 rounded-2xl font-extrabold transition",
