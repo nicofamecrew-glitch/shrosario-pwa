@@ -10,7 +10,9 @@ import CartFly from "@/components/CartFly";
 
 
 export default function ClientShell({ children }: { children: React.ReactNode }) {
-  const cartCount = useCartStore((s) => s.items.reduce((acc, it) => acc + it.quantity, 0));
+  const cartCount = useCartStore((s) =>
+  s.items.reduce((acc, it) => acc + it.qty, 0)
+);
   const setProducts = useCatalogStore((s) => s.setProducts);
 
   useEffect(() => {
