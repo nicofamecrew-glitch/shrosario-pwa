@@ -180,23 +180,25 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true }, { status: 200 });
   }
 
-  try {
-    const orderRef = String(real.payment.external_reference ?? externalRef ?? "");
-    if (orderRef) {
-    await updateOrderStatusInSheets({
-  orderId: orderRef,
-  status: "Pagado",
-  paymentId: String(paymentId),
-  paymentStatus: String(real.payment.status),
-  externalReference: String(real.payment.external_reference ?? ""),
-});
-      console.log("Pedido marcado como PAGADO ✅", { orderId: orderRef });
-    } else {
-      console.warn("Pago aprobado pero sin external_reference", { paymentId });
-    }
-  } catch (e) {
-    console.error("No pude actualizar pedido:", e);
-  }
+try {
+  const orderRef = String(real.payment.external_reference ?? externalRef ?? "");
+  const cleanOrderId = orderRef.startsWith("DRAFT-")
+    ? orderRef.replace("DRAFT-", "ORD-")
+    : orderRef;
 
-  return NextResponse.json({ ok: true }, { status: 200 });
+  if (orderRef) {
+    await updateOrderStatusInSheets({
+      orderId: cleanOrderId,
+      status: "Pagado",
+      externalReference: String(real.payment.external_reference ?? externalRef ?? ""),
+      paymentId: String(paymentId),
+      paymentStatus: String(real.payment.status),
+    });
+    console.log("Pedido marcado como PAGADO ✅", { orderId: cleanOrderId });
+  } else {
+    console.warn("Pago aprobado pero sin external_reference", { paymentId });
+  }
+} catch (e) {
+  console.error("No pude actualizar pedido:", e);
+}
 }

@@ -65,7 +65,7 @@ export async function POST(req: Request) {
     const orderId = order?.id ?? "";
     const total = order?.total ?? 0;
     const priceMode = order?.priceMode ?? "";
-    const status = "Pendiente";
+    const status = order?.status ?? "Pendiente";
 
     const customer = order?.customer ?? {};
     const fullName = customer?.fullName ?? "";

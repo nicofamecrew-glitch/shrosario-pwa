@@ -150,7 +150,38 @@ const btnPrimary =
     try {
       const draftId = `DRAFT-${Date.now()}`;
       localStorage.setItem(DRAFT_ID_KEY, draftId);
+    // Guardar pedido en Sheet como Pendiente
+try {
+  const profile = JSON.parse(localStorage.getItem(PROFILE_KEY) || "{}");
+  const shipping = JSON.parse(localStorage.getItem(SHIPPING_KEY) || "{}");
 
+  const orderPayload = {
+    id: draftId,
+    createdAt: new Date().toISOString(),
+    total: grandTotal,
+    priceMode: "minorista",
+    status: "Pendiente",
+    customer: {
+      fullName: profile.fullName ?? "Cliente app",
+      phone: profile.phone ?? "",
+      city: profile.city ?? "",
+      address: profile.address ?? "",
+      notes: profile.notes ?? "",
+      cuit: profile.cuit ?? "",
+      businessType: profile.businessType ?? "",
+    },
+    shipping,
+    items,
+  };
+
+  await fetch("/api/orders", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(orderPayload),
+  });
+} catch (err) {
+  console.error("Error guardando pedido pendiente:", err);
+}
       // Items para MP (precios reales)
       const itemsMP = items
         .map((it: any) => {
