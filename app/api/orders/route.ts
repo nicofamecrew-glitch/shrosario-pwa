@@ -81,17 +81,17 @@ export async function POST(req: Request) {
   order?.externalRef ??
   "";
     const itemsText = items
-    
-      .map((it: any) => {
-        const brand = it?.brand ? `${it.brand} ` : "";
-        const name = it?.name ?? it?.productId ?? "";
-        const size = it?.size ? ` (${it.size})` : "";
-        const sku = it?.sku ? ` SKU:${it.sku}` : "";
-        const qty = it?.qty ?? 0;
-        const unit = it?.unitPrice ?? 0;
-        return `${qty}x ${brand}${name}${size} $${unit}${sku}`;
-      })
-      .join(" | ");
+  .map((it: any) => {
+    const brand = it?.brand ? `${it.brand} ` : "";
+    const name = it?.name ?? it?.productId ?? "";
+    const size = it?.size ? ` (${it.size})` : "";
+    const sku = it?.sku ? ` SKU:${it.sku}` : "";
+    const qty = it?.qty ?? it?.quantity ?? 1;
+    const unit = it?.unitPrice ?? it?.price ?? 0;
+    const subtotal = qty * unit;
+    return `${qty}x ${brand}${name}${size} $${unit} (subtotal $${subtotal})${sku}`;
+  })
+  .join(" | ");
 
 await sheets.spreadsheets.values.append({
   spreadsheetId: sheetId,
