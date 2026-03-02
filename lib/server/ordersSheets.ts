@@ -194,20 +194,25 @@ export async function getOrderById(orderId: string) {
   const rows = res.data.values ?? [];
   if (rows.length < 2) return null;
 
-  const header = rows[0];
-  const orderIdx = header.findIndex((h: string) =>
-    String(h).toLowerCase() === "numero de orden"
+  const header = rows[0].map((h: any) => String(h ?? "").trim());
+  const orderIdx = header.findIndex(
+    (h: string) => h.toLowerCase() === "numero de orden"
   );
-
   if (orderIdx === -1) return null;
 
-  const row = rows.find((r: any, i: number) =>
-    i > 0 && String(r?.[orderIdx] ?? "") === orderId
+  const row = rows.find(
+    (r: any, i: number) => i > 0 && String(r?.[orderIdx] ?? "") === orderId
   );
+  if (!row) return null;
 
-  return row ?? null;
+  // 🔑 Mapear fila a objeto con claves del header
+  const order: any = {};
+  header.forEach((col: string, idx: number) => {
+    order[col] = row[idx];
+  });
+
+  return order;
 }
-
 export async function updateOrderWithShipment(args: any) {
   return updateOrderStatusInSheets({
     orderId: args.orderId,
