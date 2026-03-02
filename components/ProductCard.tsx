@@ -280,18 +280,27 @@ const canAdd = !!variantSku && (remainingStock === null ? true : remainingStock 
 
       {/* content */}
       <div className="relative z-10 flex flex-1 flex-col px-4 pb-4 pt-2">
-        {/* brand */}
-        <div className="flex items-center gap-2">
-          {BRAND_LOGOS[product.brand?.toLowerCase()] ? (
-            <img src={BRAND_LOGOS[product.brand.toLowerCase()]} alt={product.brand} className="h-16 w-auto opacity-80" />
-          ) : (
-            <div className="text-[10px] uppercase tracking-[0.22em] text-black/50">{product.brand}</div>
-          )}
-        </div>
+       {/* brand */}
+<div className="flex items-center gap-2">
+  {product.brand && BRAND_LOGOS[product.brand.toLowerCase()] ? (
+    <img
+      src={BRAND_LOGOS[product.brand.toLowerCase()]}
+      alt={product.brand}
+      className="h-16 w-auto opacity-80"
+    />
+  ) : (
+    <div className="text-[10px] uppercase tracking-[0.22em] text-black/50">
+      {product.brand ?? ""}
+    </div>
+  )}
+</div>
 
-        <div className="mt-2 line-clamp-2 text-[15px] font-extrabold leading-tight text-black">{product.name}</div>
-        <div className="mt-1 line-clamp-1 text-xs text-black/55">{product.line}</div>
-
+<div className="mt-2 line-clamp-2 text-[15px] font-extrabold leading-tight text-black">
+  {product.name}
+</div>
+<div className="mt-1 line-clamp-1 text-xs text-black/55">
+  {product.line ?? ""}
+</div>
 
 {/* variants pills */}
 {variants.length ? (
@@ -365,11 +374,11 @@ window.dispatchEvent(
 );
 
 
-    addItem({
-      productId: product.id,
-      variantSku,
-      quantity: 1,
-    });
+ addItem({
+  productId: product.id,
+  variant: selectedVariant, // ✅ pasás el objeto Variant que ya tenés
+  qty: 1,
+});
     // el toast “Agregado” NO lo tires acá a ciegas
     // lo va a tirar el store (ver punto 2)
   }}
