@@ -84,4 +84,18 @@ export function saveOrder(order: Order) {
   }
 }
 
+export type Variant = {
+  productId: string;
+  size: string;
+  sku: string;
+  priceRetail: number;
+  priceWholesale: number;
+  stock: number;
+  status: string;
+};
 
+export type CartItem = {
+  productId: string;
+  variant: Variant;
+  qty: number;
+};

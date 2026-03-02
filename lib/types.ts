@@ -7,23 +7,25 @@ export type ProductVariant = {
 
 export type Product = {
   id: string;
-  brand: string;
-  line: string;
   name: string;
-  category: string;
-  variants: ProductVariant[];
-  tags?: string[];
-  imageUrl?: string;
-  images?: string[];
+  brand?: string;
 };
 
+export type Variant = {
+  productId: string;
+  size: string;
+  sku: string;
+  priceRetail: number;
+  priceWholesale: number;
+  stock: number;
+  status: string;
+};
 
 export type CartItem = {
   productId: string;
-  variantSku: string;
-  quantity: number;
+  variant: Variant;
+  qty: number;
 };
-
 export type LeadFormData = {
   name: string;
   phone: string;
