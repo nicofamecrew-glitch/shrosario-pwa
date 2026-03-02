@@ -42,9 +42,9 @@ export default function CartDrawer() {
     return items.reduce((sum, item) => {
       const product = byId[item.productId];
       if (!product) return sum;
-      const variant = findVariant(product as any, item.variantSku);
-if (!variant) return sum; // ✅ si no hay variant, lo ignoramos
-return sum + getVariantPrice(variant as any, isWholesale) * item.quantity;
+   const variant = item.variant; // ya lo tenés guardado en el CartItem
+if (!variant) return sum;
+return sum + getVariantPrice(variant, isWholesale) * item.qty;
 
     }, 0);
   }, [items, byId, isWholesale]);
@@ -136,78 +136,72 @@ return sum + getVariantPrice(variant as any, isWholesale) * item.quantity;
         </div>
 
         {/* Lista scrolleable */}
-        <div className="flex-1 overflow-y-auto px-6">
-          <div className="space-y-4 pb-4">
-            {items.map((item) => {
-              const product = byId[item.productId];
-              if (!product) return null;
+    {/* Lista scrolleable */}
+<div className="flex-1 overflow-y-auto px-6">
+  <div className="space-y-4 pb-4">
+    {items.map((item) => {
+      const product = byId[item.productId];
+      if (!product) return null;
 
-              const variant = findVariant(product, item.variantSku);
-if (!variant) return null;
-const price = getVariantPrice(variant, isWholesale);
+      const variant = item.variant; // ✅ ya viene en el CartItem
+      const price = getVariantPrice(variant, isWholesale);
 
+      return (
+        <div
+          key={`${item.productId}-${variant.sku}`}
+          className="rounded-xl border border-black/10 bg-black/5 p-4 dark:border-white/10 dark:bg-white/5"
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-sm font-semibold">
+                {product.brand} {product.name}
+              </p>
+              <p className="text-xs text-black/60 dark:text-white/60">
+                {variant?.size ?? ""} - {product.line}
+              </p>
+            </div>
 
-              return (
-                <div
-                  key={`${item.productId}-${item.variantSku}`}
-                 className="rounded-xl border border-black/10 bg-black/5 p-4 dark:border-white/10 dark:bg-white/5"
+            <button
+              className="text-xs text-black/60 hover:text-black dark:text-white/60 dark:hover:text-white"
+              onClick={() => removeItem(item.productId, variant.sku)}
+            >
+              Quitar
+            </button>
+          </div>
 
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="text-sm font-semibold">
-                        {product.brand} {product.name}
-                      </p>
-                      <p className="text-xs text-black/60 dark:text-white/60">
+          <div className="mt-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <button
+                className="h-8 w-8 rounded-full border border-black/10 bg-white text-black hover:bg-black/5 disabled:opacity-50 dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10"
+                onClick={() =>
+                  updateQuantity(item.productId, variant.sku, item.qty - 1)
+                }
+                disabled={item.qty <= 1}
+              >
+                -
+              </button>
 
-                        {variant?.size ?? ""} - {product.line}
-                      </p>
-                    </div>
+              <span className="text-sm">{item.qty}</span>
 
-                    <button
-                     className="text-xs text-black/60 hover:text-black dark:text-white/60 dark:hover:text-white"
+              <button
+                className="h-8 w-8 rounded-full border border-black/10 bg-white text-black hover:bg-black/5 dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10"
+                onClick={() =>
+                  updateQuantity(item.productId, variant.sku, item.qty + 1)
+                }
+              >
+                +
+              </button>
+            </div>
 
-                      onClick={() => removeItem(item.productId, item.variantSku)}
-                    >
-                      Quitar
-                    </button>
-                  </div>
-
-                  <div className="mt-3 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <button
-                       className="h-8 w-8 rounded-full border border-black/10 bg-white text-black hover:bg-black/5 disabled:opacity-50 dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10"
-
-                        onClick={() =>
-                          updateQuantity(item.productId, item.variantSku, item.quantity - 1)
-                        }
-                        disabled={item.quantity <= 1}
-                      >
-                        -
-                      </button>
-
-                      <span className="text-sm">{item.quantity}</span>
-
-                      <button
-                       className="h-8 w-8 rounded-full border border-black/10 bg-white text-black hover:bg-black/5 dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10"
-
-                        onClick={() =>
-                          updateQuantity(item.productId, item.variantSku, item.quantity + 1)
-                        }
-                      >
-                        +
-                      </button>
-                    </div>
-
-                    <div className="text-sm font-semibold">
-                      {formatPrice(price * item.quantity)}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+            <div className="text-sm font-semibold">
+              {formatPrice(price * item.qty)}
+            </div>
           </div>
         </div>
+      );
+    })}
+  </div>
+</div>
 
         {/* Footer fijo */}
         <div
