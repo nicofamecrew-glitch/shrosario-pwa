@@ -689,9 +689,9 @@ return vars.length >= 20 && hasSep >= 10;
                 if (!selectedVariant?.sku) return;
 
                 addItem({
-                  productId: (productFixed as any).id,
-                  variantSku: (selectedVariant as any).sku,
-                  quantity: 1,
+                productId: (productFixed as any).id,
+                variant: selectedVariant, // pasa el objeto Variant completo
+                qty: 1,                   // usa qty en lugar de quantity
                 });
 
                 window.dispatchEvent(
