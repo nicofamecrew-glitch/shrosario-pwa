@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { google } from "googleapis";
+import { OrderItem } from "@/lib/orders";
 
 function getGoogleClient() {
   const b64 = process.env.GOOGLE_SHEETS_SA_B64;
@@ -61,38 +62,43 @@ export async function POST(req: Request) {
     // ⚠️ LA PESTAÑA EN GOOGLE SHEETS DEBE LLAMARSE EXACTO ASÍ:
     const TAB = "Orders";
 
-    const createdAt = order?.createdAt ?? new Date().toISOString();
-    const orderId = order?.id ?? "";
-    const total = order?.total ?? 0;
-    const priceMode = order?.priceMode ?? "";
-    const status = order?.status ?? "Pendiente";
+   const createdAt = order?.createdAt ?? new Date().toISOString();
+const orderId = order?.id ?? "";
+const priceMode = order?.priceMode ?? "";
+const status = order?.status ?? "Pendiente";
 
-    const customer = order?.customer ?? {};
-    const fullName = customer?.fullName ?? "";
-    const phone = customer?.phone ?? "";
-    const city = customer?.city ?? "";
-    const address = customer?.address ?? "";
-    const cuit = customer?.cuit ?? "";
-    const businessType = customer?.businessType ?? "";
+const customer = order?.customer ?? {};
+const fullName = customer?.fullName ?? "";
+const phone = customer?.phone ?? "";
+const city = customer?.city ?? "";
+const address = customer?.address ?? "";
+const cuit = customer?.cuit ?? "";
+const businessType = customer?.businessType ?? "";
 
-    const items = Array.isArray(order?.items) ? order.items : [];
-    const externalRef =
-  order?.external_reference ??
-  order?.externalRef ??
-  "";
-    const itemsText = items
-  .map((it: any) => {
-    const brand = it?.brand ? `${it.brand} ` : "";
-    const name = it?.name ?? it?.productId ?? "";
-    const size = it?.size ? ` (${it.size})` : "";
-    const sku = it?.sku ? ` SKU:${it.sku}` : "";
-    const qty = it?.qty ?? it?.quantity ?? 1;
-    const unit = it?.unitPrice ?? it?.price ?? 0;
-    const subtotal = qty * unit;
-    return `${qty}x ${brand}${name}${size} $${unit} (subtotal $${subtotal})${sku}`;
+// ⚠️ Primero definís items
+const items: OrderItem[] = Array.isArray(order?.items) ? order.items : [];
+
+// ✅ Después calculás total
+const total = items.reduce((acc, it: OrderItem) => {
+  const qty = it.qty ?? 1;
+  const unit = it.unitPrice ?? 0;
+  return acc + qty * unit;
+}, 0);
+
+// ✅ Armás el detalle con precios y subtotales
+const itemsText = items
+  .map((it: OrderItem) => {
+    const brand = it.brand ? `${it.brand} ` : "";
+    const size = it.size ? ` (${it.size})` : "";
+    const subtotal = it.qty * it.unitPrice;
+    return `${it.qty}x ${brand}${it.name}${size} $${it.unitPrice} (subtotal $${subtotal}) SKU:${it.sku}`;
   })
   .join(" | ");
 
+const externalRef =
+  order?.external_reference ??
+  order?.externalRef ??
+  "";
 await sheets.spreadsheets.values.append({
   spreadsheetId: sheetId,
   range: `${TAB}!A1`,
