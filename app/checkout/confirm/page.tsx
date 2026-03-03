@@ -108,6 +108,10 @@ export default function ConfirmOrderPage() {
  const handleConfirm = async () => {
   // ... validaciones previas
 
+ if (submitting) return;
+
+
+
   setSubmitting(true);
 
   const priceMode: "minorista" | "mayorista" = "minorista";
@@ -140,9 +144,6 @@ const order: Order = {
   address: address.trim(),
   notes: notes.trim(),
 };
-
-
-
 
   await fetch("/api/orders", {
     method: "POST",
