@@ -139,67 +139,61 @@ return sum + getVariantPrice(variant, isWholesale) * item.qty;
     {/* Lista scrolleable */}
 <div className="flex-1 overflow-y-auto px-6">
   <div className="space-y-4 pb-4">
-    {items.map((item) => {
-      const product = byId[item.productId];
-      if (!product) return null;
+    {items.filter((i) => i.variant).map((item) => {
+  const product = byId[item.productId];
+  if (!product) return null;
 
-      const variant = item.variant; // ✅ ya viene en el CartItem
-      const price = getVariantPrice(variant, isWholesale);
+  const variant = item.variant!;
+  const price = getVariantPrice(variant, isWholesale);
 
-      return (
-        <div
-          key={`${item.productId}-${variant.sku}`}
-          className="rounded-xl border border-black/10 bg-black/5 p-4 dark:border-white/10 dark:bg-white/5"
-        >
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <p className="text-sm font-semibold">
-                {product.brand} {product.name}
-              </p>
-              <p className="text-xs text-black/60 dark:text-white/60">
-                {variant?.size ?? ""} - {product.line}
-              </p>
-            </div>
-
-            <button
-              className="text-xs text-black/60 hover:text-black dark:text-white/60 dark:hover:text-white"
-              onClick={() => removeItem(item.productId, variant.sku)}
-            >
-              Quitar
-            </button>
-          </div>
-
-          <div className="mt-3 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <button
-                className="h-8 w-8 rounded-full border border-black/10 bg-white text-black hover:bg-black/5 disabled:opacity-50 dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10"
-                onClick={() =>
-                  updateQuantity(item.productId, variant.sku, item.qty - 1)
-                }
-                disabled={item.qty <= 1}
-              >
-                -
-              </button>
-
-              <span className="text-sm">{item.qty}</span>
-
-              <button
-                className="h-8 w-8 rounded-full border border-black/10 bg-white text-black hover:bg-black/5 dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10"
-                onClick={() =>
-                  updateQuantity(item.productId, variant.sku, item.qty + 1)
-                }
-              >
-                +
-              </button>
-            </div>
-
-            <div className="text-sm font-semibold">
-              {formatPrice(price * item.qty)}
-            </div>
-          </div>
+  return (
+    <div
+      key={`${item.productId}-${variant.sku}`}
+      className="rounded-xl border border-black/10 bg-black/5 p-4 dark:border-white/10 dark:bg-white/5"
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-sm font-semibold">
+            {product.brand} {product.name}
+          </p>
+          <p className="text-xs text-black/60 dark:text-white/60">
+            {variant.size ?? ""} - {product.line}
+          </p>
         </div>
-      );
-    })}
+
+        <button
+          className="text-xs text-black/60 hover:text-black dark:text-white/60 dark:hover:text-white"
+          onClick={() => removeItem(item.productId, variant.sku)}
+        >
+          Quitar
+        </button>
+      </div>
+
+      <div className="mt-3 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => updateQuantity(item.productId, variant.sku, item.qty - 1)}
+            disabled={item.qty <= 1}
+          >
+            -
+          </button>
+
+          <span className="text-sm">{item.qty}</span>
+
+          <button
+            onClick={() => updateQuantity(item.productId, variant.sku, item.qty + 1)}
+          >
+            +
+          </button>
+        </div>
+
+        <div className="text-sm font-semibold">
+          {formatPrice(price * item.qty)}
+        </div>
+      </div>
+    </div>
+  );
+})}
   </div>
 </div>
 
