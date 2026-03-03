@@ -176,102 +176,112 @@ export default function ConfirmOrderPage() {
     }
   };
 
-  return (
-    <main
-      className={[
-        "min-h-[calc(100dvh-96px)] px-4 pt-16 pb-6 flex flex-col",
-        "bg-[#f6f7f8] text-black",
-        "dark:bg-black dark:text-white",
-      ].join(" ")}
-    >
-      {/* HEADER */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">Confirmar pedido</h1>
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="text-sm text-black/60 hover:text-black dark:text-white/60 dark:hover:text-white"
-        >
-          Volver
-        </button>
+ return (
+  <main
+    className={[
+      "min-h-[calc(100dvh-96px)] px-4 pt-16 pb-6 flex flex-col",
+      "bg-[#f6f7f8] text-black",
+      "dark:bg-black dark:text-white",
+    ].join(" ")}
+  >
+    {/* HEADER */}
+    <div className="flex items-center justify-between">
+      <h1 className="text-xl font-bold">Confirmar pedido</h1>
+      <button
+        type="button"
+        onClick={() => router.back()}
+        className="text-sm text-black/60 hover:text-black dark:text-white/60 dark:hover:text-white"
+      >
+        Volver
+      </button>
+    </div>
+
+    <p className="mt-1 text-sm text-black/60 dark:text-white/60">
+      Usamos estos datos solo para coordinar la entrega.
+    </p>
+
+    {/* FORM */}
+    <div className="mt-6 flex-1 overflow-y-auto space-y-4 pr-1 rounded-2xl border p-4 border-black/10 bg-white shadow-sm dark:border-white/10 dark:bg-white/5 dark:shadow-none">
+      {/* Nombre y apellido */}
+      <div>
+        <label className="text-xs text-black/60 dark:text-white/60">
+          Nombre y apellido *
+        </label>
+        <input
+          className="mt-1 w-full rounded-xl border p-3 text-sm border-black/10 bg-white text-black placeholder:text-black/40 outline-none focus:border-black/20 focus:ring-2 focus:ring-[#ee078e]/30 dark:border-white/10 dark:bg-black dark:text-white dark:placeholder:text-white/30 dark:focus:border-white/20 dark:focus:ring-[#ee078e]/25"
+          placeholder="Juan Pérez"
+          value={fullName}
+          onChange={(e) => setFullName(e.target.value)}
+          autoComplete="name"
+        />
       </div>
 
-      <p className="mt-1 text-sm text-black/60 dark:text-white/60">
-        Usamos estos datos solo para coordinar la entrega.
-      </p>
-     {/* Nombre y apellido */}
-<div>
-  <label className="text-xs text-black/60 dark:text-white/60">
-    Nombre y apellido *
-  </label>
-  <input
-    className="mt-1 w-full rounded-xl border p-3 text-sm border-black/10 bg-white text-black placeholder:text-black/40 outline-none focus:border-black/20 focus:ring-2 focus:ring-[#ee078e]/30 dark:border-white/10 dark:bg-black dark:text-white dark:placeholder:text-white/30 dark:focus:border-white/20 dark:focus:ring-[#ee078e]/25"
-    placeholder="Juan Pérez"
-    value={fullName}
-    onChange={(e) => setFullName(e.target.value)}
-    autoComplete="name"
-  />
-</div>
-      {/* FORM */}
-      <div className="mt-6 flex-1 overflow-y-auto space-y-4 pr-1 rounded-2xl border p-4 border-black/10 bg-white shadow-sm dark:border-white/10 dark:bg-white/5 dark:shadow-none">
-        {/* Teléfono */}
-        <div>
-          <label className="text-xs text-black/60 dark:text-white/60">Teléfono *</label>
-          <input
-            className="mt-1 w-full rounded-xl border p-3 text-sm border-black/10 bg-white text-black placeholder:text-black/40 outline-none focus:border-black/20 focus:ring-2 focus:ring-[#ee078e]/30 dark:border-white/10 dark:bg-black dark:text-white dark:placeholder:text-white/30 dark:focus:border-white/20 dark:focus:ring-[#ee078e]/25"
-            placeholder="341 555 1234"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            inputMode="tel"
-          />
-        </div>
-
-        {/* Ciudad */}
-        <div>
-          <label className="text-xs text-black/60 dark:text-white/60">Ciudad *</label>
-          <input
-            className="mt-1 w-full rounded-xl border p-3 text-sm border-black/10 bg-white text-black placeholder:text-black/40 outline-none focus:border-black/20 focus:ring-2 focus:ring-[#ee078e]/30 dark:border-white/10 dark:bg-black dark:text-white dark:placeholder:text-white/30 dark:focus:border-white/20 dark:focus:ring-[#ee078e]/25"
-            placeholder="Rosario"
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
-          />
-        </div>
-
-        {/* Dirección */}
-        <div>
-          <label className="text-xs text-black/60 dark:text-white/60">Dirección / zona *</label>
-          <input
-            className="mt-1 w-full rounded-xl border p-3 text-sm border-black/10 bg-white text-black placeholder:text-black/40 outline-none focus:border-black/20 focus:ring-2 focus:ring-[#ee078e]/30 dark:border-white/10 dark:bg-black dark:text-white dark:placeholder:text-white/30 dark:focus:border-white/20 dark:focus:ring-[#ee078e]/25"
-            placeholder="San Martín 1234, barrio centro"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-          />
-        </div>
-
-        {/* Observaciones */}
-        <div>
-          <label className="text-xs text-black/60 dark:text-white/60">Observaciones</label>
-          <textarea
-            rows={3}
-            className="mt-1 w-full h-12 rounded-xl border px-4 text-sm border-black/10 bg-white text-black placeholder:text-black/40 outline-none focus:border-black/20 focus:ring-2 focus:ring-[#ee078e]/30 dark:border-white/10 dark:bg-black dark:text-white dark:placeholder:text-white/30 dark:focus:border-white/20 dark:focus:ring-[#ee078e]/25 resize-none"
-            placeholder="Horarios, referencias, transporte preferido, etc."
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-          />
-        </div>
+      {/* Teléfono */}
+      <div>
+        <label className="text-xs text-black/60 dark:text-white/60">
+          Teléfono *
+        </label>
+        <input
+          className="mt-1 w-full rounded-xl border p-3 text-sm border-black/10 bg-white text-black placeholder:text-black/40 outline-none focus:border-black/20 focus:ring-2 focus:ring-[#ee078e]/30 dark:border-white/10 dark:bg-black dark:text-white dark:placeholder:text-white/30 dark:focus:border-white/20 dark:focus:ring-[#ee078e]/25"
+          placeholder="341 555 1234"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          inputMode="tel"
+        />
       </div>
 
-      {/* CTA */}
-      <div className="mt-4">
-        <button
-          type="button"
-          disabled={submitting}
-          className="w-full rounded-full py-3 font-bold bg-[#ee078e] text-white shadow-none outline-none ring-0 border-0 focus-visible:outline-none focus-visible:ring-0 active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed"
-          onClick={handleConfirm}
-        >
-          {submitting ? "Confirmando…" : "Confirmar pedido"}
-        </button>
+      {/* Ciudad */}
+      <div>
+        <label className="text-xs text-black/60 dark:text-white/60">
+          Ciudad *
+        </label>
+        <input
+          className="mt-1 w-full rounded-xl border p-3 text-sm border-black/10 bg-white text-black placeholder:text-black/40 outline-none focus:border-black/20 focus:ring-2 focus:ring-[#ee078e]/30 dark:border-white/10 dark:bg-black dark:text-white dark:placeholder:text-white/30 dark:focus:border-white/20 dark:focus:ring-[#ee078e]/25"
+          placeholder="Rosario"
+          value={city}
+          onChange={(e) => setCity(e.target.value)}
+        />
       </div>
-    </main>
-  );
+
+      {/* Dirección */}
+      <div>
+        <label className="text-xs text-black/60 dark:text-white/60">
+          Dirección / zona *
+        </label>
+        <input
+          className="mt-1 w-full rounded-xl border p-3 text-sm border-black/10 bg-white text-black placeholder:text-black/40 outline-none focus:border-black/20 focus:ring-2 focus:ring-[#ee078e]/30 dark:border-white/10 dark:bg-black dark:text-white dark:placeholder:text-white/30 dark:focus:border-white/20 dark:focus:ring-[#ee078e]/25"
+          placeholder="San Martín 1234, barrio centro"
+          value={address}
+          onChange={(e) => setAddress(e.target.value)}
+        />
+      </div>
+
+      {/* Observaciones */}
+      <div>
+        <label className="text-xs text-black/60 dark:text-white/60">
+          Observaciones
+        </label>
+        <textarea
+          rows={3}
+          className="mt-1 w-full h-12 rounded-xl border px-4 text-sm border-black/10 bg-white text-black placeholder:text-black/40 outline-none focus:border-black/20 focus:ring-2 focus:ring-[#ee078e]/30 dark:border-white/10 dark:bg-black dark:text-white dark:placeholder:text-white/30 dark:focus:border-white/20 dark:focus:ring-[#ee078e]/25 resize-none"
+          placeholder="Horarios, referencias, transporte preferido, etc."
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+        />
+      </div>
+    </div>
+
+    {/* CTA */}
+    <div className="mt-4">
+      <button
+        type="button"
+        disabled={submitting}
+        className="w-full rounded-full py-3 font-bold bg-[#ee078e] text-white shadow-none outline-none ring-0 border-0 focus-visible:outline-none focus-visible:ring-0 active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed"
+        onClick={handleConfirm}
+      >
+        {submitting ? "Confirmando…" : "Confirmar pedido"}
+      </button>
+    </div>
+  </main>
+);
 }
