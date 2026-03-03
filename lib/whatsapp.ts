@@ -32,22 +32,22 @@ export function buildWhatsAppMessage({
   const product = products.find((entry) => entry.id === item.productId);
   if (!product) return;
 
-  const variant = findVariant(product, item.variantSku);
+  const variant = findVariant(product, item.variant.sku);
   if (!variant) {
     console.warn("[WHATSAPP_MISSING_VARIANT]", {
       product_id: product.id,
       product: product.name,
-      sku: item.variantSku,
+      sku: item.variant.sku,
       variants: product.variants,
     });
     return;
   }
 
   const price = getVariantPrice(variant, isWholesale);
-  total += price * item.quantity;
+  total += price * item.qty;
 
   lines.push(
-    `- ${item.quantity}x ${product.brand} ${product.line} ${product.name} (${variant.size}) - ${formatPrice(price)}`
+    `- ${item.qty}x ${product.brand} ${product.line} ${product.name} (${variant.size}) - ${formatPrice(price)}`
   );
 });
 
