@@ -51,14 +51,14 @@ export const useCartStore = create<CartState>()(
       },
 
       getQtyBySku: (sku) => {
-        const found = get().items.find((i) => i.variantSku === sku);
-        return found?.quantity ?? 0;
-      },
+  const found = get().items.find((i) => i.variant.sku === sku);
+  return found?.qty ?? 0;
+},
 
       addItem: (item) =>
         set((state) => {
-          const sku = item.variantSku;
-          const qtyToAdd = Math.max(1, Number(item.quantity) || 1);
+          const sku = item.variant.sku;
+          const qtyToAdd = Math.max(1, Number(item.qty) || 1);
 
           // stock conocido?
           const stockKnown = state.stockBySku?.[sku];
@@ -67,11 +67,16 @@ export const useCartStore = create<CartState>()(
 
           const existing = state.items.find(
             (entry) =>
-              entry.productId === item.productId && entry.variantSku === item.variantSku
+              entry.productId === item.productId && entry.variant.sku === item.variant.sku
+
           );
 
-          const currentQty = existing?.quantity ?? 0;
-          const nextQty = currentQty + qtyToAdd;
+         const currentQty = existing?.qty ?? 0;
+const nextQty = currentQty + qtyToAdd;
+
+
+
+
 
           if (stock !== null) {
             if (stock <= 0) {
@@ -88,8 +93,9 @@ export const useCartStore = create<CartState>()(
             toast("Agregado al carrito", "success");
             return {
               items: state.items.map((entry) =>
-                entry.productId === item.productId && entry.variantSku === item.variantSku
-                  ? { ...entry, quantity: nextQty }
+             entry.productId === item.productId && entry.variant.sku === item.variant.sku
+
+                  ? { ...entry, qty: nextQty }
                   : entry
               ),
             };
@@ -112,8 +118,8 @@ export const useCartStore = create<CartState>()(
             toast(`Stock insuficiente (disponible: ${stock})`, "error");
             return {
               items: state.items.map((entry) =>
-                entry.productId === productId && entry.variantSku === variantSku
-                  ? { ...entry, quantity: stock }
+               entry.productId === productId && entry.variant.sku === variantSku
+                  ? { ...entry, qty: stock }
                   : entry
               ),
             };
@@ -122,18 +128,18 @@ export const useCartStore = create<CartState>()(
           return {
             items: state.items
               .map((entry) =>
-                entry.productId === productId && entry.variantSku === variantSku
-                  ? { ...entry, quantity: q }
+                entry.productId === productId && entry.variant.sku === variantSku
+                  ? { ...entry, qty: q }
                   : entry
               )
-              .filter((entry) => entry.quantity > 0),
+              .filter((entry) => entry.qty > 0),
           };
         }),
 
       removeItem: (productId, variantSku) =>
         set((state) => ({
           items: state.items.filter(
-            (entry) => !(entry.productId === productId && entry.variantSku === variantSku)
+            (entry) => !(entry.productId === productId && entry.variant.sku === variantSku)
           ),
         })),
 
