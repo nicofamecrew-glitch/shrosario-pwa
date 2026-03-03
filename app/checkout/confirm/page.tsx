@@ -199,7 +199,7 @@ export default function ConfirmOrderPage() {
       <p className="mt-1 text-sm text-black/60 dark:text-white/60">
         Usamos estos datos solo para coordinar la entrega.
       </p>
-      {/* Nombre y apellido */}
+     {/* Nombre y apellido */}
 <div>
   <label className="text-xs text-black/60 dark:text-white/60">
     Nombre y apellido *
