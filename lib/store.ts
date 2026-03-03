@@ -50,98 +50,105 @@ export const useCartStore = create<CartState>()(
         return Math.max(0, Number(v) || 0);
       },
 
-      getQtyBySku: (sku) => {
+getQtyBySku: (sku) => {
   const found = get().items.find((i) => i.variant && i.variant.sku === sku);
   return found?.qty ?? 0;
 },
 
       addItem: (item) =>
-        set((state) => {
-          const sku = item.variant.sku;
-          const qtyToAdd = Math.max(1, Number(item.qty) || 1);
+  set((state) => {
+    const sku = item.variant?.sku;
+    if (!sku) return state;
 
-          // stock conocido?
-          const stockKnown = state.stockBySku?.[sku];
-          const stock =
-            stockKnown === undefined ? null : Math.max(0, Number(stockKnown) || 0);
+    const qtyToAdd = Math.max(1, Number(item.qty) || 1);
 
-          const existing = state.items.find(
-            (entry) =>
-              entry.productId === item.productId && entry.variant.sku === item.variant.sku
+    const stockKnown = state.stockBySku?.[sku];
+    const stock =
+      stockKnown === undefined ? null : Math.max(0, Number(stockKnown) || 0);
 
-          );
+    const existing = state.items.find(
+      (entry) =>
+        entry.productId === item.productId &&
+        entry.variant &&
+        entry.variant.sku === item.variant.sku
+    );
 
-         const currentQty = existing?.qty ?? 0;
-const nextQty = currentQty + qtyToAdd;
+    const currentQty = existing?.qty ?? 0;
+    const nextQty = currentQty + qtyToAdd;
 
+    if (stock !== null) {
+      if (stock <= 0) {
+        toast("Sin stock", "error");
+        return state;
+      }
+      if (nextQty > stock) {
+        toast(`Stock insuficiente (disponible: ${stock})`, "error");
+        return state;
+      }
+    }
 
+    if (existing) {
+      toast("Agregado al carrito", "success");
+      return {
+        items: state.items.map((entry) =>
+          entry.productId === item.productId &&
+          entry.variant &&
+          entry.variant.sku === item.variant.sku
+            ? { ...entry, qty: nextQty }
+            : entry
+        ),
+      };
+    }
 
-
-
-          if (stock !== null) {
-            if (stock <= 0) {
-              toast("Sin stock", "error");
-              return state;
-            }
-            if (nextQty > stock) {
-              toast(`Stock insuficiente (disponible: ${stock})`, "error");
-              return state;
-            }
-          }
-
-          if (existing) {
-            toast("Agregado al carrito", "success");
-            return {
-              items: state.items.map((entry) =>
-             entry.productId === item.productId && entry.variant.sku === item.variant.sku
-
-                  ? { ...entry, qty: nextQty }
-                  : entry
-              ),
-            };
-          }
-
-          toast("Agregado al carrito", "success");
-          return { items: [...state.items, { ...item, quantity: nextQty }] };
-        }),
+    toast("Agregado al carrito", "success");
+    return { items: [...state.items, { ...item, qty: nextQty }] };
+  }),
 
       updateQuantity: (productId, variantSku, quantity) =>
-        set((state) => {
-          const q = Math.max(0, Number(quantity) || 0);
+  set((state) => {
+    const q = Math.max(0, Number(quantity) || 0);
 
-          // stock conocido?
-          const stockKnown = state.stockBySku?.[variantSku];
-          const stock =
-            stockKnown === undefined ? null : Math.max(0, Number(stockKnown) || 0);
+    const stockKnown = state.stockBySku?.[variantSku];
+    const stock =
+      stockKnown === undefined ? null : Math.max(0, Number(stockKnown) || 0);
 
-          if (stock !== null && q > stock) {
-            toast(`Stock insuficiente (disponible: ${stock})`, "error");
-            return {
-              items: state.items.map((entry) =>
-               entry.productId === productId && entry.variant.sku === variantSku
-                  ? { ...entry, qty: stock }
-                  : entry
-              ),
-            };
-          }
+    if (stock !== null && q > stock) {
+      toast(`Stock insuficiente (disponible: ${stock})`, "error");
+      return {
+        items: state.items.map((entry) =>
+          entry.productId === productId &&
+          entry.variant &&
+          entry.variant.sku === variantSku
+            ? { ...entry, qty: stock }
+            : entry
+        ),
+      };
+    }
 
-          return {
-            items: state.items
-              .map((entry) =>
-                entry.productId === productId && entry.variant.sku === variantSku
-                  ? { ...entry, qty: q }
-                  : entry
-              )
-              .filter((entry) => entry.qty > 0),
-          };
-        }),
+    return {
+      items: state.items
+        .map((entry) =>
+          entry.productId === productId &&
+          entry.variant &&
+          entry.variant.sku === variantSku
+            ? { ...entry, qty: q }
+            : entry
+        )
+        .filter((entry) => entry.qty > 0),
+    };
+  }),
 
       removeItem: (productId, variantSku) =>
-        set((state) => ({
-          items: state.items.filter(
-            (entry) => !(entry.productId === productId && entry.variant.sku === variantSku)
-          ),
-        })),
+  set((state) => ({
+    items: state.items.filter(
+      (entry) =>
+        !(
+          entry.productId === productId &&
+          entry.variant &&
+          entry.variant.sku === variantSku
+        )
+    ),
+  })),
 
       clearCart: () => set({ items: [] }),
       setWholesale: (enabled) => set({ isWholesale: enabled }),
