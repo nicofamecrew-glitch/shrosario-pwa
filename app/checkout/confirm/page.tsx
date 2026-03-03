@@ -27,6 +27,7 @@ interface OrderItem {
 interface Order {
   items: OrderItem[];
   priceMode: "minorista" | "mayorista";
+  fullName: string;
   phone: string;
   city: string;
   address: string;
@@ -36,7 +37,7 @@ interface Order {
 export default function ConfirmOrderPage() {
   const router = useRouter();
   const items = useCartStore((s) => s.items);
-
+  const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [city, setCity] = useState("");
   const [address, setAddress] = useState("");
@@ -54,6 +55,7 @@ export default function ConfirmOrderPage() {
       const raw = localStorage.getItem(PROFILE_KEY);
       if (raw) {
         const p = JSON.parse(raw);
+        if (typeof p.fullName === "string") setFullName(p.fullName);
         if (typeof p.phone === "string") setPhone(p.phone);
         if (typeof p.city === "string") setCity(p.city);
         if (typeof p.address === "string") setAddress(p.address);
@@ -72,6 +74,7 @@ export default function ConfirmOrderPage() {
       localStorage.setItem(
         PROFILE_KEY,
         JSON.stringify({
+          fullName: fullName.trim(),
           phone: phone.trim(),
           city: city.trim(),
           address: address.trim(),
@@ -81,7 +84,7 @@ export default function ConfirmOrderPage() {
     } catch {
       // ignore
     }
-  }, [loaded, phone, city, address, notes]);
+  }, [loaded, fullName, phone, city, address, notes]);
 
   const buildOrderItem = (
     product: Product,
@@ -113,10 +116,10 @@ export default function ConfirmOrderPage() {
       const priceMode: "minorista" | "mayorista" = "minorista";
 
       // Validaciones básicas de perfil
-      if (!phone.trim() || !city.trim() || !address.trim()) {
-        toast("Completá teléfono, ciudad y dirección.", "warn");
-        return;
-      }
+     if (!fullName.trim() || !phone.trim() || !city.trim() || !address.trim()) {
+  toast("Completá nombre, teléfono, ciudad y dirección.", "warn");
+  return;
+} 
 
       // ✅ Filtrar solo items válidos (con variant y precio)
       const validItems = items.filter(
@@ -146,6 +149,7 @@ export default function ConfirmOrderPage() {
       const order: Order = {
         items: orderItems,
         priceMode,
+        fullName: fullName.trim(),
         phone: phone.trim(),
         city: city.trim(),
         address: address.trim(),
@@ -195,7 +199,19 @@ export default function ConfirmOrderPage() {
       <p className="mt-1 text-sm text-black/60 dark:text-white/60">
         Usamos estos datos solo para coordinar la entrega.
       </p>
-
+      {/* Nombre y apellido */}
+<div>
+  <label className="text-xs text-black/60 dark:text-white/60">
+    Nombre y apellido *
+  </label>
+  <input
+    className="mt-1 w-full rounded-xl border p-3 text-sm border-black/10 bg-white text-black placeholder:text-black/40 outline-none focus:border-black/20 focus:ring-2 focus:ring-[#ee078e]/30 dark:border-white/10 dark:bg-black dark:text-white dark:placeholder:text-white/30 dark:focus:border-white/20 dark:focus:ring-[#ee078e]/25"
+    placeholder="Juan Pérez"
+    value={fullName}
+    onChange={(e) => setFullName(e.target.value)}
+    autoComplete="name"
+  />
+</div>
       {/* FORM */}
       <div className="mt-6 flex-1 overflow-y-auto space-y-4 pr-1 rounded-2xl border p-4 border-black/10 bg-white shadow-sm dark:border-white/10 dark:bg-white/5 dark:shadow-none">
         {/* Teléfono */}
