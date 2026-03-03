@@ -51,7 +51,7 @@ export const useCartStore = create<CartState>()(
       },
 
       getQtyBySku: (sku) => {
-  const found = get().items.find((i) => i.variant.sku === sku);
+  const found = get().items.find((i) => i.variant && i.variant.sku === sku);
   return found?.qty ?? 0;
 },
 
