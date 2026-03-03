@@ -65,7 +65,7 @@ export default function ConfirmOrderPage() {
 
   return {
     productId: product.id,
-    sku: variant.sku,
+    sku: variant?.sku ?? "",
     qty,
     unitPrice,
     name: product.name,
