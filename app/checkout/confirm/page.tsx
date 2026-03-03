@@ -1,20 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCartStore } from "@/lib/store";
-import { Product, Variant } from "@/lib/types";
+import type { Product, Variant } from "@/lib/types";
 import products from "@/data/products.json";
 
 const PROFILE_KEY = "sh_checkout_profile_v1";
 
-// ⬇️ Pegá acá arriba las definiciones
 type ToastType = "success" | "error" | "warn";
 
 function toast(message: string, type: ToastType) {
-  window.dispatchEvent(
-    new CustomEvent("toast", { detail: { message, type } })
-  );
+  window.dispatchEvent(new CustomEvent("toast", { detail: { message, type } }));
 }
 
 interface OrderItem {
@@ -36,8 +33,6 @@ interface Order {
   notes?: string;
 }
 
-
-
 export default function ConfirmOrderPage() {
   const router = useRouter();
   const items = useCartStore((s) => s.items);
@@ -50,6 +45,9 @@ export default function ConfirmOrderPage() {
   const [submitting, setSubmitting] = useState(false);
   const [loaded, setLoaded] = useState(false);
 
+  // 🔒 anti doble disparo inmediato (no depende del state)
+  const sendingRef = useRef(false);
+
   // 1) cargar perfil guardado
   useEffect(() => {
     try {
@@ -61,7 +59,9 @@ export default function ConfirmOrderPage() {
         if (typeof p.address === "string") setAddress(p.address);
         if (typeof p.notes === "string") setNotes(p.notes);
       }
-    } catch {}
+    } catch {
+      // ignore
+    }
     setLoaded(true);
   }, []);
 
@@ -78,81 +78,99 @@ export default function ConfirmOrderPage() {
           notes: notes.trim(),
         })
       );
-    } catch {}
+    } catch {
+      // ignore
+    }
   }, [loaded, phone, city, address, notes]);
 
-  // 🔎 Construcción de ítems con precios
   const buildOrderItem = (
-  product: Product,
-  variant: Variant,
-  qty: number,
-  priceMode: "minorista" | "mayorista"
-) => {
-  const unitPrice =
-    priceMode === "mayorista"
-      ? variant.priceWholesale
-      : variant.priceRetail;
+    product: Product,
+    variant: Variant,
+    qty: number,
+    priceMode: "minorista" | "mayorista"
+  ): OrderItem => {
+    const unitPrice =
+      priceMode === "mayorista" ? variant.priceWholesale : variant.priceRetail;
 
-  return {
-    productId: product.id,
-    sku: variant?.sku ?? "",
-    qty,
-    unitPrice,
-    name: product.name,
-    brand: product.brand ?? "",
-    size: variant.size,
+    return {
+      productId: product.id,
+      sku: variant?.sku ?? "",
+      qty,
+      unitPrice,
+      name: product.name,
+      brand: product.brand ?? "",
+      size: variant.size,
+    };
   };
-};
 
+  const handleConfirm = async () => {
+    // 🔒 anti doble click/tap rápido
+    if (sendingRef.current) return;
+    sendingRef.current = true;
+    setSubmitting(true);
 
- const handleConfirm = async () => {
-  // ... validaciones previas
+    try {
+      const priceMode: "minorista" | "mayorista" = "minorista";
 
- if (submitting) return;
+      // Validaciones básicas de perfil
+      if (!phone.trim() || !city.trim() || !address.trim()) {
+        toast("Completá teléfono, ciudad y dirección.", "warn");
+        return;
+      }
 
+      // ✅ Filtrar solo items válidos (con variant y precio)
+      const validItems = items.filter(
+        (i: any) =>
+          i?.variant &&
+          ((i.variant.priceRetail ?? 0) > 0 || (i.variant.priceWholesale ?? 0) > 0)
+      );
 
+      if (validItems.length === 0) {
+        toast("No hay productos válidos para confirmar", "error");
+        return;
+      }
 
-  setSubmitting(true);
+      // ✅ Construcción de ítems con precios correctos
+      const orderItems: OrderItem[] = validItems.map((it: any) => {
+        const product = (products as Product[]).find((p) => p.id === it.productId);
+        if (!product) throw new Error(`Producto no encontrado: ${it.productId}`);
+        return buildOrderItem(product, it.variant as Variant, it.qty ?? 1, priceMode);
+      });
 
-  const priceMode: "minorista" | "mayorista" = "minorista";
+      // ✅ Corte por lo sano: no permitas SKU vacío o precio 0
+      const bad = orderItems.find((x) => !x.sku || !x.unitPrice || x.unitPrice <= 0);
+      if (bad) {
+        throw new Error("Hay un producto sin SKU o precio válido. No se puede confirmar.");
+      }
 
-  // ✅ Filtrar solo items válidos
-  const validItems = items.filter(
-    (i) => i.variant && (i.variant.priceRetail > 0 || i.variant.priceWholesale > 0)
-  );
+      const order: Order = {
+        items: orderItems,
+        priceMode,
+        phone: phone.trim(),
+        city: city.trim(),
+        address: address.trim(),
+        notes: notes.trim(),
+      };
 
-  if (validItems.length === 0) {
-    toast("No hay productos válidos para confirmar", "error");
-    setSubmitting(false);
-    return;
-  }
+      const res = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(order),
+      });
 
-  // ✅ Construcción de ítems con precios correctos
-  const orderItems = validItems.map((it) => {
-    const product = products.find((p) => p.id === it.productId);
-    if (!product) {
-      throw new Error(`Producto no encontrado: ${it.productId}`);
+      if (!res.ok) {
+        const txt = await res.text().catch(() => "");
+        throw new Error(`Error guardando pedido (${res.status}). ${txt}`.trim());
+      }
+
+      router.push("/checkout/shipping");
+    } catch (e: any) {
+      toast(e?.message ?? "Error confirmando pedido", "error");
+    } finally {
+      setSubmitting(false);
+      sendingRef.current = false;
     }
-    return buildOrderItem(product, it.variant!, it.qty, priceMode);
-  });
-
-const order: Order = {
-  items: orderItems,
-  priceMode,
-  phone: phone.trim(),
-  city: city.trim(),
-  address: address.trim(),
-  notes: notes.trim(),
-};
-
-  await fetch("/api/orders", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(order),
-  });
-
-  router.push("/checkout/shipping");
-};
+  };
 
   return (
     <main
@@ -182,9 +200,7 @@ const order: Order = {
       <div className="mt-6 flex-1 overflow-y-auto space-y-4 pr-1 rounded-2xl border p-4 border-black/10 bg-white shadow-sm dark:border-white/10 dark:bg-white/5 dark:shadow-none">
         {/* Teléfono */}
         <div>
-          <label className="text-xs text-black/60 dark:text-white/60">
-            Teléfono *
-          </label>
+          <label className="text-xs text-black/60 dark:text-white/60">Teléfono *</label>
           <input
             className="mt-1 w-full rounded-xl border p-3 text-sm border-black/10 bg-white text-black placeholder:text-black/40 outline-none focus:border-black/20 focus:ring-2 focus:ring-[#ee078e]/30 dark:border-white/10 dark:bg-black dark:text-white dark:placeholder:text-white/30 dark:focus:border-white/20 dark:focus:ring-[#ee078e]/25"
             placeholder="341 555 1234"
@@ -196,9 +212,7 @@ const order: Order = {
 
         {/* Ciudad */}
         <div>
-          <label className="text-xs text-black/60 dark:text-white/60">
-            Ciudad *
-          </label>
+          <label className="text-xs text-black/60 dark:text-white/60">Ciudad *</label>
           <input
             className="mt-1 w-full rounded-xl border p-3 text-sm border-black/10 bg-white text-black placeholder:text-black/40 outline-none focus:border-black/20 focus:ring-2 focus:ring-[#ee078e]/30 dark:border-white/10 dark:bg-black dark:text-white dark:placeholder:text-white/30 dark:focus:border-white/20 dark:focus:ring-[#ee078e]/25"
             placeholder="Rosario"
@@ -209,9 +223,7 @@ const order: Order = {
 
         {/* Dirección */}
         <div>
-          <label className="text-xs text-black/60 dark:text-white/60">
-            Dirección / zona *
-          </label>
+          <label className="text-xs text-black/60 dark:text-white/60">Dirección / zona *</label>
           <input
             className="mt-1 w-full rounded-xl border p-3 text-sm border-black/10 bg-white text-black placeholder:text-black/40 outline-none focus:border-black/20 focus:ring-2 focus:ring-[#ee078e]/30 dark:border-white/10 dark:bg-black dark:text-white dark:placeholder:text-white/30 dark:focus:border-white/20 dark:focus:ring-[#ee078e]/25"
             placeholder="San Martín 1234, barrio centro"
@@ -222,9 +234,7 @@ const order: Order = {
 
         {/* Observaciones */}
         <div>
-          <label className="text-xs text-black/60 dark:text-white/60">
-            Observaciones
-          </label>
+          <label className="text-xs text-black/60 dark:text-white/60">Observaciones</label>
           <textarea
             rows={3}
             className="mt-1 w-full h-12 rounded-xl border px-4 text-sm border-black/10 bg-white text-black placeholder:text-black/40 outline-none focus:border-black/20 focus:ring-2 focus:ring-[#ee078e]/30 dark:border-white/10 dark:bg-black dark:text-white dark:placeholder:text-white/30 dark:focus:border-white/20 dark:focus:ring-[#ee078e]/25 resize-none"
