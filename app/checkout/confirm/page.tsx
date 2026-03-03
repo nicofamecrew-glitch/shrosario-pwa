@@ -8,6 +8,36 @@ import products from "@/data/products.json";
 
 const PROFILE_KEY = "sh_checkout_profile_v1";
 
+// ⬇️ Pegá acá arriba las definiciones
+type ToastType = "success" | "error" | "warn";
+
+function toast(message: string, type: ToastType) {
+  window.dispatchEvent(
+    new CustomEvent("toast", { detail: { message, type } })
+  );
+}
+
+interface OrderItem {
+  productId: string;
+  sku: string;
+  qty: number;
+  unitPrice: number;
+  name: string;
+  brand?: string;
+  size?: string;
+}
+
+interface Order {
+  items: OrderItem[];
+  priceMode: "minorista" | "mayorista";
+  phone: string;
+  city: string;
+  address: string;
+  notes?: string;
+}
+
+
+
 export default function ConfirmOrderPage() {
   const router = useRouter();
   const items = useCartStore((s) => s.items);
@@ -69,7 +99,7 @@ export default function ConfirmOrderPage() {
     qty,
     unitPrice,
     name: product.name,
-    brand: product.brand,
+    brand: product.brand ?? "",
     size: variant.size,
   };
 };
@@ -82,20 +112,37 @@ export default function ConfirmOrderPage() {
 
   const priceMode: "minorista" | "mayorista" = "minorista";
 
-  const orderItems = items.map((it) => {
-    const product = products.find(p => p.id === it.productId);
+  // ✅ Filtrar solo items válidos
+  const validItems = items.filter(
+    (i) => i.variant && (i.variant.priceRetail > 0 || i.variant.priceWholesale > 0)
+  );
+
+  if (validItems.length === 0) {
+    toast("No hay productos válidos para confirmar", "error");
+    setSubmitting(false);
+    return;
+  }
+
+  // ✅ Construcción de ítems con precios correctos
+  const orderItems = validItems.map((it) => {
+    const product = products.find((p) => p.id === it.productId);
     if (!product) {
       throw new Error(`Producto no encontrado: ${it.productId}`);
     }
-    return buildOrderItem(product, it.variant, it.qty, priceMode);
+    return buildOrderItem(product, it.variant!, it.qty, priceMode);
   });
 
-  const order = {
-    id: `DRAFT-${Date.now()}`,
-    customer: { fullName: "Cliente app", phone, city, address, notes },
-    items: orderItems,
-    priceMode,
-  };
+const order: Order = {
+  items: orderItems,
+  priceMode,
+  phone: phone.trim(),
+  city: city.trim(),
+  address: address.trim(),
+  notes: notes.trim(),
+};
+
+
+
 
   await fetch("/api/orders", {
     method: "POST",
