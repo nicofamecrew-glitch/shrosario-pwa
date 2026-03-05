@@ -199,7 +199,15 @@ export async function POST(req: Request) {
     const ORIGIN_ID = Number(mustEnv("ZIPNOVA_ORIGIN_ID"));
 
     const body = await req.json().catch(() => ({}));
-
+    const draftId = String(
+  body?.draftId ?? body?.draft_id ?? body?.external_reference ?? ""
+).trim();
+if (!draftId) {
+  return NextResponse.json(
+    { ok: false, error: "Missing draftId (DRAFT-...)" },
+    { status: 400 }
+  );
+}
     // ------------------------
     // DESTINO (CP obligatorio)
     // ------------------------
@@ -552,6 +560,7 @@ const weightFromQuery = toNum(
     // ------------------------
     await appendShippingEvent({
       event_type: "quote_created",
+      order_id: draftId,
       provider: "zipnova",
       account_id: ACCOUNT_ID,
       origin_id: ORIGIN_ID,
@@ -570,23 +579,23 @@ const weightFromQuery = toNum(
       ) ?? options[0];
 
     if (selected) {
-      await appendShippingEvent({
-        event_type: "quote_selected",
-        provider: "zipnova",
-        account_id: ACCOUNT_ID,
-        origin_id: ORIGIN_ID,
-        destination_zipcode: destZip,
-        option_id: selected.id,
-        option_name: selected.name,
-        price: selected.price,
-        eta: selected?.meta?.eta ?? "",
-        carrier_id: selected?.meta?.carrier_id ?? "",
-        service_type_id: selected?.meta?.service_type_id ?? "",
-        service_code: selected?.meta?.service_code ?? "",
-        raw: { selected_id: selected.id },
-      });
-    }
-
+  await appendShippingEvent({
+    event_type: "quote_selected",
+    order_id: draftId,   // ← AGREGAR ESTA LINEA
+    provider: "zipnova",
+    account_id: ACCOUNT_ID,
+    origin_id: ORIGIN_ID,
+    destination_zipcode: destZip,
+    option_id: selected.id,
+    option_name: selected.name,
+    price: selected.price,
+    eta: selected?.meta?.eta ?? "",
+    carrier_id: selected?.meta?.carrier_id ?? "",
+    service_type_id: selected?.meta?.service_type_id ?? "",
+    service_code: selected?.meta?.service_code ?? "",
+    raw: { selected_id: selected.id },
+  });
+}
     // ------------------------
     // Respuesta
     // ------------------------
