@@ -16,6 +16,7 @@ type ShippingOption = {
 };
 
 type ShippingSelection = {
+  orderId: string;
   method: string;
   label: string;
   cost: number;
@@ -80,7 +81,9 @@ export default function ShippingPage() {
 
   const freeShippingThreshold = 80000;
   const onePesoShippingCost = 1;
-
+  const draftId = useMemo(() => {
+  return `DRAFT-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+}, []);
   const [zipcode, setZipcode] = useState("");
   const [options, setOptions] = useState<ShippingOption[]>([]);
   const [selected, setSelected] = useState<ShippingOption | null>(null);
@@ -101,6 +104,7 @@ export default function ShippingPage() {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
+          draftId,
           destination: { zipcode: zipcode.trim() },
           declared_value: Math.round(cartTotal),
           items: items.map((it: any) => ({
@@ -135,6 +139,7 @@ export default function ShippingPage() {
     if (!selected) return;
 
     const payload: ShippingSelection = {
+      orderId: draftId,
       method: selected.id,
       label: selected.label,
       cost: finalCost,
