@@ -9,9 +9,11 @@ import { findVariant, getVariantPrice } from "@/lib/pricing";
 const PROFILE_KEY = "sh_checkout_profile_v1";
 const SHIPPING_KEY = "sh_shipping_v1";
 const PAYMENT_KEY = "sh_payment_v1";
-const DRAFT_ID_KEY = "sh_order_draft_id";
+const DRAFT_KEY = "sh_draft_id_v1";
 
 type ShippingSelection = {
+  orderId?: string;
+  zipcode?: string;
   method: string;
   label: string;
   cost: number;
@@ -148,15 +150,18 @@ const btnPrimary =
     setSubmitting(true);
 
     try {
-      const draftId = `DRAFT-${Date.now()}`;
-      localStorage.setItem(DRAFT_ID_KEY, draftId);
-    // Guardar pedido en Sheet como Pendiente
+      const draftId = localStorage.getItem(DRAFT_KEY) || "";
+if (!draftId || !draftId.startsWith("DRAFT-")) {
+  alert("Falta el número de orden (DRAFT). Volvé a Confirmar pedido.");
+  router.push("/checkout/confirm");
+  return;
+}
 try {
   const profile = JSON.parse(localStorage.getItem(PROFILE_KEY) || "{}");
   const shipping = JSON.parse(localStorage.getItem(SHIPPING_KEY) || "{}");
 
   const orderPayload = {
-    id: draftId,
+    orderId: draftId,
     createdAt: new Date().toISOString(),
     total: grandTotal,
     priceMode: "minorista",
@@ -223,9 +228,9 @@ try {
         headers: { "Content-Type": "application/json" },
         // 👇 Body LIMPIO: tu API arma back_urls y notification_url por su cuenta (con token)
         body: JSON.stringify({
-          orderDraftId: draftId,
-          items: itemsMP,
-        }),
+  external_reference: draftId,
+  items: itemsMP,
+}),
       });
 
       const data = await res.json();

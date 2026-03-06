@@ -84,6 +84,15 @@ export async function POST(req: NextRequest) {
     const client = new MercadoPagoConfig({ accessToken });
     const preferenceClient = new Preference(client);
 
+    const draftId = body.external_reference || body.orderDraftId;
+
+if (!draftId || !String(draftId).startsWith("DRAFT-")) {
+  return NextResponse.json(
+    { ok: false, error: "Missing valid DRAFT id" },
+    { status: 400 }
+  );
+}
+
     const preference = {
       items,
       payer: body.payer?.email ? { email: body.payer.email } : undefined,
@@ -93,7 +102,7 @@ export async function POST(req: NextRequest) {
         failure: `${base}/checkout/mp/failure`,
       },
       auto_return: "approved",
-      external_reference: body.orderDraftId || `order-${Date.now()}`,
+     external_reference: draftId,
       notification_url: `${base}/api/mp/webhook?token=${webhookToken}`,
     };
 

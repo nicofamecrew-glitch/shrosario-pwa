@@ -60,6 +60,78 @@ async function columnHasValue(
   return false;
 }
 
+async function findRowByValue(
+  sheets: any,
+  sheetId: string,
+  tab: string,
+  col: string, // ej: "B"
+  value: string,
+  lookbackRows = 1500
+) {
+  const range = `${tab}!${col}:${col}`;
+
+  const res = await sheets.spreadsheets.values.get({
+    spreadsheetId: sheetId,
+    range,
+  });
+
+  const values: any[][] = res.data.values ?? [];
+  if (!values.length) return null;
+
+  const start = Math.max(0, values.length - lookbackRows);
+
+  for (let i = values.length - 1; i >= start; i--) {
+    const cell = (values[i]?.[0] ?? "").toString().trim();
+    if (cell === value) return i + 1; // Sheets usa filas 1-based
+  }
+
+  return null;
+}
+
+async function updateOrderRow(
+  sheets: any,
+  sheetId: string,
+  tab: string,
+  row: number,
+  data: {
+    externalRef: string;
+    status: string;
+    priceMode: string;
+    total: number;
+    fullName: string;
+    phone: string;
+    city: string;
+    address: string;
+    cuit: string;
+    businessType: string;
+    itemsText: string;
+  }
+) {
+  // C:M
+  const range = `${tab}!C${row}:M${row}`;
+
+  await sheets.spreadsheets.values.update({
+    spreadsheetId: sheetId,
+    range,
+    valueInputOption: "USER_ENTERED",
+    requestBody: {
+      values: [[
+        data.externalRef,   // C external_reference
+        data.status,        // D estado
+        data.priceMode,     // E concepto / modo
+        data.total,         // F precio
+        data.fullName,      // G nombre
+        data.phone,         // H telefono
+        data.city,          // I ciudad
+        data.address,       // J direccion
+        data.cuit,          // K cuit
+        data.businessType,  // L businessType
+        data.itemsText,     // M items
+      ]],
+    },
+  });
+}
+
 async function appendOrderItems(
   sheets: any,
   sheetId: string,
@@ -193,32 +265,51 @@ export async function POST(req: Request) {
     );
 
     if (!orderExists) {
-      await sheets.spreadsheets.values.append({
-        spreadsheetId: sheetId,
-        range: `${TAB}!A1`,
-        valueInputOption: "USER_ENTERED",
-        requestBody: {
-          values: [
-            [
-              createdAt,
-              orderId,
-              externalRef,
-              status,
-              priceMode,
-              total,
-              fullName,
-              phone,
-              city,
-              address,
-              cuit,
-              businessType,
-              itemsText,
-            ],
-          ],
-        },
-      });
-    }
+  await sheets.spreadsheets.values.append({
+    spreadsheetId: sheetId,
+    range: `${TAB}!A1`,
+    valueInputOption: "USER_ENTERED",
+    requestBody: {
+      values: [
+        [
+          createdAt,
+          orderId,
+          externalRef,
+          status,
+          priceMode,
+          total,
+          fullName,
+          phone,
+          city,
+          address,
+          cuit,
+          businessType,
+          itemsText,
+        ],
+      ],
+    },
+  });
+} else {
+  const row = await findRowByValue(sheets, sheetId, TAB, "B", orderId, 1500);
 
+  if (!row) {
+    throw new Error(`No encontré la fila del pedido existente: ${orderId}`);
+  }
+
+  await updateOrderRow(sheets, sheetId, TAB, row, {
+    externalRef,
+    status,
+    priceMode,
+    total,
+    fullName,
+    phone,
+    city,
+    address,
+    cuit,
+    businessType,
+    itemsText,
+  });
+}
     await appendOrderItems(sheets, sheetId, orderId, items);
 
     return NextResponse.json({

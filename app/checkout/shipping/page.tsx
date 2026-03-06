@@ -8,7 +8,7 @@ import { findVariant, getVariantPrice } from "@/lib/pricing";
 import LocationAutocomplete, { type ZipRow } from "@/components/shipping/LocationAutocomplete";
 
 const STORAGE_KEY = "sh_shipping_v1";
-
+const DRAFT_KEY = "sh_draft_id_v1";
 type ShippingOption = {
   id: string;
   label: string;
@@ -82,7 +82,9 @@ export default function ShippingPage() {
   const freeShippingThreshold = 80000;
   const onePesoShippingCost = 1;
   const draftId = useMemo(() => {
-  return `DRAFT-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+  if (typeof window === "undefined") return "";
+  const v = localStorage.getItem(DRAFT_KEY) || "";
+  return v.startsWith("DRAFT-") ? v : "";
 }, []);
   const [zipcode, setZipcode] = useState("");
   const [options, setOptions] = useState<ShippingOption[]>([]);
@@ -136,22 +138,29 @@ export default function ShippingPage() {
   }
 
   function saveAndContinue() {
-    if (!selected) return;
 
-    const payload: ShippingSelection = {
-      orderId: draftId,
-      method: selected.id,
-      label: selected.label,
-      cost: finalCost,
-      notes: notes?.trim() ? notes.trim() : undefined,
-      updatedAt: new Date().toISOString(),
-      total: cartTotal,
-      zipcode,
-    };
-
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-    router.push("/checkout/payment");
+  if (!draftId) {
+    alert("Falta el número de orden (DRAFT). Volvé a Confirmar pedido.");
+    router.push("/checkout/confirm");
+    return;
   }
+
+  if (!selected) return;
+
+  const payload: ShippingSelection = {
+    orderId: draftId,
+    method: selected.id,
+    label: selected.label,
+    cost: finalCost,
+    notes: notes?.trim() ? notes.trim() : undefined,
+    updatedAt: new Date().toISOString(),
+    total: cartTotal,
+    zipcode,
+  };
+
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+  router.push("/checkout/payment");
+}
 
   if (!items?.length) {
     return (

@@ -7,13 +7,39 @@ import type { Product, Variant } from "@/lib/types";
 import products from "@/data/products.json";
 
 const PROFILE_KEY = "sh_checkout_profile_v1";
-
+const DRAFT_KEY = "sh_draft_id_v1";
+const SHIPPING_KEY = "sh_shipping_v1";
 type ToastType = "success" | "error" | "warn";
 
 function toast(message: string, type: ToastType) {
   window.dispatchEvent(new CustomEvent("toast", { detail: { message, type } }));
 }
+function getDraftId() {
+  try {
+    const v = localStorage.getItem(DRAFT_KEY);
+    return v && v.startsWith("DRAFT-") ? v : "";
+  } catch {
+    return "";
+  }
+}
 
+function ensureDraftId() {
+  const existing = getDraftId();
+  if (existing) return existing;
+
+  const created = `DRAFT-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+  localStorage.setItem(DRAFT_KEY, created);
+  return created;
+}
+
+function readShippingSelection(): any | null {
+  try {
+    const raw = localStorage.getItem(SHIPPING_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
 interface OrderItem {
   productId: string;
   sku: string;
@@ -145,16 +171,31 @@ export default function ConfirmOrderPage() {
       if (bad) {
         throw new Error("Hay un producto sin SKU o precio válido. No se puede confirmar.");
       }
+      const draftId = ensureDraftId();
+      const shippingSel = readShippingSelection();
+      
+      const order: any = {
+  orderId: draftId, // ✅ este es el Numero de orden
+  items: orderItems,
+  priceMode,
+  fullName: fullName.trim(),
+  phone: phone.trim(),
+  city: city.trim(),
+  address: address.trim(),
+  notes: notes.trim(),
 
-      const order: Order = {
-        items: orderItems,
-        priceMode,
-        fullName: fullName.trim(),
-        phone: phone.trim(),
-        city: city.trim(),
-        address: address.trim(),
-        notes: notes.trim(),
-      };
+  // ✅ opcional: pegamos envío seleccionado si existe
+  shipping: shippingSel
+    ? {
+        method: shippingSel.method,
+        label: shippingSel.label,
+        cost: shippingSel.cost,
+        zipcode: shippingSel.zipcode,
+        notes: shippingSel.notes,
+        updatedAt: shippingSel.updatedAt,
+      }
+    : null,
+};
 
       const res = await fetch("/api/orders", {
         method: "POST",
