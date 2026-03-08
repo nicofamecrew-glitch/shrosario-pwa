@@ -54,151 +54,183 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const expected = process.env.MP_WEBHOOK_TOKEN;
-  if (!expected) {
-    console.error("Falta MP_WEBHOOK_TOKEN en entorno");
-    return NextResponse.json({ ok: false, error: "Missing MP_WEBHOOK_TOKEN" }, { status: 200 });
-  }
-
-  const url = new URL(req.url);
-  const token = url.searchParams.get("token") || "";
-  if (token !== expected) {
-    console.warn("Token inválido en webhook");
-    return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
-  }
-
-  const accessToken = process.env.MP_ACCESS_TOKEN || "";
-  if (!accessToken) {
-    console.error("Falta MP_ACCESS_TOKEN en entorno");
-    return NextResponse.json({ ok: true }, { status: 200 });
-  }
-
-  let payload: any = {};
   try {
-    payload = await req.json();
-  } catch {
-    console.warn("Payload vacío o inválido (seguimos con querystring)");
-    payload = {};
-  }
-
-  const type = String(
-    payload?.type ??
-      payload?.topic ??
-      url.searchParams.get("type") ??
-      url.searchParams.get("topic") ??
-      ""
-  );
-  const action = String(payload?.action ?? url.searchParams.get("action") ?? "");
-
-  let paymentId = "";
-  let merchantOrderId = "";
-  let status = "";
-  let externalRef = "";
-
-  const pid = String(pickPaymentId(payload, url));
-
-  if ((type === "payment" || payload?.type === "payment") && pid) {
-    paymentId = pid;
-    merchantOrderId = String(payload?.data?.merchant_order_id ?? payload?.merchant_order_id ?? "");
-    status = String(payload?.data?.status ?? payload?.status ?? "");
-    externalRef = String(payload?.data?.external_reference ?? payload?.external_reference ?? "");
-  }
-
-  if (!paymentId && (type === "merchant_order" || payload?.topic === "merchant_order")) {
-    const moId = extractMerchantOrderId(payload?.resource ?? url.searchParams.get("resource") ?? "");
-    if (moId) {
-      merchantOrderId = moId;
-      const moRes = await fetchMerchantOrder(moId, accessToken);
-      if (moRes.ok && moRes.data) {
-        externalRef = String(moRes.data.external_reference ?? "");
-        const payments = Array.isArray(moRes.data.payments) ? moRes.data.payments : [];
-        const chosen =
-          payments.find((p: any) => p?.status === "approved") ||
-          payments.find((p: any) => p?.status === "in_process") ||
-          payments[0] ||
-          null;
-
-        paymentId = chosen?.id ? String(chosen.id) : "";
-        status = chosen?.status ? String(chosen.status) : String(moRes.data.status ?? "");
-      }
+    const expected = process.env.MP_WEBHOOK_TOKEN;
+    if (!expected) {
+      console.error("Falta MP_WEBHOOK_TOKEN en entorno");
+      return NextResponse.json(
+        { ok: false, error: "Missing MP_WEBHOOK_TOKEN" },
+        { status: 200 }
+      );
     }
-  }
 
-  console.log("[MP WEBHOOK]", {
-    type,
-    action,
-    paymentId: paymentId || "(none)",
-    merchantOrderId: merchantOrderId || "(none)",
-    status: status || "(none)",
-    qs: url.search,
-  });
+    const url = new URL(req.url);
+    const token = url.searchParams.get("token") || "";
+    if (token !== expected) {
+      console.warn("Token inválido en webhook");
+      return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+    }
 
-  try {
-    await appendMpEvent("mp_events", [
-      new Date().toISOString(),
-      type,
-      action,
-      paymentId,
-      merchantOrderId,
-      status,
-      externalRef,
-      JSON.stringify(payload),
-    ]);
-  } catch (e) {
-    console.error("mp_events append failed:", e);
-  }
-
-  if (!paymentId) return NextResponse.json({ ok: true }, { status: 200 });
-
-  let real: any = null;
-  try {
-    const base = url.origin;
-    const res = await fetch(`${base}/api/mp/payment/${paymentId}`, { cache: "no-store" });
-    real = await res.json();
-    if (!res.ok) {
-      console.warn("Consulta de pago real falló", { paymentId, httpStatus: res.status });
+    const accessToken = process.env.MP_ACCESS_TOKEN || "";
+    if (!accessToken) {
+      console.error("Falta MP_ACCESS_TOKEN en entorno");
       return NextResponse.json({ ok: true }, { status: 200 });
     }
-  } catch (e) {
-    console.error("Error consultando pago real:", e);
-    return NextResponse.json({ ok: true }, { status: 200 });
-  }
 
-  if (!real?.ok || !real?.payment) {
-    console.warn("Respuesta de pago real inválida", { paymentId, realOk: real?.ok });
-    return NextResponse.json({ ok: true }, { status: 200 });
-  }
+    let payload: any = {};
+    try {
+      payload = await req.json();
+    } catch {
+      console.warn("Payload vacío o inválido (seguimos con querystring)");
+      payload = {};
+    }
 
-  console.log("Pago real recibido", {
-    paymentId,
-    status: real.payment.status,
-    amount: real.payment.transaction_amount,
-    external_reference: real.payment.external_reference,
-  });
+    const type = String(
+      payload?.type ??
+        payload?.topic ??
+        url.searchParams.get("type") ??
+        url.searchParams.get("topic") ??
+        ""
+    );
+    const action = String(payload?.action ?? url.searchParams.get("action") ?? "");
 
-  if (real.payment.status !== "approved") {
-    return NextResponse.json({ ok: true }, { status: 200 });
-  }
+    let paymentId = "";
+    let merchantOrderId = "";
+    let status = "";
+    let externalRef = "";
 
-try {
-  const orderRef = String(real.payment.external_reference ?? externalRef ?? "");
-  const cleanOrderId = orderRef.startsWith("DRAFT-")
-    ? orderRef.replace("DRAFT-", "ORD-")
-    : orderRef;
+    const pid = String(pickPaymentId(payload, url));
 
-  if (orderRef) {
-    await updateOrderStatusInSheets({
-      orderId: cleanOrderId,
-      status: "Pagado",
-      externalReference: String(real.payment.external_reference ?? externalRef ?? ""),
-      paymentId: String(paymentId),
-      paymentStatus: String(real.payment.status),
+    if ((type === "payment" || payload?.type === "payment") && pid) {
+      paymentId = pid;
+      merchantOrderId = String(payload?.data?.merchant_order_id ?? payload?.merchant_order_id ?? "");
+      status = String(payload?.data?.status ?? payload?.status ?? "");
+      externalRef = String(payload?.data?.external_reference ?? payload?.external_reference ?? "");
+    }
+
+    if (!paymentId && (type === "merchant_order" || payload?.topic === "merchant_order")) {
+      const moId = extractMerchantOrderId(
+        payload?.resource ?? url.searchParams.get("resource") ?? ""
+      );
+
+      if (moId) {
+        merchantOrderId = moId;
+        const moRes = await fetchMerchantOrder(moId, accessToken);
+
+        if (moRes.ok && moRes.data) {
+          externalRef = String(moRes.data.external_reference ?? "");
+          const payments = Array.isArray(moRes.data.payments) ? moRes.data.payments : [];
+
+          const chosen =
+            payments.find((p: any) => p?.status === "approved") ||
+            payments.find((p: any) => p?.status === "in_process") ||
+            payments[0] ||
+            null;
+
+          paymentId = chosen?.id ? String(chosen.id) : "";
+          status = chosen?.status ? String(chosen.status) : String(moRes.data.status ?? "");
+        }
+      }
+    }
+
+    console.log("[MP WEBHOOK]", {
+      type,
+      action,
+      paymentId: paymentId || "(none)",
+      merchantOrderId: merchantOrderId || "(none)",
+      status: status || "(none)",
+      qs: url.search,
     });
-    console.log("Pedido marcado como PAGADO ✅", { orderId: cleanOrderId });
-  } else {
-    console.warn("Pago aprobado pero sin external_reference", { paymentId });
+
+    try {
+      await appendMpEvent("mp_events", [
+        new Date().toISOString(),
+        type,
+        action,
+        paymentId,
+        merchantOrderId,
+        status,
+        externalRef,
+        JSON.stringify(payload),
+      ]);
+    } catch (e) {
+      console.error("mp_events append failed:", e);
+    }
+
+    if (!paymentId) {
+      return NextResponse.json({ ok: true, skipped: "no_payment_id" }, { status: 200 });
+    }
+
+    let real: any = null;
+    try {
+      const base = url.origin;
+      const res = await fetch(`${base}/api/mp/payment/${paymentId}`, {
+        cache: "no-store",
+      });
+
+      real = await res.json();
+
+      if (!res.ok) {
+        console.warn("Consulta de pago real falló", {
+          paymentId,
+          httpStatus: res.status,
+        });
+        return NextResponse.json({ ok: true, skipped: "payment_lookup_failed" }, { status: 200 });
+      }
+    } catch (e) {
+      console.error("Error consultando pago real:", e);
+      return NextResponse.json({ ok: true, skipped: "payment_lookup_error" }, { status: 200 });
+    }
+
+    if (!real?.ok || !real?.payment) {
+      console.warn("Respuesta de pago real inválida", { paymentId, realOk: real?.ok });
+      return NextResponse.json({ ok: true, skipped: "invalid_payment_payload" }, { status: 200 });
+    }
+
+    console.log("Pago real recibido", {
+      paymentId,
+      status: real.payment.status,
+      amount: real.payment.transaction_amount,
+      external_reference: real.payment.external_reference,
+    });
+
+    if (real.payment.status !== "approved") {
+      return NextResponse.json(
+        { ok: true, skipped: `payment_status_${real.payment.status}` },
+        { status: 200 }
+      );
+    }
+
+    try {
+      const orderRef = String(real.payment.external_reference ?? externalRef ?? "");
+
+      if (orderRef) {
+        await updateOrderStatusInSheets({
+          orderId: orderRef,
+          status: "Pagado",
+          externalReference: String(real.payment.external_reference ?? externalRef ?? ""),
+          paymentId: String(paymentId),
+          paymentStatus: String(real.payment.status),
+        });
+
+        console.log("Pedido marcado como PAGADO ✅", { orderId: orderRef });
+      } else {
+        console.warn("Pago aprobado pero sin external_reference", { paymentId });
+      }
+    } catch (e) {
+      console.error("No pude actualizar pedido:", e);
+      return NextResponse.json(
+        { ok: false, error: "order_update_failed" },
+        { status: 200 }
+      );
+    }
+
+    return NextResponse.json({ ok: true, processed: true }, { status: 200 });
+  } catch (e) {
+    console.error("Webhook fatal error:", e);
+    return NextResponse.json(
+      { ok: false, error: e instanceof Error ? e.message : "Unknown error" },
+      { status: 500 }
+    );
   }
-} catch (e) {
-  console.error("No pude actualizar pedido:", e);
-}
 }
