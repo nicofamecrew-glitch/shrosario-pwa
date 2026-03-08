@@ -87,11 +87,11 @@ export async function updateOrderStatusInSheets(args: UpdateArgs) {
 
   const q = String(args.orderId ?? "").trim();
 
-  // Buscar por DRAFT o por ORD
-  const keyCol =
-    q.startsWith("DRAFT-") ? "external_reference" : "Numero de orden";
+// En Orders SIEMPRE buscamos por "Numero de orden"
+// tanto si es DRAFT-... como si después en el futuro es ORD-...
+const keyCol = "Numero de orden";
 
-  const keyIdx = colIndex(keyCol);
+const keyIdx = colIndex(keyCol);
 
   const rowIdx = rows.findIndex((r: any, i: number) => {
     if (i === 0) return false;
