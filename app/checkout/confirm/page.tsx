@@ -23,10 +23,7 @@ function getDraftId() {
   }
 }
 
-function ensureDraftId() {
-  const existing = getDraftId();
-  if (existing) return existing;
-
+function createFreshDraftId() {
   const created = `DRAFT-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
   localStorage.setItem(DRAFT_KEY, created);
   return created;
@@ -51,6 +48,7 @@ interface OrderItem {
 }
 
 interface Order {
+  orderId: string;
   items: OrderItem[];
   priceMode: "minorista" | "mayorista";
   fullName: string;
@@ -58,6 +56,7 @@ interface Order {
   city: string;
   address: string;
   notes?: string;
+  shipping?: any | null;
 }
 
 export default function ConfirmOrderPage() {
@@ -171,10 +170,10 @@ export default function ConfirmOrderPage() {
       if (bad) {
         throw new Error("Hay un producto sin SKU o precio válido. No se puede confirmar.");
       }
-      const draftId = ensureDraftId();
+      const draftId = createFreshDraftId();
       const shippingSel = readShippingSelection();
       
-      const order: any = {
+      const order: Order = {
   orderId: draftId, // ✅ este es el Numero de orden
   items: orderItems,
   priceMode,
