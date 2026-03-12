@@ -18,7 +18,7 @@ type PromoPopupProps = {
 
 export default function PromoPopup({
   promoId,
-  cooldownHours = 72,
+  cooldownHours = 96,
   alwaysShow = false,
   imageUrl,
   title = "Promo de la semana",
@@ -34,43 +34,46 @@ export default function PromoPopup({
   const [imgOk, setImgOk] = useState(true);
   const [mounted, setMounted] = useState(false);
 
-  // mount guard (evita problemas con document/body)
+  // Evita problemas con document/body en SSR
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // decide si abre
+  // Decide si abre según cooldown
   useEffect(() => {
-  if (alwaysShow) {
-    setOpen(true);
-    return;
-  }
-
-  try {
-    const raw = localStorage.getItem(storageKey);
-    const last = raw ? Number(raw) : 0;
-    const cooldownMs = cooldownHours * 60 * 60 * 1000;
-
-    // si nunca se vio o pasó el cooldown -> abrir y marcar visto ya
-    if (!last || Date.now() - last > cooldownMs) {
+    if (alwaysShow) {
       setOpen(true);
-      localStorage.setItem(storageKey, String(Date.now())); // ✅ marca visto al mostrar
+      return;
     }
-  } catch {
-    setOpen(true);
-  }
-}, [storageKey, cooldownHours, alwaysShow]);
 
+    try {
+      const raw = localStorage.getItem(storageKey);
+      const lastSeenAt = raw ? Number(raw) : 0;
+      const cooldownMs = cooldownHours * 60 * 60 * 1000;
+      const now = Date.now();
+
+      // Si nunca se mostró o ya venció el cooldown, abrir y marcar como visto
+      if (!lastSeenAt || now - lastSeenAt > cooldownMs) {
+        setOpen(true);
+        localStorage.setItem(storageKey, String(now));
+      }
+    } catch {
+      // Si localStorage falla, lo mostramos igual
+      setOpen(true);
+    }
+  }, [storageKey, cooldownHours, alwaysShow]);
 
   function close() {
     setOpen(false);
   }
 
-  // lock scroll cuando está abierto
+  // Bloquea scroll cuando el modal está abierto
   useEffect(() => {
     if (!open) return;
+
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+
     return () => {
       document.body.style.overflow = prev;
     };
@@ -84,15 +87,13 @@ export default function PromoPopup({
 
   return createPortal(
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-      {/* overlay */}
       <button
         aria-label="Cerrar promo"
         onClick={close}
         className="absolute inset-0 bg-black/70 backdrop-blur-sm"
       />
 
-      {/* modal */}
-      <div className="relative w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl max-h-[90vh] overflow-y-auto">
+      <div className="relative w-full max-w-md max-h-[90vh] overflow-hidden overflow-y-auto rounded-3xl bg-white shadow-2xl">
         {imageUrl && imgOk && (
           <div className="bg-black">
             <img
@@ -111,7 +112,7 @@ export default function PromoPopup({
               <div className="inline-flex items-center rounded-full bg-[#ee078e]/90 px-3 py-1 text-xs font-extrabold text-white">
                 PROMO ACTIVA
               </div>
-              <h3 className="mt-3 text-xl font-extrabold text-white leading-tight">
+              <h3 className="mt-3 text-xl font-extrabold leading-tight text-white">
                 {title}
               </h3>
               <p className="mt-1 text-sm text-white/80">{subtitle}</p>

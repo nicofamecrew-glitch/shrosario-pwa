@@ -8,7 +8,7 @@ type Order = {
   id: string;
   createdAt: string;
   total: number;
-  status?: string; // "Pendiente" | "Pagado" | etc
+  status?: string;
   priceMode?: "mayorista" | "minorista";
   shipmentId?: string;
 };
@@ -38,7 +38,16 @@ export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [shipStatus, setShipStatus] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
-  const [debug, setDebug] = useState<string>("");
+  const [debug, setDebug] = useState("");
+
+  const page =
+    "min-h-[100svh] px-4 pt-12 pb-24 bg-[hsl(var(--app-bg))] text-[hsl(var(--app-fg))]";
+  const muted = "text-[hsl(var(--app-muted))]";
+  const mutedSoft = "text-[hsl(var(--app-muted-2))]";
+  const card =
+    "w-full rounded-2xl border border-[hsl(var(--app-border))] bg-[hsl(var(--app-surface))] p-4 text-left shadow-sm transition hover:opacity-95";
+  const primaryButton =
+    "mt-6 w-full rounded-full bg-[hsl(var(--app-fg))] px-4 py-3 font-bold text-[hsl(var(--app-bg))] transition hover:opacity-90";
 
   const phone = useMemo(() => {
     try {
@@ -58,14 +67,12 @@ export default function OrdersPage() {
         setLoading(true);
         setDebug("");
 
-        // 0) si no hay phone, no hay forma de filtrar pedidos
         if (!phone) {
           setOrders([]);
           setDebug("No hay phone en sh_profile_v1");
           return;
         }
 
-        // 1) Traer pedidos reales desde Sheets
         const res = await fetch(
           `/api/orders/list?phone=${encodeURIComponent(phone)}`,
           { cache: "no-store" }
@@ -86,7 +93,6 @@ export default function OrdersPage() {
         const list: Order[] = Array.isArray(data.orders) ? data.orders : [];
         setOrders(list);
 
-        // 2) Traer estados de envío (Zipnova) si hay shipmentId
         const unique = Array.from(
           new Set(list.map((o) => safeStr(o.shipmentId)).filter(Boolean))
         );
@@ -131,30 +137,31 @@ export default function OrdersPage() {
 
   if (loading) {
     return (
-      <main className="px-4 pt-16 pb-24">
+      <main className={page}>
         <h1 className="text-xl font-bold">Mis pedidos</h1>
-        <p className="mt-2 text-sm text-white/60">Cargando…</p>
+        <p className={`mt-2 text-sm ${muted}`}>Cargando…</p>
       </main>
     );
   }
 
   if (!orders.length) {
     return (
-      <main className="px-4 pt-16 pb-24">
+      <main className={page}>
         <h1 className="text-xl font-bold">Mis pedidos</h1>
 
-        <p className="mt-2 text-sm text-white/60">
+        <p className={`mt-2 text-sm ${muted}`}>
           Todavía no tenés pedidos registrados.
         </p>
 
-        {/* Debug útil (no rompe UX) */}
         {debug ? (
-          <p className="mt-2 text-xs text-white/40 break-words">Debug: {debug}</p>
+          <p className={`mt-2 break-words text-xs ${mutedSoft}`}>
+            Debug: {debug}
+          </p>
         ) : null}
 
         <button
           onClick={() => router.push("/catalog")}
-          className="mt-6 w-full rounded-full bg-white px-4 py-3 font-bold text-black"
+          className={primaryButton}
         >
           Ir a Categorías
         </button>
@@ -163,12 +170,12 @@ export default function OrdersPage() {
   }
 
   return (
-    <main className="px-4 pt-12 pb-24">
-      <div className="flex items-center justify-between">
+    <main className={page}>
+      <div className="flex items-center justify-between gap-3">
         <h1 className="text-xl font-bold">Mis pedidos</h1>
         <button
           onClick={() => router.push("/catalog")}
-          className="text-sm text-white/70"
+          className={`text-sm font-medium ${muted} hover:opacity-80`}
         >
           Seguir comprando
         </button>
@@ -188,12 +195,12 @@ export default function OrdersPage() {
               <button
                 key={o.id}
                 onClick={() => router.push(`/account/orders/${o.id}`)}
-                className="w-full rounded-2xl border border-panel bg-panel p-4 text-left"
+                className={card}
               >
                 <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="text-sm font-semibold">{o.id}</p>
-                    <p className="mt-1 text-xs text-white/60">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold">{o.id}</p>
+                    <p className={`mt-1 text-xs ${muted}`}>
                       {formatDate(o.createdAt)}
                       {o.priceMode ? ` · ${o.priceMode}` : ""}
                       {" · "}
@@ -203,9 +210,9 @@ export default function OrdersPage() {
                     </p>
                   </div>
 
-                  <div className="text-right">
+                  <div className="shrink-0 text-right">
                     <p className="text-base font-bold">{formatPrice(o.total)}</p>
-                    <p className="mt-1 text-xs text-white/60">Ver detalle</p>
+                    <p className={`mt-1 text-xs ${muted}`}>Ver detalle</p>
                   </div>
                 </div>
               </button>

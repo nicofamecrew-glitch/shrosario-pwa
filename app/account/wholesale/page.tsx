@@ -16,13 +16,10 @@ function onlyDigits(s: string) {
 
 export default function WholesalePage() {
   const { setWholesale } = useCartStore();
- const { status, request, submit, reset } = useWholesaleStore();
-
+  const { status, request, submit, reset } = useWholesaleStore();
 
   const [cuit, setCuit] = useState(request?.cuit ?? "");
-  const [razonSocial, setRazonSocial] = useState(
-    request?.razonSocial ?? ""
-  );
+  const [razonSocial, setRazonSocial] = useState(request?.razonSocial ?? "");
   const [condicionFiscal, setCondicionFiscal] = useState(
     request?.condicionFiscal ?? conds[0]
   );
@@ -39,20 +36,37 @@ export default function WholesalePage() {
     ciudad.trim().length >= 2 &&
     phoneDigits.length >= 8;
 
+  const page =
+    "min-h-[100svh] px-4 pt-16 pb-24 bg-[hsl(var(--app-bg))] text-[hsl(var(--app-fg))]";
+
+  const muted = "text-[hsl(var(--app-muted))]";
+  const mutedSoft = "text-[hsl(var(--app-muted-2))]";
+
+  const panel =
+    "rounded-2xl border border-[hsl(var(--app-border))] bg-[hsl(var(--app-surface))] p-4 shadow-sm";
+
+  const label =
+    "text-xs uppercase tracking-wide text-[hsl(var(--app-muted))]";
+
+  const input =
+    "mt-2 w-full rounded-xl border border-[hsl(var(--app-border))] bg-[hsl(var(--app-surface))] px-3 py-2 text-sm text-[hsl(var(--app-fg))] placeholder:text-[hsl(var(--app-muted-2))] outline-none transition focus:border-[hsl(var(--app-fg))]";
+
+  const help = "mt-1 text-xs text-[hsl(var(--app-muted-2))]";
+
+  const selectClass =
+    "mt-2 w-full rounded-xl border border-[hsl(var(--app-border))] bg-[hsl(var(--app-surface))] px-3 py-2 text-sm text-[hsl(var(--app-fg))] outline-none transition focus:border-[hsl(var(--app-fg))]";
+
   return (
-    <main className="px-4 pt-16 pb-24">
+    <main className={page}>
       <h1 className="text-xl font-bold">Mayorista</h1>
-      <p className="mt-1 text-sm text-white/60">
+      <p className={`mt-1 text-sm ${muted}`}>
         Pedí acceso a precios mayoristas. Respuesta manual.
       </p>
 
-      {/* ================= APPROVED ================= */}
       {status === "approved" ? (
-        <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-4">
-          <div className="text-sm font-semibold">
-            Acceso mayorista activo ✅
-          </div>
-          <p className="mt-1 text-sm text-white/60">
+        <div className={`mt-6 ${panel}`}>
+          <div className="text-sm font-semibold">Acceso mayorista activo ✅</div>
+          <p className={`mt-1 text-sm ${muted}`}>
             Ya estás viendo precios mayoristas en el catálogo.
           </p>
 
@@ -61,23 +75,19 @@ export default function WholesalePage() {
               setWholesale(false);
               reset();
             }}
-            className="mt-4 inline-flex rounded-full border border-white/10 px-4 py-2 text-sm"
+            className="mt-4 inline-flex rounded-full border border-[hsl(var(--app-border))] bg-[hsl(var(--app-surface))] px-4 py-2 text-sm font-medium text-[hsl(var(--app-fg))] transition hover:opacity-90"
           >
             Quitar acceso (reset)
           </button>
         </div>
       ) : status === "pending" ? (
-        /* ================= PENDING ================= */
-        <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-4">
-          <div className="text-sm font-semibold">
-            Solicitud enviada ⏳
-          </div>
-          <p className="mt-1 text-sm text-white/60">
-            Estado: pendiente. Te habilitamos cuando validemos
-            los datos.
+        <div className={`mt-6 ${panel}`}>
+          <div className="text-sm font-semibold">Solicitud enviada ⏳</div>
+          <p className={`mt-1 text-sm ${muted}`}>
+            Estado: pendiente. Te habilitamos cuando validemos los datos.
           </p>
 
-          <div className="mt-4 text-xs text-white/50">
+          <div className={`mt-4 text-xs leading-6 ${mutedSoft}`}>
             CUIT: {request?.cuit}
             <br />
             Razón social: {request?.razonSocial}
@@ -94,13 +104,12 @@ export default function WholesalePage() {
               setWholesale(false);
               reset();
             }}
-            className="mt-4 inline-flex rounded-full border border-white/10 px-4 py-2 text-sm"
+            className="mt-4 inline-flex rounded-full border border-[hsl(var(--app-border))] bg-[hsl(var(--app-surface))] px-4 py-2 text-sm font-medium text-[hsl(var(--app-fg))] transition hover:opacity-90"
           >
             Editar datos (reset)
           </button>
         </div>
       ) : (
-        /* ================= FORM ================= */
         <form
           className="mt-6 space-y-4"
           onSubmit={async (e) => {
@@ -123,8 +132,7 @@ export default function WholesalePage() {
               window.dispatchEvent(
                 new CustomEvent("toast", {
                   detail: {
-                    message:
-                      "No pudimos enviar la solicitud. Probá de nuevo.",
+                    message: "No pudimos enviar la solicitud. Probá de nuevo.",
                     kind: "error",
                   },
                 })
@@ -151,52 +159,36 @@ export default function WholesalePage() {
           }}
         >
           <div>
-            <label className="text-xs uppercase tracking-wide text-white/60">
-              CUIT
-            </label>
+            <label className={label}>CUIT</label>
             <input
               value={cuit}
               onChange={(e) => setCuit(e.target.value)}
               inputMode="numeric"
-              className="mt-2 w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm"
+              className={input}
               placeholder="Ej: 20301234567"
             />
-            <p className="mt-1 text-xs text-white/40">
-              Mínimo 11 dígitos.
-            </p>
+            <p className={help}>Mínimo 11 dígitos.</p>
           </div>
 
           <div>
-            <label className="text-xs uppercase tracking-wide text-white/60">
-              Razón social
-            </label>
+            <label className={label}>Razón social</label>
             <input
               value={razonSocial}
-              onChange={(e) =>
-                setRazonSocial(e.target.value)
-              }
-              className="mt-2 w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm"
+              onChange={(e) => setRazonSocial(e.target.value)}
+              className={input}
               placeholder="Ej: Peluquería X SRL"
             />
           </div>
 
           <div>
-            <label className="text-xs uppercase tracking-wide text-white/60">
-              Condición fiscal
-            </label>
+            <label className={label}>Condición fiscal</label>
             <select
               value={condicionFiscal}
-              onChange={(e) =>
-                setCondicionFiscal(e.target.value)
-              }
-              className="mt-2 w-full rounded-xl border border-panel bg-ink px-3 py-2 text-sm text-white [color-scheme:dark]"
+              onChange={(e) => setCondicionFiscal(e.target.value)}
+              className={selectClass}
             >
               {conds.map((c) => (
-                <option
-                  key={c}
-                  value={c}
-                  className="bg-ink text-white"
-                >
+                <option key={c} value={c}>
                   {c}
                 </option>
               ))}
@@ -204,30 +196,22 @@ export default function WholesalePage() {
           </div>
 
           <div>
-            <label className="text-xs uppercase tracking-wide text-white/60">
-              Ciudad
-            </label>
+            <label className={label}>Ciudad</label>
             <input
               value={ciudad}
-              onChange={(e) =>
-                setCiudad(e.target.value)
-              }
-              className="mt-2 w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm"
+              onChange={(e) => setCiudad(e.target.value)}
+              className={input}
               placeholder="Ej: Rosario"
             />
           </div>
 
           <div>
-            <label className="text-xs uppercase tracking-wide text-white/60">
-              Teléfono
-            </label>
+            <label className={label}>Teléfono</label>
             <input
               value={telefono}
-              onChange={(e) =>
-                setTelefono(e.target.value)
-              }
+              onChange={(e) => setTelefono(e.target.value)}
               inputMode="tel"
-              className="mt-2 w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm"
+              className={input}
               placeholder="Ej: 3411234567"
             />
           </div>
@@ -235,10 +219,10 @@ export default function WholesalePage() {
           <button
             type="submit"
             disabled={!canSubmit}
-            className={`w-full rounded-full px-4 py-3 text-sm font-semibold ${
+            className={`w-full rounded-full px-4 py-3 text-sm font-semibold transition ${
               canSubmit
-                ? "bg-accent text-black"
-                : "border border-white/10 text-white/40"
+                ? "bg-[hsl(var(--app-fg))] text-[hsl(var(--app-bg))] hover:opacity-90"
+                : "border border-[hsl(var(--app-border))] bg-[hsl(var(--app-surface))] text-[hsl(var(--app-muted-2))]"
             }`}
           >
             Enviar solicitud
