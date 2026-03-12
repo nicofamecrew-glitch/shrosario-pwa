@@ -9,6 +9,7 @@ import LocationAutocomplete, { type ZipRow } from "@/components/shipping/Locatio
 
 const STORAGE_KEY = "sh_shipping_v1";
 const DRAFT_KEY = "sh_draft_id_v1";
+
 type ShippingOption = {
   id: string;
   label: string;
@@ -60,11 +61,22 @@ export default function ShippingPage() {
     "bg-black/5 text-black hover:bg-black/10 disabled:opacity-40 " +
     "dark:bg-white/10 dark:text-white dark:hover:bg-white/15";
 
+  const pickupOption: ShippingOption = {
+    id: "pickup_local",
+    label: "Retiro en local",
+    cost: 0,
+  };
+
+  const freeShippingThreshold = 80000;
+
   const cartTotal = useMemo(() => {
     return items.reduce((acc: number, it: any) => {
       const qty = Number(it?.quantity ?? 1);
       const direct = Number(it?.unitPrice ?? it?.price ?? 0);
-      if (Number.isFinite(direct) && direct > 0) return acc + direct * qty;
+
+      if (Number.isFinite(direct) && direct > 0) {
+        return acc + direct * qty;
+      }
 
       const productId = String(it?.productId ?? "");
       const variantSku = String(it?.variantSku ?? "");
@@ -79,13 +91,12 @@ export default function ShippingPage() {
     }, 0);
   }, [items, byId, isWholesale]);
 
-  const freeShippingThreshold = 80000;
-  const onePesoShippingCost = 1;
   const draftId = useMemo(() => {
-  if (typeof window === "undefined") return "";
-  const v = localStorage.getItem(DRAFT_KEY) || "";
-  return v.startsWith("DRAFT-") ? v : "";
-}, []);
+    if (typeof window === "undefined") return "";
+    const v = localStorage.getItem(DRAFT_KEY) || "";
+    return v.startsWith("DRAFT-") ? v : "";
+  }, []);
+
   const [zipcode, setZipcode] = useState("");
   const [options, setOptions] = useState<ShippingOption[]>([]);
   const [selected, setSelected] = useState<ShippingOption | null>(null);
@@ -95,19 +106,21 @@ export default function ShippingPage() {
 
   const finalCost = useMemo(() => {
     if (!selected) return 0;
+    if (selected.id === pickupOption.id) return 0;
     return cartTotal >= freeShippingThreshold ? 0 : selected.cost;
-  }, [selected, cartTotal, freeShippingThreshold]);
+  }, [selected, cartTotal]);
 
-  async function fetchZipnovaOptions() {
+  async function fetchZipnovaOptions(explicitZipcode?: string) {
     try {
-      if (!zipcode.trim()) return;
+      const cp = (explicitZipcode ?? zipcode).trim();
+      if (!cp) return;
 
       const res = await fetch("/api/zipnova/quote", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           draftId,
-          destination: { zipcode: zipcode.trim() },
+          destination: { zipcode: cp },
           declared_value: Math.round(cartTotal),
           items: items.map((it: any) => ({
             sku: String(it?.variantSku ?? it?.sku ?? it?.id ?? it?.productId ?? "")
@@ -120,7 +133,7 @@ export default function ShippingPage() {
 
       const data = await res.json();
 
-      const opts = (data?.options ?? []).map((o: any, idx: number) => ({
+      const opts: ShippingOption[] = (data?.options ?? []).map((o: any, idx: number) => ({
         id: o.id ?? `opt-${idx}`,
         label: o.name ?? "Opción de envío",
         cost: Number(o.price ?? 0),
@@ -128,39 +141,50 @@ export default function ShippingPage() {
 
       setOptions(opts);
 
-      // si no hay nada seleccionado, seleccionamos la primera cotización
-      setSelected((prev) => prev ?? (opts[0] ?? null));
+      setSelected((prev) => {
+        if (!prev) return opts[0] ?? null;
+        if (prev.id === pickupOption.id) return prev;
+
+        const stillExists = opts.find((o) => o.id === prev.id);
+        return stillExists ?? opts[0] ?? null;
+      });
     } catch (err) {
       console.error("Error cotizando Zipnova:", err);
       setOptions([]);
-      // no borramos lo seleccionado: si eligió Envío $1, que siga
     }
   }
 
   function saveAndContinue() {
+    if (!draftId) {
+      alert("Falta el número de orden (DRAFT). Volvé a Confirmar pedido.");
+      router.push("/checkout/confirm");
+      return;
+    }
 
-  if (!draftId) {
-    alert("Falta el número de orden (DRAFT). Volvé a Confirmar pedido.");
-    router.push("/checkout/confirm");
-    return;
+    if (!selected) return;
+
+    const payload: ShippingSelection = {
+      orderId: draftId,
+      method: selected.id,
+      label: selected.label,
+      cost: finalCost,
+      notes: notes?.trim() ? notes.trim() : undefined,
+      updatedAt: new Date().toISOString(),
+      total: cartTotal,
+      zipcode: selected.id === pickupOption.id ? "" : zipcode,
+    };
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    router.push("/checkout/payment");
   }
 
-  if (!selected) return;
-
-  const payload: ShippingSelection = {
-    orderId: draftId,
-    method: selected.id,
-    label: selected.label,
-    cost: finalCost,
-    notes: notes?.trim() ? notes.trim() : undefined,
-    updatedAt: new Date().toISOString(),
-    total: cartTotal,
-    zipcode,
-  };
-
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-  router.push("/checkout/payment");
-}
+  const optionBtn = (active: boolean) =>
+    [
+      "w-full rounded-2xl border p-4 text-left transition active:scale-[0.98]",
+      "border-black/10 bg-white hover:bg-black/5",
+      "dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10",
+      active ? "ring-2 ring-[#ee078e]/30" : "",
+    ].join(" ");
 
   if (!items?.length) {
     return (
@@ -174,54 +198,22 @@ export default function ShippingPage() {
     );
   }
 
-  const optionBtn = (active: boolean) =>
-    [
-      "w-full rounded-2xl border p-4 text-left transition active:scale-[0.98]",
-      "border-black/10 bg-white hover:bg-black/5",
-      "dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10",
-      active ? "ring-2 ring-[#ee078e]/30" : "",
-    ].join(" ");
-
   return (
     <main className={`p-4 ${pageBg}`}>
       <h1 className="text-xl font-bold">Envío</h1>
-    {/* OPCIÓN RÁPIDA */}
-<div className={`mt-4 ${card}`}>
-  <div className="flex items-center justify-between">
-    <div className="font-bold">Opción rápida</div>
-    <div className="text-sm text-white/60">sin cotizar</div>
-  </div>
 
-  <button
-    type="button"
-    onClick={() => setSelected({ id: "promo_1peso", label: "Envío $1", cost: onePesoShippingCost })}
-    className={[
-      "mt-3 w-full rounded-2xl border p-4 text-left transition active:scale-[0.98]",
-      "border-black/10 bg-white hover:bg-black/5",
-      "dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10",
-      selected?.id === "promo_1peso" ? "ring-2 ring-[#ee078e]/30" : "",
-    ].join(" ")}
-  >
-    <div className="font-bold text-black dark:text-white">Envío $1</div>
-    <div className="text-sm text-black/60 dark:text-white/70">
-      {cartTotal >= freeShippingThreshold ? formatARS(0) : formatARS(onePesoShippingCost)}
-    </div>
-  </button>
-</div>
       {/* TOTAL */}
-      <div className={`mt-3 ${card}`}>
+      <div className={`mt-4 ${card}`}>
         <div className="flex items-center justify-between">
           <div className={muted2}>Total del carrito</div>
           <div className="font-bold">{formatARS(cartTotal)}</div>
         </div>
 
         <div className={`mt-2 ${muted}`}>
-          Envío gratis desde {formatARS(freeShippingThreshold)} (no aplica a retiro).
+          Envío a domicilio gratis desde {formatARS(freeShippingThreshold)}.
         </div>
 
-        <div className={`mt-1 ${muted}`}>
-          Envío promo: {formatARS(onePesoShippingCost)} (opción disponible).
-        </div>
+        <div className={`mt-1 ${muted}`}>Retiro en local: gratis.</div>
       </div>
 
       {/* DESTINO */}
@@ -239,7 +231,7 @@ export default function ShippingPage() {
             setPicked(row);
             setZipcode(row.zipcode);
             setLocationQuery(`${row.city} (${row.state}) · CP ${row.zipcode}`);
-            setTimeout(() => fetchZipnovaOptions(), 0);
+            setTimeout(() => fetchZipnovaOptions(row.zipcode), 0);
           }}
           placeholder="Buscar por localidad o CP (ej: 2500 o Cañada)"
         />
@@ -253,27 +245,30 @@ export default function ShippingPage() {
           </div>
         )}
 
-        <button onClick={fetchZipnovaOptions} disabled={!zipcode.trim()} className={`mt-3 ${btn}`}>
+        <button
+          onClick={() => fetchZipnovaOptions()}
+          disabled={!zipcode.trim()}
+          className={`mt-3 ${btn}`}
+        >
           Cotizar envíos
         </button>
       </div>
 
       {/* OPCIONES */}
       <div className="mt-4 space-y-3">
-        {/* Envío $1 SIEMPRE */}
         <button
           type="button"
-          onClick={() => setSelected({ id: "promo_1peso", label: "Envío $1", cost: onePesoShippingCost })}
-          className={optionBtn(selected?.id === "promo_1peso")}
+          onClick={() => setSelected(pickupOption)}
+          className={optionBtn(selected?.id === pickupOption.id)}
         >
-          <div className="font-bold text-black dark:text-white">Envío $1</div>
-          <div className="text-sm text-black/60 dark:text-white/70">
-            {cartTotal >= freeShippingThreshold ? formatARS(0) : formatARS(onePesoShippingCost)}
-          </div>
+          <div className="font-bold text-black dark:text-white">Retiro en local</div>
+          <div className="text-sm text-black/60 dark:text-white/70">{formatARS(0)}</div>
         </button>
 
         {options.length === 0 && (
-          <div className="text-gray-400 text-sm">No hay opciones aún. Ingresá un código postal y cotizá.</div>
+          <div className={muted}>
+            No hay envíos cotizados todavía. Podés ingresar un código postal o elegir retiro en local.
+          </div>
         )}
 
         {options.map((opt) => (
