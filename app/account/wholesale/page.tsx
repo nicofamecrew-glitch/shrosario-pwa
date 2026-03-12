@@ -84,17 +84,32 @@ export default function WholesalePage() {
     async function checkWholesaleStatus() {
       try {
         setCheckingStatus(true);
+const lookupCuit = storedCuit || cuitDigits;
+const lookupPhone = storedPhone || phoneDigits;
 
-        const lookupCuit = storedCuit || cuitDigits;
-        const lookupPhone = storedPhone || phoneDigits;
+const hasStoredData = !!storedCuit || !!storedPhone;
+const hasValidCuit = lookupCuit.length >= 11;
+const hasValidPhone = lookupPhone.length >= 8;
 
-        if (!lookupCuit && !lookupPhone) {
-          if (!alive) return;
-          setRemoteStatus(null);
-          setRemoteRequest(null);
-          setWholesale(false);
-          return;
-        }
+// No verificar mientras escribe datos incompletos.
+// Solo consultar si ya hay datos persistidos o si el CUIT está completo.
+if (!hasStoredData && !hasValidCuit) {
+  if (!alive) return;
+  setCheckingStatus(false);
+  setRemoteStatus(null);
+  setRemoteRequest(null);
+  setWholesale(false);
+  return;
+}
+
+if (!lookupCuit && !lookupPhone) {
+  if (!alive) return;
+  setCheckingStatus(false);
+  setRemoteStatus(null);
+  setRemoteRequest(null);
+  setWholesale(false);
+  return;
+}
 
         const qs = new URLSearchParams();
         if (lookupCuit) qs.set("cuit", lookupCuit);
@@ -314,7 +329,7 @@ export default function WholesalePage() {
           }}
         >
           <div>
-            <label className={label}>CUIT</label>
+            <label className={label}>CUIT (11 dígitos, sin guiones)</label>
             <input
               value={cuit}
               onChange={(e) => setCuit(e.target.value)}
@@ -322,7 +337,7 @@ export default function WholesalePage() {
               className={input}
               placeholder="Ej: 20301234567"
             />
-            <p className={help}>Mínimo 11 dígitos.</p>
+            <p className={help}>Ingresalo solo con números, sin puntos ni guiones.</p>
           </div>
 
           <div>

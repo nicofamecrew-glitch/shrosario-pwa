@@ -6,29 +6,30 @@ export function getVariantPrice(
 ) {
   if (!variant) return 0;
 
-  if (isWholesale && typeof variant.priceWholesale === "number") {
-    return variant.priceWholesale;
+  const retail = Number((variant as any).priceRetail ?? 0);
+  const wholesale = Number((variant as any).priceWholesale ?? 0);
+
+  if (isWholesale && wholesale > 0) {
+    return wholesale;
   }
-  return variant.priceRetail;
+
+  return retail;
 }
-
-
 
 export function formatPrice(value: number) {
   return new Intl.NumberFormat("es-AR", {
     style: "currency",
     currency: "ARS",
-    maximumFractionDigits: 0
+    maximumFractionDigits: 0,
   }).format(value);
 }
 
 export function findVariant(product: Product, sku?: string) {
   const variants = Array.isArray((product as any)?.variants)
-    ? (product as any).variants
+    ? (product as any)?.variants
     : [];
 
   if (variants.length === 0) {
-    // loguear una sola vez por product_id para no spamear consola
     (globalThis as any).__noVariantsLogged ??= new Set<string>();
     const key = String((product as any)?.id ?? "");
 
