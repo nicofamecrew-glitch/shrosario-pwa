@@ -1,14 +1,20 @@
 "use client";
 
-import { useFavoritesStore } from "@/lib/store";
-import products from "@/data/products.json";
-import ProductCard from "@/components/ProductCard";
+import { useMemo } from "react";
 import Link from "next/link";
+import ProductCard from "@/components/ProductCard";
+import { useFavoritesStore } from "@/lib/store";
+import { useCatalogStore } from "@/lib/lib/catalogStore";
 
 export default function FavoritesPage() {
   const favorites = useFavoritesStore((s) => s.favorites);
+  const byId = useCatalogStore((s) => s.byId);
 
-  const favProducts = products.filter((p) => favorites.includes(p.id));
+  const favProducts = useMemo(() => {
+    return favorites
+      .map((id) => byId?.[id])
+      .filter(Boolean);
+  }, [favorites, byId]);
 
   return (
     <main className="min-h-[100svh] bg-[hsl(var(--app-bg))] p-4 pb-24 text-[hsl(var(--app-fg))]">
