@@ -5,6 +5,7 @@ import Link from "next/link";
 import ProductCard from "@/components/ProductCard";
 import { useFavoritesStore } from "@/lib/store";
 import { useCatalogStore } from "@/lib/lib/catalogStore";
+import products from "@/data/products.json";
 
 export default function FavoritesPage() {
   const favorites = useFavoritesStore((s) => s.favorites);
@@ -12,7 +13,27 @@ export default function FavoritesPage() {
 
   const favProducts = useMemo(() => {
     return favorites
-      .map((id) => byId?.[id])
+      .map((id) => {
+        const live = byId?.[id];
+        const staticProduct = products.find((p) => p.id === id);
+
+        if (!live && !staticProduct) return null;
+
+        return {
+          ...(staticProduct ?? {}),
+          ...(live ?? {}),
+          image:
+            (live as any)?.image ||
+            (staticProduct as any)?.image ||
+            "",
+          images:
+            Array.isArray((live as any)?.images) && (live as any).images.length > 0
+              ? (live as any).images
+              : Array.isArray((staticProduct as any)?.images)
+              ? (staticProduct as any).images
+              : [],
+        };
+      })
       .filter(Boolean);
   }, [favorites, byId]);
 
@@ -38,7 +59,7 @@ export default function FavoritesPage() {
         </div>
       ) : (
         <div className="mt-6 grid auto-rows-fr grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
-          {favProducts.map((product) => (
+          {favProducts.map((product: any) => (
             <ProductCard key={product.id} product={product} />
           ))}
         </div>
