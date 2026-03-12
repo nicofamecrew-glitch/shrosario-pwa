@@ -7,6 +7,51 @@ import { useFavoritesStore } from "@/lib/store";
 import { useCatalogStore } from "@/lib/lib/catalogStore";
 import products from "@/data/products.json";
 
+function norm(s: unknown) {
+  return String(s ?? "").trim().toLowerCase();
+}
+
+function mergeVariants(liveVariants: any[] = [], staticVariants: any[] = []) {
+  return liveVariants.map((live) => {
+    const liveSku = norm(live?.sku);
+    const liveSize = norm(live?.size);
+
+    const staticMatch =
+      staticVariants.find((sv) => norm(sv?.sku) === liveSku && liveSku) ||
+      staticVariants.find((sv) => norm(sv?.size) === liveSize && liveSize) ||
+      null;
+
+    if (!staticMatch) return live;
+
+    return {
+      ...staticMatch,
+      ...live,
+
+      // priorizar imágenes visuales del JSON si existen
+      image_url:
+        live?.image_url ||
+        staticMatch?.image_url ||
+        live?.image ||
+        staticMatch?.image ||
+        "",
+
+      image:
+        live?.image ||
+        staticMatch?.image ||
+        live?.image_url ||
+        staticMatch?.image_url ||
+        "",
+
+      images:
+        Array.isArray(live?.images) && live.images.length > 0
+          ? live.images
+          : Array.isArray(staticMatch?.images)
+          ? staticMatch.images
+          : [],
+    };
+  });
+}
+
 export default function FavoritesPage() {
   const favorites = useFavoritesStore((s) => s.favorites);
   const byId = useCatalogStore((s) => s.byId);
@@ -15,16 +60,29 @@ export default function FavoritesPage() {
     return favorites
       .map((id) => {
         const live = byId?.[id];
-        const staticProduct = products.find((p) => p.id === id);
+        const staticProduct = products.find((p: any) => p.id === id);
 
         if (!live && !staticProduct) return null;
+
+        const mergedVariants = mergeVariants(
+          Array.isArray((live as any)?.variants) ? (live as any).variants : [],
+          Array.isArray((staticProduct as any)?.variants)
+            ? (staticProduct as any).variants
+            : []
+        );
 
         return {
           ...(staticProduct ?? {}),
           ...(live ?? {}),
+
+          // visuales del producto base
           image:
             (live as any)?.image ||
             (staticProduct as any)?.image ||
+            "",
+          image_url:
+            (live as any)?.image_url ||
+            (staticProduct as any)?.image_url ||
             "",
           images:
             Array.isArray((live as any)?.images) && (live as any).images.length > 0
@@ -32,6 +90,11 @@ export default function FavoritesPage() {
               : Array.isArray((staticProduct as any)?.images)
               ? (staticProduct as any).images
               : [],
+
+          // clave: variantes mergeadas
+          variants: mergedVariants.length
+            ? mergedVariants
+            : (live as any)?.variants ?? (staticProduct as any)?.variants ?? [],
         };
       })
       .filter(Boolean);
