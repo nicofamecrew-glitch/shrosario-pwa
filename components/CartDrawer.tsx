@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useCartStore } from "@/lib/store";
 import { useCatalogStore } from "@/lib/lib/catalogStore";
 
-import { findVariant, formatPrice, getVariantPrice } from "@/lib/pricing";
+import { formatPrice, getVariantPrice } from "@/lib/pricing";
 
 export default function CartDrawer() {
   const router = useRouter();
@@ -39,23 +39,30 @@ export default function CartDrawer() {
   const hasItems = items.length > 0;
 
   const total = useMemo(() => {
-    return items.reduce((sum, item) => {
-      const product = byId[item.productId];
-      if (!product) return sum;
-   const variant = item.variant; // ya lo tenés guardado en el CartItem
-if (!variant) return sum;
-return sum + getVariantPrice(variant, isWholesale) * item.qty;
+  return items.reduce((sum, item) => {
+    if (!byId[item.productId]) return sum;
 
-    }, 0);
-  }, [items, byId, isWholesale]);
+    const variant = item.variant; // ya lo tenés guardado en el CartItem
+    if (!variant) return sum;
 
-  const ctaDisabled = !hasItems || !hasCatalog;
+    return sum + getVariantPrice(variant, isWholesale) * item.qty;
+  }, 0);
+}, [items, byId, isWholesale]);
+
+const WHOLESALE_MIN_TOTAL = 500000;
+const wholesaleReady = total >= WHOLESALE_MIN_TOTAL;
+const missingWholesale = Math.max(0, WHOLESALE_MIN_TOTAL - total);
+const blockWholesaleCheckout = isWholesale && !wholesaleReady;
+
+const ctaDisabled = !hasItems || !hasCatalog || blockWholesaleCheckout;
 
   const ctaLabel = !hasItems
-    ? "Agregá productos para continuar"
-    : !hasCatalog
-    ? 'Cargando catálogo… (abrí "Categorías" una vez)'
-    : "Confirmar pedido";
+  ? "Agregá productos para continuar"
+  : !hasCatalog
+  ? 'Cargando catálogo… (abrí "Categorías" una vez)'
+  : blockWholesaleCheckout
+  ? "Mínimo mayorista no alcanzado"
+  : "Confirmar pedido";
 
   const onGoConfirm = () => {
     if (!hasItems) {
@@ -78,7 +85,19 @@ return sum + getVariantPrice(variant, isWholesale) * item.qty;
       );
       return;
     }
-
+       if (blockWholesaleCheckout) {
+      window.dispatchEvent(
+        new CustomEvent("toast", {
+          detail: {
+            message: `Pedido mayorista mínimo: ${formatPrice(
+              WHOLESALE_MIN_TOTAL
+            )}. Te faltan ${formatPrice(missingWholesale)}.`,
+            type: "warn",
+          },
+        })
+      );
+      return;
+    }
     close();
     router.push("/checkout/confirm");
   };
@@ -136,7 +155,7 @@ return sum + getVariantPrice(variant, isWholesale) * item.qty;
         </div>
 
         {/* Lista scrolleable */}
-    {/* Lista scrolleable */}
+    
 <div className="flex-1 overflow-y-auto px-6">
   <div className="space-y-4 pb-4">
     {items.filter((i) => i.variant).map((item) => {
@@ -211,7 +230,26 @@ Total estimado</span>
               <span className="text-lg font-semibold">{formatPrice(total)}</span>
             </div>
           </div>
+                   {isWholesale && (
+            <div
+              className={[
+                "mt-4 rounded-xl border p-4 text-sm",
+                wholesaleReady
+                  ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
+                  : "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300",
+              ].join(" ")}
+            >
+              <div className="font-semibold">
+                Pedido mayorista mínimo: {formatPrice(WHOLESALE_MIN_TOTAL)}
+              </div>
 
+              <div className="mt-1">
+                {wholesaleReady
+                  ? "Ya cumplís el monto mínimo para confirmar el pedido."
+                  : `Te faltan ${formatPrice(missingWholesale)} para confirmar el pedido.`}
+              </div>
+            </div>
+          )}
           {/* CTA */}
           <div className="mt-4 flex flex-col gap-3">
             <button
