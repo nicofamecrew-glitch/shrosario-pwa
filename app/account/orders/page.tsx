@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { formatPrice } from "@/lib/pricing";
 
 type Order = {
@@ -34,6 +35,7 @@ function safeStr(v: any) {
 
 export default function OrdersPage() {
   const router = useRouter();
+  const { data: session, status: sessionStatus } = useSession();
 
   const [orders, setOrders] = useState<Order[]>([]);
   const [shipStatus, setShipStatus] = useState<Record<string, string>>({});
@@ -59,7 +61,11 @@ export default function OrdersPage() {
     }
   }, []);
 
+  const email = safeStr(session?.user?.email);
+
   useEffect(() => {
+    if (sessionStatus === "loading") return;
+
     let alive = true;
 
     (async () => {
@@ -67,16 +73,19 @@ export default function OrdersPage() {
         setLoading(true);
         setDebug("");
 
-        if (!phone) {
+        if (!email && !phone) {
           setOrders([]);
-          setDebug("No hay phone en sh_profile_v1");
+          setDebug("No hay email de sesión ni phone en sh_profile_v1");
           return;
         }
 
-        const res = await fetch(
-          `/api/orders/list?phone=${encodeURIComponent(phone)}`,
-          { cache: "no-store" }
-        );
+        const qs = new URLSearchParams();
+        if (email) qs.set("email", email);
+        if (phone) qs.set("phone", phone);
+
+        const res = await fetch(`/api/orders/list?${qs.toString()}`, {
+          cache: "no-store",
+        });
 
         const data = await res.json().catch(() => null);
 
@@ -133,9 +142,9 @@ export default function OrdersPage() {
     return () => {
       alive = false;
     };
-  }, [phone]);
+  }, [email, phone, sessionStatus]);
 
-  if (loading) {
+  if (loading || sessionStatus === "loading") {
     return (
       <main className={page}>
         <h1 className="text-xl font-bold">Mis pedidos</h1>
