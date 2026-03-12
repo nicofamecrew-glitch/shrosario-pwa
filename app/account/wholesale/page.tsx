@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useCartStore, useWholesaleStore } from "@/lib/store";
 
 const conds = [
@@ -14,6 +14,17 @@ function onlyDigits(s: string) {
   return s.replace(/\D/g, "");
 }
 
+type RemoteWholesaleStatus = "none" | "pending" | "approved" | "rejected";
+
+type RemoteWholesaleRequest = {
+  fecha?: string;
+  cuit?: string;
+  razonSocial?: string;
+  condicionFiscal?: string;
+  ciudad?: string;
+  telefono?: string;
+};
+
 export default function WholesalePage() {
   const { setWholesale } = useCartStore();
   const { status, request, submit, reset } = useWholesaleStore();
@@ -26,11 +37,23 @@ export default function WholesalePage() {
   const [ciudad, setCiudad] = useState(request?.ciudad ?? "");
   const [telefono, setTelefono] = useState(request?.telefono ?? "");
 
+  const [remoteStatus, setRemoteStatus] = useState<RemoteWholesaleStatus | null>(null);
+  const [remoteRequest, setRemoteRequest] = useState<RemoteWholesaleRequest | null>(null);
+  const [checkingStatus, setCheckingStatus] = useState(true);
+
   const cuitDigits = useMemo(() => onlyDigits(cuit), [cuit]);
   const phoneDigits = useMemo(() => onlyDigits(telefono), [telefono]);
 
+  const storedCuit = onlyDigits(request?.cuit ?? "");
+  const storedPhone = onlyDigits(request?.telefono ?? "");
+
+  const effectiveStatus: RemoteWholesaleStatus =
+    remoteStatus ?? (status as RemoteWholesaleStatus);
+
+  const effectiveRequest = remoteRequest ?? request;
+
   const canSubmit =
-    status === "none" &&
+    effectiveStatus === "none" &&
     cuitDigits.length >= 11 &&
     razonSocial.trim().length >= 3 &&
     ciudad.trim().length >= 2 &&
@@ -45,8 +68,7 @@ export default function WholesalePage() {
   const panel =
     "rounded-2xl border border-[hsl(var(--app-border))] bg-[hsl(var(--app-surface))] p-4 shadow-sm";
 
-  const label =
-    "text-xs uppercase tracking-wide text-[hsl(var(--app-muted))]";
+  const label = "text-xs uppercase tracking-wide text-[hsl(var(--app-muted))]";
 
   const input =
     "mt-2 w-full rounded-xl border border-[hsl(var(--app-border))] bg-[hsl(var(--app-surface))] px-3 py-2 text-sm text-[hsl(var(--app-fg))] placeholder:text-[hsl(var(--app-muted-2))] outline-none transition focus:border-[hsl(var(--app-fg))]";
@@ -56,6 +78,83 @@ export default function WholesalePage() {
   const selectClass =
     "mt-2 w-full rounded-xl border border-[hsl(var(--app-border))] bg-[hsl(var(--app-surface))] px-3 py-2 text-sm text-[hsl(var(--app-fg))] outline-none transition focus:border-[hsl(var(--app-fg))]";
 
+  useEffect(() => {
+    let alive = true;
+
+    async function checkWholesaleStatus() {
+      try {
+        setCheckingStatus(true);
+
+        const lookupCuit = storedCuit || cuitDigits;
+        const lookupPhone = storedPhone || phoneDigits;
+
+        if (!lookupCuit && !lookupPhone) {
+          if (!alive) return;
+          setRemoteStatus(null);
+          setRemoteRequest(null);
+          setWholesale(false);
+          return;
+        }
+
+        const qs = new URLSearchParams();
+        if (lookupCuit) qs.set("cuit", lookupCuit);
+        if (lookupPhone) qs.set("phone", lookupPhone);
+
+        const res = await fetch(`/api/wholesale/status?${qs.toString()}`, {
+          cache: "no-store",
+        });
+
+        const data = await res.json().catch(() => null);
+
+        if (!alive) return;
+
+        if (!res.ok || !data?.ok) {
+          setRemoteStatus(null);
+          setRemoteRequest(null);
+          return;
+        }
+
+        const nextStatus = (data.status || "none") as RemoteWholesaleStatus;
+        setRemoteStatus(nextStatus);
+        setRemoteRequest(data.request ?? null);
+
+        if (nextStatus === "approved") {
+          setWholesale(true);
+        } else {
+          setWholesale(false);
+        }
+      } catch {
+        if (!alive) return;
+        setRemoteStatus(null);
+        setRemoteRequest(null);
+      } finally {
+        if (!alive) return;
+        setCheckingStatus(false);
+      }
+    }
+
+    checkWholesaleStatus();
+
+    return () => {
+      alive = false;
+    };
+  }, [storedCuit, storedPhone, cuitDigits, phoneDigits, setWholesale]);
+
+  if (checkingStatus) {
+    return (
+      <main className={page}>
+        <h1 className="text-xl font-bold">Mayorista</h1>
+        <p className={`mt-1 text-sm ${muted}`}>
+          Pedí acceso a precios mayoristas. Respuesta manual.
+        </p>
+
+        <div className={`mt-6 ${panel}`}>
+          <p className={`text-sm ${muted}`}>Verificando estado…</p>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className={page}>
       <h1 className="text-xl font-bold">Mayorista</h1>
@@ -63,16 +162,30 @@ export default function WholesalePage() {
         Pedí acceso a precios mayoristas. Respuesta manual.
       </p>
 
-      {status === "approved" ? (
+      {effectiveStatus === "approved" ? (
         <div className={`mt-6 ${panel}`}>
           <div className="text-sm font-semibold">Acceso mayorista activo ✅</div>
           <p className={`mt-1 text-sm ${muted}`}>
             Ya estás viendo precios mayoristas en el catálogo.
           </p>
 
+          <div className={`mt-4 text-xs leading-6 ${mutedSoft}`}>
+            CUIT: {effectiveRequest?.cuit || "—"}
+            <br />
+            Razón social: {effectiveRequest?.razonSocial || "—"}
+            <br />
+            Condición: {effectiveRequest?.condicionFiscal || "—"}
+            <br />
+            Ciudad: {effectiveRequest?.ciudad || "—"}
+            <br />
+            Teléfono: {effectiveRequest?.telefono || "—"}
+          </div>
+
           <button
             onClick={() => {
               setWholesale(false);
+              setRemoteStatus("none");
+              setRemoteRequest(null);
               reset();
             }}
             className="mt-4 inline-flex rounded-full border border-[hsl(var(--app-border))] bg-[hsl(var(--app-surface))] px-4 py-2 text-sm font-medium text-[hsl(var(--app-fg))] transition hover:opacity-90"
@@ -80,7 +193,7 @@ export default function WholesalePage() {
             Quitar acceso (reset)
           </button>
         </div>
-      ) : status === "pending" ? (
+      ) : effectiveStatus === "pending" ? (
         <div className={`mt-6 ${panel}`}>
           <div className="text-sm font-semibold">Solicitud enviada ⏳</div>
           <p className={`mt-1 text-sm ${muted}`}>
@@ -88,25 +201,58 @@ export default function WholesalePage() {
           </p>
 
           <div className={`mt-4 text-xs leading-6 ${mutedSoft}`}>
-            CUIT: {request?.cuit}
+            CUIT: {effectiveRequest?.cuit || "—"}
             <br />
-            Razón social: {request?.razonSocial}
+            Razón social: {effectiveRequest?.razonSocial || "—"}
             <br />
-            Condición: {request?.condicionFiscal}
+            Condición: {effectiveRequest?.condicionFiscal || "—"}
             <br />
-            Ciudad: {request?.ciudad}
+            Ciudad: {effectiveRequest?.ciudad || "—"}
             <br />
-            Teléfono: {request?.telefono}
+            Teléfono: {effectiveRequest?.telefono || "—"}
           </div>
 
           <button
             onClick={() => {
               setWholesale(false);
+              setRemoteStatus("none");
+              setRemoteRequest(null);
               reset();
             }}
             className="mt-4 inline-flex rounded-full border border-[hsl(var(--app-border))] bg-[hsl(var(--app-surface))] px-4 py-2 text-sm font-medium text-[hsl(var(--app-fg))] transition hover:opacity-90"
           >
             Editar datos (reset)
+          </button>
+        </div>
+      ) : effectiveStatus === "rejected" ? (
+        <div className={`mt-6 ${panel}`}>
+          <div className="text-sm font-semibold">Solicitud rechazada ❌</div>
+          <p className={`mt-1 text-sm ${muted}`}>
+            Revisá los datos y volvé a enviar la solicitud.
+          </p>
+
+          <div className={`mt-4 text-xs leading-6 ${mutedSoft}`}>
+            CUIT: {effectiveRequest?.cuit || "—"}
+            <br />
+            Razón social: {effectiveRequest?.razonSocial || "—"}
+            <br />
+            Condición: {effectiveRequest?.condicionFiscal || "—"}
+            <br />
+            Ciudad: {effectiveRequest?.ciudad || "—"}
+            <br />
+            Teléfono: {effectiveRequest?.telefono || "—"}
+          </div>
+
+          <button
+            onClick={() => {
+              setWholesale(false);
+              setRemoteStatus("none");
+              setRemoteRequest(null);
+              reset();
+            }}
+            className="mt-4 inline-flex rounded-full border border-[hsl(var(--app-border))] bg-[hsl(var(--app-surface))] px-4 py-2 text-sm font-medium text-[hsl(var(--app-fg))] transition hover:opacity-90"
+          >
+            Corregir datos
           </button>
         </div>
       ) : (
@@ -141,6 +287,15 @@ export default function WholesalePage() {
             }
 
             submit({
+              cuit: cuitDigits,
+              razonSocial: razonSocial.trim(),
+              condicionFiscal,
+              ciudad: ciudad.trim(),
+              telefono: phoneDigits,
+            });
+
+            setRemoteStatus("pending");
+            setRemoteRequest({
               cuit: cuitDigits,
               razonSocial: razonSocial.trim(),
               condicionFiscal,
