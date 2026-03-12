@@ -142,19 +142,6 @@ export default function ProductCard({ product, showFavorite = true }: ProductCar
   return out;
 }, [product?.id, (product as any)?.variants]);
 
-useEffect(() => {
-  const raw = Array.isArray((product as any)?.variants)
-    ? (product as any).variants
-    : [];
-
-  console.log("[DEBUG variants RAW]", {
-    productId: product.id,
-    name: product.name,
-    rawCount: raw.length,
-    sizes: raw.map((v: any) => v?.size),
-    skus: raw.map((v: any) => v?.sku),
-  });
-}, [product?.id]);
 
   const MAX_VARIANTS_PREVIEW = 5;
   const shown = variants.slice(0, MAX_VARIANTS_PREVIEW);
@@ -189,22 +176,7 @@ const canAdd = !!variantSku && (remainingStock === null ? true : remainingStock 
     return getProductImage(product as any, selectedVariant as any, selectedIndex);
   }, [product, selectedVariant, selectedIndex]);
 
-  // Debug (opcional)
-  useEffect(() => {
-    const v: any = selectedVariant;
-    console.log("[ProductCard img]", {
-      id: product?.id,
-      idx: selectedIndex,
-      size: v?.size,
-      sku: v?.sku,
-      resolved: v?._resolvedImage,
-      image_url: v?.image_url,
-      image: v?.image,
-      images0: Array.isArray(v?.images) ? v.images[0] : null,
-      imgSrc,
-    });
-  }, [product?.id, selectedIndex, selectedVariant, imgSrc]);
-
+ 
   return (
     <div className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-white/10 bg-[#f5f5f5] shadow-[0_12px_30px_rgba(0,0,0,0.28)]">
       {/* diagonal ribbon */}
