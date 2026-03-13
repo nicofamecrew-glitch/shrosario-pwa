@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { google } from "googleapis";
 import { OrderItem } from "@/lib/orders";
+import { supabaseAdmin } from "@/lib/lib/supabase-server";
 
 function getGoogleClient() {
   const b64 = process.env.GOOGLE_SHEETS_SA_B64;
@@ -177,22 +178,13 @@ async function appendOrderItems(
 
 export async function POST(req: Request) {
   try {
-    const sheetId = process.env.GOOGLE_SHEETS_SHEET_ID;
-    if (!sheetId) throw new Error("Falta GOOGLE_SHEETS_SHEET_ID");
-
     const order = await req.json();
-
-    const auth = getGoogleClient();
-    const sheets = google.sheets({ version: "v4", auth });
-
-    const TAB = "Orders";
 
     const createdAt = order?.createdAt ?? new Date().toISOString();
     const orderId = ensureOrderId(order);
     const priceMode = order?.priceMode ?? "";
     const status = order?.status ?? "Pendiente";
 
-    // soporta customer anidado y también campos root (como tu confirm/page)
     const customer = order?.customer ?? {};
     const fullName = customer?.fullName ?? order?.fullName ?? "Cliente app";
     const phone = customer?.phone ?? order?.phone ?? "";
@@ -203,19 +195,20 @@ export async function POST(req: Request) {
 
     const items: OrderItem[] = Array.isArray(order?.items) ? order.items : [];
 
-    // ✅ validación dura: sin esto, te aparecen filas $0 y SKU vacío
     if (!items.length) {
       return NextResponse.json(
         { ok: false, error: "Pedido sin items" },
         { status: 400 }
       );
     }
+
     const bad = items.find((it) => {
       const qty = it.qty ?? 1;
       const unit = it.unitPrice ?? 0;
       const sku = (it.sku ?? "").trim();
       return qty <= 0 || unit <= 0 || !sku;
     });
+
     if (bad) {
       return NextResponse.json(
         {
@@ -254,7 +247,161 @@ export async function POST(req: Request) {
     const externalRef =
       order?.external_reference ?? order?.externalRef ?? "";
 
-    // ✅ idempotencia Orders: si ya existe orderId en col B, no duplicar
+    // 1) Buscar cliente por phone/cuit
+    let customerId: string | null = null;
+
+    const phoneClean = phone.trim();
+    const cuitClean = cuit.trim();
+
+    if (phoneClean) {
+      const { data: existingCustomerByPhone, error: phoneFindError } =
+        await supabaseAdmin
+          .from("customers")
+          .select("id")
+          .eq("phone", phoneClean)
+          .maybeSingle();
+
+      if (phoneFindError) throw phoneFindError;
+      if (existingCustomerByPhone?.id) customerId = existingCustomerByPhone.id;
+    }
+
+    if (!customerId && cuitClean) {
+      const { data: existingCustomerByCuit, error: cuitFindError } =
+        await supabaseAdmin
+          .from("customers")
+          .select("id")
+          .eq("cuit", cuitClean)
+          .maybeSingle();
+
+      if (cuitFindError) throw cuitFindError;
+      if (existingCustomerByCuit?.id) customerId = existingCustomerByCuit.id;
+    }
+
+    // 2) Crear o actualizar customer
+    if (!customerId) {
+      const { data: newCustomer, error: customerInsertError } =
+        await supabaseAdmin
+          .from("customers")
+          .insert({
+            full_name: fullName,
+            phone: phoneClean || null,
+            city: city || null,
+            address: address || null,
+            cuit: cuitClean || null,
+            business_type: businessType || null,
+            created_at: createdAt,
+          })
+          .select("id")
+          .single();
+
+      if (customerInsertError) throw customerInsertError;
+      customerId = newCustomer.id;
+    } else {
+      const { error: customerUpdateError } = await supabaseAdmin
+        .from("customers")
+        .update({
+          full_name: fullName,
+          phone: phoneClean || null,
+          city: city || null,
+          address: address || null,
+          cuit: cuitClean || null,
+          business_type: businessType || null,
+        })
+        .eq("id", customerId);
+
+      if (customerUpdateError) throw customerUpdateError;
+    }
+
+    // 3) Buscar si ya existe la orden
+    const { data: existingOrder, error: existingOrderError } =
+      await supabaseAdmin
+        .from("orders")
+        .select("id")
+        .eq("order_code", orderId)
+        .maybeSingle();
+
+    if (existingOrderError) throw existingOrderError;
+
+    let dbOrderId: string;
+    let duplicated = false;
+
+    if (!existingOrder?.id) {
+      const { data: insertedOrder, error: orderInsertError } =
+        await supabaseAdmin
+          .from("orders")
+          .insert({
+            order_code: orderId,
+            external_ref: externalRef || null,
+            status,
+            price_mode: priceMode || null,
+            total,
+            customer_id: customerId,
+            created_at: createdAt,
+          })
+          .select("id")
+          .single();
+
+      if (orderInsertError) throw orderInsertError;
+      dbOrderId = insertedOrder.id;
+    } else {
+      duplicated = true;
+      dbOrderId = existingOrder.id;
+
+      const { error: orderUpdateError } = await supabaseAdmin
+        .from("orders")
+        .update({
+          external_ref: externalRef || null,
+          status,
+          price_mode: priceMode || null,
+          total,
+          customer_id: customerId,
+        })
+        .eq("id", dbOrderId);
+
+      if (orderUpdateError) throw orderUpdateError;
+
+      const { error: deleteItemsError } = await supabaseAdmin
+        .from("order_items")
+        .delete()
+        .eq("order_id", dbOrderId);
+
+      if (deleteItemsError) throw deleteItemsError;
+    }
+
+    // 4) Insertar items
+    const itemRows = items.map((it) => {
+      const qty = it.qty ?? 1;
+      const unit = it.unitPrice ?? 0;
+
+      return {
+        order_id: dbOrderId,
+        sku: it.sku ?? "",
+        product_id: it.productId ?? null,
+        name: it.name ?? null,
+        brand: it.brand ?? null,
+        size: it.size ?? null,
+        qty,
+        unit_price: unit,
+        line_total: qty * unit,
+      };
+    });
+
+    if (itemRows.length) {
+      const { error: itemsInsertError } = await supabaseAdmin
+        .from("order_items")
+        .insert(itemRows);
+
+      if (itemsInsertError) throw itemsInsertError;
+    }
+
+    // 5) Espejo a Sheets (mantenelo por ahora)
+    const sheetId = process.env.GOOGLE_SHEETS_SHEET_ID;
+    if (!sheetId) throw new Error("Falta GOOGLE_SHEETS_SHEET_ID");
+
+    const auth = getGoogleClient();
+    const sheets = google.sheets({ version: "v4", auth });
+    const TAB = "Orders";
+
     const orderExists = await columnHasValue(
       sheets,
       sheetId,
@@ -265,57 +412,58 @@ export async function POST(req: Request) {
     );
 
     if (!orderExists) {
-  await sheets.spreadsheets.values.append({
-    spreadsheetId: sheetId,
-    range: `${TAB}!A1`,
-    valueInputOption: "USER_ENTERED",
-    requestBody: {
-      values: [
-        [
-          createdAt,
-          orderId,
-          externalRef,
-          status,
-          priceMode,
-          total,
-          fullName,
-          phone,
-          city,
-          address,
-          cuit,
-          businessType,
-          itemsText,
-        ],
-      ],
-    },
-  });
-} else {
-  const row = await findRowByValue(sheets, sheetId, TAB, "B", orderId, 1500);
+      await sheets.spreadsheets.values.append({
+        spreadsheetId: sheetId,
+        range: `${TAB}!A1`,
+        valueInputOption: "USER_ENTERED",
+        requestBody: {
+          values: [[
+            createdAt,
+            orderId,
+            externalRef,
+            status,
+            priceMode,
+            total,
+            fullName,
+            phone,
+            city,
+            address,
+            cuit,
+            businessType,
+            itemsText,
+          ]],
+        },
+      });
+    } else {
+      const row = await findRowByValue(sheets, sheetId, TAB, "B", orderId, 1500);
 
-  if (!row) {
-    throw new Error(`No encontré la fila del pedido existente: ${orderId}`);
-  }
+      if (!row) {
+        throw new Error(`No encontré la fila del pedido existente: ${orderId}`);
+      }
 
-  await updateOrderRow(sheets, sheetId, TAB, row, {
-    externalRef,
-    status,
-    priceMode,
-    total,
-    fullName,
-    phone,
-    city,
-    address,
-    cuit,
-    businessType,
-    itemsText,
-  });
-}
+      await updateOrderRow(sheets, sheetId, TAB, row, {
+        externalRef,
+        status,
+        priceMode,
+        total,
+        fullName,
+        phone,
+        city,
+        address,
+        cuit,
+        businessType,
+        itemsText,
+      });
+    }
+
     await appendOrderItems(sheets, sheetId, orderId, items);
 
     return NextResponse.json({
       ok: true,
       orderId,
-      duplicated: orderExists,
+      duplicated,
+      db: true,
+      sheet: true,
     });
   } catch (e: any) {
     console.error("API /api/orders ERROR:", e);
