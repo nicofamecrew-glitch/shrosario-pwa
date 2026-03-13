@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { google } from "googleapis";
+import { sendPushToToken } from "@/lib/server/push";
 
 export async function POST(req: Request) {
   try {
@@ -18,7 +19,6 @@ export async function POST(req: Request) {
     await sheets.spreadsheets.values.append({
       spreadsheetId: process.env.GOOGLE_SHEETS_SPREADSHEET_ID,
       range: "'SH Rosario - Mayoristas'!A:G",
-
       valueInputOption: "USER_ENTERED",
       requestBody: {
         values: [[
@@ -32,6 +32,20 @@ export async function POST(req: Request) {
         ]],
       },
     });
+
+    const adminPushToken = process.env.ADMIN_PUSH_TOKEN;
+
+    if (adminPushToken) {
+      try {
+        await sendPushToToken({
+          token: adminPushToken,
+          title: "🟣 Nueva solicitud mayorista",
+          body: `${body.razonSocial} · ${body.ciudad}`,
+        });
+      } catch (pushErr) {
+        console.error("WHOLESALE PUSH ERROR:", pushErr);
+      }
+    }
 
     return NextResponse.json({ ok: true });
   } catch (err) {

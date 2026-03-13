@@ -1,0 +1,4 @@
+[35mapp/layout.tsx[m[36m:[m[32m9[m[36m:[mimport AppBoot[1;31mSplash[m from "@/components/AppBoot[1;31mSplash[m";
+[35mapp/layout.tsx[m[36m:[m[32m33[m[36m:[m            <AppBoot[1;31mSplash[m logoSrc="/brand/sh-logo.png" />
+[35mcomponents/AppBootSplash.tsx[m[36m:[m[32m1[m[36m:[m// components/app/AppBoot[1;31mSplash[m.tsx
+[35mcomponents/AppBootSplash.tsx[m[36m:[m[32m12[m[36m:[mexport default function AppBoot[1;31mSplash[m({
