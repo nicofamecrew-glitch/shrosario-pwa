@@ -9,6 +9,7 @@
     "sync:products": "node scripts/syncProducts.js"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.99.1",
     "dotenv": "^17.2.3",
     "firebase-admin": "^13.7.0",
     "framer-motion": "^12.34.0",
