@@ -106,10 +106,30 @@ useEffect(() => {
   const PAGE_SIZE = 20;
   const [visible, setVisible] = useState(PAGE_SIZE);
 
-  const filteredProducts = useMemo(() => {
+   const jsonIndex = useMemo(() => buildJsonIndex(), []);
+
+  const preparedProducts = useMemo(() => {
+    const merged = mergeImagesFast(products, jsonIndex);
+
+    const seen = new Set<string>();
+    const out: Product[] = [];
+
+    for (const p of merged) {
+      const sku0 = (p as any)?.variants?.[0]?.sku ?? "";
+      const key = `${(p as any)?.id ?? ""}::${sku0}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push(p);
+    }
+
+    return out;
+  }, [products, jsonIndex]);
+
+
+   const filteredProducts = useMemo(() => {
     const s = norm(search);
 
-    return products.filter((product) => {
+    return preparedProducts.filter((product) => {
       if (!isWholesale && norm((product as any).category) === "mayoristas") return false;
 
       const matchesSearch =
@@ -155,36 +175,13 @@ useEffect(() => {
         matchesQ
       );
     });
-  }, [products, search, brand, category, size, type, isWholesale, q]);
+    }, [preparedProducts, search, brand, category, size, type, isWholesale, q]);
 
   // Index JSON una sola vez
-  const jsonIndex = useMemo(() => buildJsonIndex(), []);
-
-  // Merge imágenes rápido (O(1))
-  const filteredWithImages = useMemo(
-    () => mergeImagesFast(filteredProducts, jsonIndex),
-    [filteredProducts, jsonIndex]
-  );
-
-  // Dedupe defensivo
-  const deduped = useMemo(() => {
-    const seen = new Set<string>();
-    const out: Product[] = [];
-
-    for (const p of filteredWithImages) {
-      const sku0 = (p as any)?.variants?.[0]?.sku ?? "";
-      const key = `${(p as any)?.id ?? ""}::${sku0}`;
-      if (seen.has(key)) continue;
-      seen.add(key);
-      out.push(p);
-    }
-
-    return out;
-  }, [filteredWithImages]);
-
+  
   // Slice visible
-  const shown = useMemo(() => deduped.slice(0, visible), [deduped, visible]);
-  const canLoadMore = deduped.length > visible;
+    const shown = useMemo(() => filteredProducts.slice(0, visible), [filteredProducts, visible]);
+  const canLoadMore = filteredProducts.length > visible;
 
   return (
   <div className="min-h-screen bg-[hsl(var(--app-bg))] text-[hsl(var(--app-fg))]">
@@ -213,7 +210,7 @@ useEffect(() => {
         ) : null}
 
         <section className="mt-8">
-          {deduped.length === 0 ? (
+          {filteredProducts.length === 0 ? (
             <div className="py-20 text-center">
               <p className="text-sm text-black/60 dark:text-white/60">
                 No encontramos productos con esos filtros.
@@ -266,8 +263,8 @@ className="mt-4 inline-flex items-center justify-center rounded-full border bord
                    className="rounded-full border border-black/10 bg-[hsl(var(--app-surface))] px-5 py-2 text-sm font-semibold text-[hsl(var(--app-fg))] dark:border-white/10"
 
                   >
-                    Ver más ({Math.min(visible + PAGE_SIZE, deduped.length)}/
-                    {deduped.length})
+                     Ver más ({Math.min(visible + PAGE_SIZE, filteredProducts.length)}/
+                    {filteredProducts.length})
                   </button>
                 </div>
               ) : null}
