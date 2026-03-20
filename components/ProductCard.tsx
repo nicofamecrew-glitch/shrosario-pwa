@@ -178,8 +178,8 @@ const canAdd = !!variantSku && (remainingStock === null ? true : remainingStock 
 
  
   return (
-  <div className="group [perspective:1200px]">
-   <div className="relative flex h-full min-h-[420px] flex-col overflow-hidden rounded-3xl border border-white/10 bg-[#f5f5f5] shadow-[0_12px_30px_rgba(0,0,0,0.28)] transition-all duration-300 ease-out will-change-transform group-hover:-translate-y-1 group-hover:shadow-[0_22px_50px_rgba(0,0,0,0.38)] sm:group-hover:[transform:rotateX(4deg)_rotateY(-5deg)_translateY(-4px)]">
+  <div className="group h-full [perspective:1200px]">
+  <div className="relative flex h-full min-h-[430px] flex-col overflow-hidden rounded-3xl border border-white/10 bg-[#f5f5f5] shadow-[0_12px_30px_rgba(0,0,0,0.28)] transition-all duration-300 ease-out will-change-transform group-hover:-translate-y-1 group-hover:shadow-[0_22px_50px_rgba(0,0,0,0.38)] sm:group-hover:[transform:rotateX(4deg)_rotateY(-5deg)_translateY(-4px)]">
       {/* diagonal ribbon */}
       <div
         className="absolute right-0 top-0 h-[70%] w-[70%] opacity-95 z-0 pointer-events-none"
@@ -355,10 +355,10 @@ window.dispatchEvent(
     // el toast “Agregado” NO lo tires acá a ciegas
     // lo va a tirar el store (ver punto 2)
   }}
-  className={[
-    "inline-flex h-11 w-full items-center justify-center gap-2 rounded-2xl font-extrabold shadow-[0_12px_20px_rgba(0,0,0,0.25)] active:scale-[0.99]",
-    canAdd ? "bg-black text-white" : "bg-black/40 text-white/70 cursor-not-allowed",
-  ].join(" ")}
+ className={[
+  "mt-auto inline-flex h-11 w-full items-center justify-center gap-2 rounded-2xl font-extrabold shadow-[0_12px_20px_rgba(0,0,0,0.25)] active:scale-[0.99]",
+  canAdd ? "bg-black text-white" : "bg-black/40 text-white/70 cursor-not-allowed",
+].join(" ")}
 >
   <ShoppingCart size={18} />{canAdd
   ? "Agregar al carrito"
