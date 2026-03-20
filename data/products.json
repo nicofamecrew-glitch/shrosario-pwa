@@ -5327,8 +5327,8 @@
     {
       "size": "300ml",
       "sku": "COA-TOTAL-REPAIR-SHAMPOO-300ML",
-      "priceRetail": 0,
-      "priceWholesale": 0,
+      "priceRetail": 4341,
+      "priceWholesale": 3256,
       "images": [
         "/product/total-repair-shampoo-x-300-ml.png"
       ]
@@ -5346,8 +5346,8 @@
     {
       "size": "300ml",
       "sku": "COA-TOTAL-REPAIR-ACONDICIONADOR-300ML",
-      "priceRetail": 0,
-      "priceWholesale": 0,
+      "priceRetail": 4341,
+      "priceWholesale": 3256,
       "images": [
         "/product/total-repair-acondicionador-x-300-ml.png"
       ]
@@ -5365,8 +5365,8 @@
     {
       "size": "1000gr",
       "sku": "INF-KERATINA-MASCARA-1000GR",
-      "priceRetail": 0,
-      "priceWholesale": 0,
+      "priceRetail": 8665,
+      "priceWholesale": 6498,
       "images": [
         "/product/mascara-keratina_influencia-prof-x-1000-g.png"
       ]
@@ -5384,8 +5384,8 @@
     {
       "size": "1000gr",
       "sku": "INF-ACIDA-MASCARA-1000GR",
-      "priceRetail": 0,
-      "priceWholesale": 0,
+      "priceRetail": 8076,
+      "priceWholesale": 6057,
       "images": [
         "/product/mascara-acida_influencia-prof-x-1000-g.png"
       ]
@@ -5422,8 +5422,8 @@
     {
       "size": "300ml",
       "sku": "COA-HYALURONIC-ACID-SHAMPOO-300ML",
-      "priceRetail": 0,
-      "priceWholesale": 0,
+      "priceRetail": 4095,
+      "priceWholesale": 3071,
       "images": [
         "/product/hyaluronic-acid-shampoo-x-300-ml.png"
       ]
@@ -5460,8 +5460,8 @@
     {
       "size": "300ml",
       "sku": "COA-ARGAN-OIL-SHAMPOO-300ML",
-      "priceRetail": 0,
-      "priceWholesale": 0,
+      "priceRetail": 4200,
+      "priceWholesale": 3150,
       "images": [
         "/product/argan-oil-shampoo-x-300-ml.png"
       ]
@@ -5479,8 +5479,8 @@
     {
       "size": "300ml",
       "sku": "COA-ARGAN-OIL-ACONDICIONADOR-300ML",
-      "priceRetail": 0,
-      "priceWholesale": 0,
+      "priceRetail": 4200,
+      "priceWholesale": 3150,
       "images": [
         "/product/argan-oil-acondicionador-x-300-ml.png"
       ]
@@ -5498,8 +5498,8 @@
     {
       "size": "45ml",
       "sku": "INF-SERUM-45ML",
-      "priceRetail": 0,
-      "priceWholesale": 0,
+      "priceRetail": 8665,
+      "priceWholesale": 6498,
       "images": [
         "/product/serum-influencia-prof-x-45-ml.png"
       ]
