@@ -5297,5 +5297,214 @@
       ]
     }
   ]
+},
+{
+  "id": "total-repair-coalix-tratamiento-250g",
+  "brand": "Coalix",
+  "line": "Total Repair",
+  "name": "Tratamiento Total Repair",
+  "category": "Tratamientos",
+  "variants": [
+    {
+      "size": "250gr",
+      "sku": "COA-TOTAL-REPAIR-TRATAMIENTO-250GR",
+      "priceRetail": 0,
+      "priceWholesale": 0,
+      "images": [
+        "/product/total-repair-tratamiento-x-250-g.png"
+      ]
+    }
+  ],
+  "tags": []
+},
+{
+  "id": "total-repair-coalix-shampoo-300ml",
+  "brand": "Coalix",
+  "line": "Total Repair",
+  "name": "Shampoo Total Repair",
+  "category": "Shampoos",
+  "variants": [
+    {
+      "size": "300ml",
+      "sku": "COA-TOTAL-REPAIR-SHAMPOO-300ML",
+      "priceRetail": 0,
+      "priceWholesale": 0,
+      "images": [
+        "/product/total-repair-shampoo-x-300-ml.png"
+      ]
+    }
+  ],
+  "tags": []
+},
+{
+  "id": "total-repair-coalix-acondicionador-300ml",
+  "brand": "Coalix",
+  "line": "Total Repair",
+  "name": "Acondicionador Total Repair",
+  "category": "Acondicionadores",
+  "variants": [
+    {
+      "size": "300ml",
+      "sku": "COA-TOTAL-REPAIR-ACONDICIONADOR-300ML",
+      "priceRetail": 0,
+      "priceWholesale": 0,
+      "images": [
+        "/product/total-repair-acondicionador-x-300-ml.png"
+      ]
+    }
+  ],
+  "tags": []
+},
+{
+  "id": "keratina-influencia-prof-mascara-1000g",
+  "brand": "Influencia Prof",
+  "line": "Keratina",
+  "name": "Máscara Keratina",
+  "category": "Tratamientos",
+  "variants": [
+    {
+      "size": "1000gr",
+      "sku": "INF-KERATINA-MASCARA-1000GR",
+      "priceRetail": 0,
+      "priceWholesale": 0,
+      "images": [
+        "/product/mascara-keratina_influencia-prof-x-1000-g.png"
+      ]
+    }
+  ],
+  "tags": []
+},
+{
+  "id": "acida-influencia-prof-mascara-1000g",
+  "brand": "Influencia Prof",
+  "line": "Ácida",
+  "name": "Máscara Ácida",
+  "category": "Tratamientos",
+  "variants": [
+    {
+      "size": "1000gr",
+      "sku": "INF-ACIDA-MASCARA-1000GR",
+      "priceRetail": 0,
+      "priceWholesale": 0,
+      "images": [
+        "/product/mascara-acida_influencia-prof-x-1000-g.png"
+      ]
+    }
+  ],
+  "tags": []
+},
+{
+  "id": "hyaluronic-acid-coalix-tratamiento-250g",
+  "brand": "Coalix",
+  "line": "Hyaluronic Acid",
+  "name": "Tratamiento Hyaluronic Acid",
+  "category": "Tratamientos",
+  "variants": [
+    {
+      "size": "250gr",
+      "sku": "COA-HYALURONIC-ACID-TRATAMIENTO-250GR",
+      "priceRetail": 0,
+      "priceWholesale": 0,
+      "images": [
+        "/product/hyaluronic-acid-tratamiento-x-250-g.png"
+      ]
+    }
+  ],
+  "tags": []
+},
+{
+  "id": "hyaluronic-acid-coalix-shampoo-300ml",
+  "brand": "Coalix",
+  "line": "Hyaluronic Acid",
+  "name": "Shampoo Hyaluronic Acid",
+  "category": "Shampoos",
+  "variants": [
+    {
+      "size": "300ml",
+      "sku": "COA-HYALURONIC-ACID-SHAMPOO-300ML",
+      "priceRetail": 0,
+      "priceWholesale": 0,
+      "images": [
+        "/product/hyaluronic-acid-shampoo-x-300-ml.png"
+      ]
+    }
+  ],
+  "tags": []
+},
+{
+  "id": "argan-oil-coalix-tratamiento-250g",
+  "brand": "Coalix",
+  "line": "Argan Oil",
+  "name": "Tratamiento Argan Oil",
+  "category": "Tratamientos",
+  "variants": [
+    {
+      "size": "250gr",
+      "sku": "COA-ARGAN-OIL-TRATAMIENTO-250GR",
+      "priceRetail": 0,
+      "priceWholesale": 0,
+      "images": [
+        "/product/argan-oil-tratamiento-x-250-g.png"
+      ]
+    }
+  ],
+  "tags": []
+},
+{
+  "id": "argan-oil-coalix-shampoo-300ml",
+  "brand": "Coalix",
+  "line": "Argan Oil",
+  "name": "Shampoo Argan Oil",
+  "category": "Shampoos",
+  "variants": [
+    {
+      "size": "300ml",
+      "sku": "COA-ARGAN-OIL-SHAMPOO-300ML",
+      "priceRetail": 0,
+      "priceWholesale": 0,
+      "images": [
+        "/product/argan-oil-shampoo-x-300-ml.png"
+      ]
+    }
+  ],
+  "tags": []
+},
+{
+  "id": "argan-oil-coalix-acondicionador-300ml",
+  "brand": "Coalix",
+  "line": "Argan Oil",
+  "name": "Acondicionador Argan Oil",
+  "category": "Acondicionadores",
+  "variants": [
+    {
+      "size": "300ml",
+      "sku": "COA-ARGAN-OIL-ACONDICIONADOR-300ML",
+      "priceRetail": 0,
+      "priceWholesale": 0,
+      "images": [
+        "/product/argan-oil-acondicionador-x-300-ml.png"
+      ]
+    }
+  ],
+  "tags": []
+},
+{
+  "id": "serum-influencia-prof-45ml",
+  "brand": "Influencia Prof",
+  "line": "Serum",
+  "name": "Serum",
+  "category": "Serums",
+  "variants": [
+    {
+      "size": "45ml",
+      "sku": "INF-SERUM-45ML",
+      "priceRetail": 0,
+      "priceWholesale": 0,
+      "images": [
+        "/product/serum-influencia-prof-x-45-ml.png"
+      ]
+    }
+  ],
+  "tags": []
 }
 ]
