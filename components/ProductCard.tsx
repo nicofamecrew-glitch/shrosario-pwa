@@ -179,7 +179,7 @@ const canAdd = !!variantSku && (remainingStock === null ? true : remainingStock 
  
   return (
   <div className="group [perspective:1200px]">
-    <div className="relative flex h-full flex-col overflow-hidden rounded-3xl border border-white/10 bg-[#f5f5f5] shadow-[0_12px_30px_rgba(0,0,0,0.28)] transition-all duration-300 ease-out will-change-transform group-hover:-translate-y-1 group-hover:shadow-[0_22px_50px_rgba(0,0,0,0.38)] sm:group-hover:[transform:rotateX(4deg)_rotateY(-5deg)_translateY(-4px)]">
+   <div className="relative flex h-full min-h-[420px] flex-col overflow-hidden rounded-3xl border border-white/10 bg-[#f5f5f5] shadow-[0_12px_30px_rgba(0,0,0,0.28)] transition-all duration-300 ease-out will-change-transform group-hover:-translate-y-1 group-hover:shadow-[0_22px_50px_rgba(0,0,0,0.38)] sm:group-hover:[transform:rotateX(4deg)_rotateY(-5deg)_translateY(-4px)]">
       {/* diagonal ribbon */}
       <div
         className="absolute right-0 top-0 h-[70%] w-[70%] opacity-95 z-0 pointer-events-none"
