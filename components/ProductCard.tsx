@@ -178,7 +178,8 @@ const canAdd = !!variantSku && (remainingStock === null ? true : remainingStock 
 
  
   return (
-    <div className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-white/10 bg-[#f5f5f5] shadow-[0_12px_30px_rgba(0,0,0,0.28)]">
+  <div className="group [perspective:1200px]">
+    <div className="relative flex h-full flex-col overflow-hidden rounded-3xl border border-white/10 bg-[#f5f5f5] shadow-[0_12px_30px_rgba(0,0,0,0.28)] transition-all duration-300 ease-out will-change-transform group-hover:-translate-y-1 group-hover:shadow-[0_22px_50px_rgba(0,0,0,0.38)] sm:group-hover:[transform:rotateX(4deg)_rotateY(-5deg)_translateY(-4px)]">
       {/* diagonal ribbon */}
       <div
         className="absolute right-0 top-0 h-[70%] w-[70%] opacity-95 z-0 pointer-events-none"
@@ -229,7 +230,7 @@ const canAdd = !!variantSku && (remainingStock === null ? true : remainingStock 
         const isJar = cat.includes("mascara") || cat.includes("mascarilla") || cat.includes("tratamiento");
 
         return (
-<div className="relative flex h-[210px] items-center justify-center px-4 pt-10">
+<div className="relative flex h-[210px] items-center justify-center px-4 pt-10 transition-transform duration-300 ease-out sm:group-hover:translate-y-[-4px]">
             <div className="pointer-events-none absolute bottom-6 left-1/2 h-8 w-2/3 -translate-x-1/2 rounded-full bg-black/20 blur-xl" />
 
             <img
@@ -238,9 +239,9 @@ const canAdd = !!variantSku && (remainingStock === null ? true : remainingStock 
               alt={product?.name ?? "Producto"}
               loading="lazy"
               className={[
-                "relative z-10 h-full w-full object-contain drop-shadow-[0_20px_18px_rgba(0,0,0,0.35)] transition-transform duration-200",
-                isJar ? "p-3 scale-[1.10]" : "p-1 scale-[1.38]",
-                "group-hover:scale-[1.03]",
+                "relative z-10 h-full w-full object-contain drop-shadow-[0_20px_18px_rgba(0,0,0,0.35)] transition-transform duration-300 ease-out will-change-transform",
+isJar ? "p-3 scale-[1.10]" : "p-1 scale-[1.38]",
+"group-hover:scale-[1.06] sm:group-hover:-translate-y-1",
               ].join(" ")}
               onError={(e) => {
                 (e.currentTarget as HTMLImageElement).src = "/product/placeholder.png";
@@ -368,7 +369,7 @@ window.dispatchEvent(
       : "Agregar al carrito"}
 
 </button>
-
+</div>
 </div>
 </div>
   );
