@@ -1,0 +1,7 @@
+[35mapp/api/auth/[...nextauth]/route.ts[m[36m:[m[32m1[m[36m:[mimport [1;31mNextAuth[m from "next-auth";
+[35mapp/api/auth/[...nextauth]/route.ts[m[36m:[m[32m4[m[36m:[mconst handler = [1;31mNextAuth[m({
+[35mcomponents/welcome/WelcomeClient.tsx[m[36m:[m[32m6[m[36m:[m// ✅ Elegí UNA de estas dos opciones según tu [1;31mNextAuth[m
+[35mcomponents/welcome/WelcomeClient.tsx[m[36m:[m[32m7[m[36m:[m// Opción A ([1;31mNextAuth[m v4): descomentá la siguiente línea
+[35mcomponents/welcome/WelcomeClient.tsx[m[36m:[m[32m10[m[36m:[m// Opción B ([1;31mNextAuth[m v5): si en tu repo ya usás "@/auth", comentá la de arriba y usá esto:
+[35mcomponents/welcome/WelcomeClient.tsx[m[36m:[m[32m15[m[36m:[m    // ✅ [1;31mNextAuth[m v4: signIn(provider, options, authorizationParams)
+[35mcomponents/welcome/WelcomeClient.tsx[m[36m:[m[32m23[m[36m:[m    // ✅ [1;31mNextAuth[m v5 (si usás esa): suele ser distinto.
