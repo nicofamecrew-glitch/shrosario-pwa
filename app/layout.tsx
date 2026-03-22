@@ -8,6 +8,7 @@ import AppTransitions from "@/components/AppTransitions";
 import NavDebug from "@/components/dev/NavDebug";
 import AppBootSplash from "@/components/AppBootSplash";
 import ThemeToggle from "@/components/ThemeToggle";
+import PwaInstallPrompt from "@/components/PwaInstallPrompt";
 
 const inter = Poppins({
   subsets: ["latin"],
@@ -33,7 +34,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <AppBootSplash logoSrc="/brand/sh-logo.png" />
 
             <AppTransitions>{children}</AppTransitions>
-
+            <PwaInstallPrompt />
             {isProd ? null : <NavDebug />}
           </ClientShell>
         </Providers>
