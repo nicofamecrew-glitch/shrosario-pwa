@@ -160,8 +160,9 @@ try {
   const profile = JSON.parse(localStorage.getItem(PROFILE_KEY) || "{}");
   const shipping = JSON.parse(localStorage.getItem(SHIPPING_KEY) || "{}");
 
-  const orderPayload = {
+    const orderPayload = {
     orderId: draftId,
+    external_reference: draftId,
     createdAt: new Date().toISOString(),
     total: grandTotal,
     priceMode: "minorista",

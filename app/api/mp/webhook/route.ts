@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { appendMpEvent } from "@/lib/lib/sheets";
 import { updateOrderStatusInSheets } from "@/lib/server/ordersSheets";
+import { supabaseAdmin } from "@/lib/lib/supabase-server";
 
 export const runtime = "nodejs";
 
@@ -201,17 +202,45 @@ export async function POST(req: Request) {
       );
     }
 
-    try {
+        try {
       const orderRef = String(real.payment.external_reference ?? externalRef ?? "");
 
       if (orderRef) {
+        // 1) Sheets
         await updateOrderStatusInSheets({
           orderId: orderRef,
           status: "Pagado",
-          externalReference: String(real.payment.external_reference ?? externalRef ?? ""),
+          externalReference: orderRef,
           paymentId: String(paymentId),
           paymentStatus: String(real.payment.status),
         });
+
+        // 2) Supabase
+        const { data: updatedOrder, error: supabaseOrderError } = await supabaseAdmin
+          .from("orders")
+          .update({
+            status: "Pagado",
+            external_ref: orderRef,
+          })
+          .eq("order_code", orderRef)
+          .select("id, order_code, status")
+          .maybeSingle();
+
+        if (supabaseOrderError) {
+          throw supabaseOrderError;
+        }
+
+        if (!updatedOrder) {
+          console.warn("Pago aprobado pero no encontré la orden en Supabase", {
+            orderRef,
+            paymentId,
+          });
+        } else {
+          console.log("Pedido marcado como PAGADO en Supabase ✅", {
+            orderId: updatedOrder.order_code,
+            status: updatedOrder.status,
+          });
+        }
 
         console.log("Pedido marcado como PAGADO ✅", { orderId: orderRef });
       } else {
