@@ -134,14 +134,22 @@ export async function POST(req: Request) {
       }
     }
 
-    console.log("[MP WEBHOOK]", {
-      type,
-      action,
-      paymentId: paymentId || "(none)",
-      merchantOrderId: merchantOrderId || "(none)",
-      status: status || "(none)",
-      qs: url.search,
-    });
+    console.log("[MP WEBHOOK] incoming", {
+  type,
+  action,
+  paymentId: paymentId || "(none)",
+  merchantOrderId: merchantOrderId || "(none)",
+  status: status || "(none)",
+  externalRef: externalRef || "(none)",
+  qs: url.search,
+  payloadSummary: {
+    id: payload?.id ?? null,
+    live_mode: payload?.live_mode ?? null,
+    date_created: payload?.date_created ?? null,
+    user_id: payload?.user_id ?? null,
+    api_version: payload?.api_version ?? null,
+  },
+});
 
     try {
       await appendMpEvent("mp_events", [
@@ -188,12 +196,16 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: true, skipped: "invalid_payment_payload" }, { status: 200 });
     }
 
-    console.log("Pago real recibido", {
-      paymentId,
-      status: real.payment.status,
-      amount: real.payment.transaction_amount,
-      external_reference: real.payment.external_reference,
-    });
+  console.log("[MP WEBHOOK] real payment", {
+  paymentId,
+  status: real?.payment?.status ?? null,
+  status_detail: real?.payment?.status_detail ?? null,
+  amount: real?.payment?.transaction_amount ?? null,
+  external_reference: real?.payment?.external_reference ?? null,
+  merchant_order_id: real?.payment?.order?.id ?? null,
+  payment_type_id: real?.payment?.payment_type_id ?? null,
+  date_approved: real?.payment?.date_approved ?? null,
+});
 
     if (real.payment.status !== "approved") {
       return NextResponse.json(
@@ -215,6 +227,20 @@ export async function POST(req: Request) {
           paymentStatus: String(real.payment.status),
         });
 
+              console.log("[MP WEBHOOK] Sheets updated OK", {
+          orderRef,
+          paymentId,
+          paymentStatus: real?.payment?.status ?? null,
+        });
+
+        console.log("[MP WEBHOOK] updating Supabase order", {
+          orderRef,
+          paymentId,
+          targetTable: "orders",
+          matchField: "order_code",
+          newStatus: "Pagado",
+        });
+
         // 2) Supabase
         const { data: updatedOrder, error: supabaseOrderError } = await supabaseAdmin
           .from("orders")
@@ -223,12 +249,27 @@ export async function POST(req: Request) {
             external_ref: orderRef,
           })
           .eq("order_code", orderRef)
-          .select("id, order_code, status")
+          .select("id, order_code, status, external_ref")
           .maybeSingle();
 
         if (supabaseOrderError) {
+          console.error("[MP WEBHOOK] Supabase update error", {
+            message: supabaseOrderError.message,
+            details: supabaseOrderError.details ?? null,
+            hint: supabaseOrderError.hint ?? null,
+            code: supabaseOrderError.code ?? null,
+            orderRef,
+            paymentId,
+          });
           throw supabaseOrderError;
         }
+
+              console.log("[MP WEBHOOK] Supabase update result", {
+          found: !!updatedOrder,
+          updatedOrder: updatedOrder ?? null,
+          orderRef,
+          paymentId,
+        });
 
         if (!updatedOrder) {
           console.warn("Pago aprobado pero no encontré la orden en Supabase", {
@@ -246,8 +287,7 @@ export async function POST(req: Request) {
       } else {
         console.warn("Pago aprobado pero sin external_reference", { paymentId });
       }
-    } catch (e) {
-      console.error("No pude actualizar pedido:", e);
+    } catch (e) {console.error("[MP WEBHOOK] order update failed", e);
       return NextResponse.json(
         { ok: false, error: "order_update_failed" },
         { status: 200 }
