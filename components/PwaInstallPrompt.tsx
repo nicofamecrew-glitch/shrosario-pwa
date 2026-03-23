@@ -64,8 +64,8 @@ export default function PwaInstallPrompt() {
   if (!visible || !deferredPrompt) return null;
 
   return (
-    <div className="fixed inset-x-0 bottom-20 z-[9998] px-4">
-      <div className="mx-auto max-w-md rounded-3xl border border-black/10 bg-white p-4 shadow-2xl">
+       <div className="fixed inset-0 z-[9998] flex items-center justify-center bg-black/30 backdrop-blur-sm px-4">
+  <div className="w-full max-w-md rounded-3xl border border-black/10 bg-white p-5 shadow-2xl animate-[fadeIn_0.35s_ease-out]">
         <div className="flex items-start gap-3">
           <img
             src="/icons/icon-192.png"
