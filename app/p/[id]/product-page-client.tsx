@@ -234,38 +234,31 @@ export default function ProductPageClient({
 
   const productColor = useMemo(() => resolveProductColor(productFixed as any), [productFixed]);
 
-     const gallery = useMemo(() => {
-    const p: any = productFixed ?? {};
+      const gallery = useMemo(() => {
     const v: any = selectedVariant ?? {};
+    const p: any = productFixed ?? {};
 
-    const productImages: string[] = Array.isArray(p?.images) ? p.images.filter(Boolean) : [];
-    const variantImages: string[] = Array.isArray(v?.images) ? v.images.filter(Boolean) : [];
-
-    // 1) En detalle, priorizamos la imagen del producto por índice de variante
-    const mainFromProduct =
-      productImages[selectedIndex] ||
-      productImages[0] ||
-      p?.image ||
-      p?.imageUrl ||
-      p?.img ||
-      "";
-
-    // 2) Si la variante tiene imagen directa REAL, la usamos solo si existe
-    const directVariantImage =
+    const main =
+      v?._resolvedImage ||
       v?.image ||
       v?.imageUrl ||
       v?.img ||
-      "";
+      (Array.isArray(v?.images) ? v.images[0] : null) ||
+      (Array.isArray(p?.images) ? p.images[selectedIndex] ?? p.images[0] : null) ||
+      p?.image ||
+      p?.imageUrl ||
+      p?.img ||
+      "/product/placeholder.png";
 
-    const main = directVariantImage || mainFromProduct || "/product/placeholder.png";
-
-    const rest = [...productImages, ...variantImages]
+    const rest = [
+      ...(Array.isArray(v?.images) ? v.images : []),
+      ...(Array.isArray(p?.images) ? p.images : []),
+    ]
       .filter(Boolean)
       .filter((img) => img !== main);
 
     return [main, ...rest];
   }, [productFixed, selectedVariant, selectedIndex]);
-
   const heroSrc = useMemo(() => {
     return gallery[activeImage] ?? gallery[0] ?? "/product/placeholder.png";
   }, [gallery, activeImage]);
@@ -601,62 +594,58 @@ export default function ProductPageClient({
               </div>
             </div>
 
-            <div className="mt-6">
-              <div className="rounded-[18px] bg-[#c2c2c2] p-4 shadow-[0_10px_22px_rgba(0,0,0,0.08)]">
-                <div className="flex items-center justify-between">
-                  <div className="text-sm font-extrabold text-black">Calcula tu envio</div>
-                  <div className="text-xs text-black/50">Estimado</div>
-                </div>
-
-                <div className="mt-3 flex gap-2">
-                  <input
-                    value={zipCp}
-                    onChange={(e) => setZipCp(e.target.value)}
-                    placeholder="Ingresá tu CP"
-                    className="w-full rounded-xl border border-black/10 px-4 py-3 text-sm font-semibold outline-none"
-                  />
-                  <button
-                    type="button"
-                    onClick={fetchZipnovaQuote}
-                    className="rounded-xl bg-black px-4 py-3 text-sm font-extrabold text-white"
-                  >
-                    {zipLoading ? "..." : "Calcular"}
-                  </button>
-                </div>
-
-                {zipError ? <div className="mt-3 text-xs font-semibold text-red-600">{zipError}</div> : null}
-
-                {zipOptions.length > 0 ? (
-                  <div className="mt-3 space-y-2">
-                    {zipOptions.slice(0, 4).map((op: any, idx: number) => {
-                      const label = op?.label || op?.name || op?.service_name || `Opción ${idx + 1}`;
-                      const cost = Number(op?.cost ?? op?.price ?? op?.amount ?? 0) || 0;
-                      const eta = op?.eta || op?.delivery_time || op?.estimated_delivery || op?.meta?.eta || "";
-
-                      return (
-                        <div
-                          key={op?.id ?? `${label}-${idx}`}
-                          className="flex items-center justify-between rounded-xl bg-black/5 px-4 py-3"
-                        >
-                          <div className="min-w-0">
-                            <div className="truncate text-sm font-extrabold text-black">{label}</div>
-                            {eta ? <div className="text-xs text-black/60">{String(eta)}</div> : null}
-                          </div>
-
-                          <div className="text-right">
-                            <div className="text-sm font-extrabold text-black">{formatPrice(cost)}</div>
-                          </div>
-                        </div>
-                      );
-                    })}
-
-                    <div className="pt-2 text-xs leading-relaxed text-black/60">
-                      Cotización estimada. El costo final se confirma al finalizar la compra.
+                        <div className="sticky bottom-[72px] z-40 mt-6">
+              <div className="rounded-[18px] border border-white/10 bg-black/95 p-4 shadow-[0_10px_22px_rgba(0,0,0,0.18)] backdrop-blur supports-[backdrop-filter]:bg-black/80">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="text-lg font-black text-white">
+                      {formatPrice(price)}
+                    </div>
+                    <div className="text-xs font-semibold">
+                      {stock > 0 ? (
+                        <span className="text-green-400">✔ En stock</span>
+                      ) : (
+                        <span className="text-red-400">✖ Sin stock</span>
+                      )}
+                      <span className="ml-2 text-white/60">
+                        {isWholesale ? "Mayorista" : "Minorista"}
+                      </span>
                     </div>
                   </div>
-                ) : null}
+
+                  <button
+                    type="button"
+                    disabled={!selectedVariant?.sku || stock <= 0}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      if (!selectedVariant?.sku) return;
+
+                      addItem({
+                        productId: (productFixed as any).id,
+                        variant: selectedVariant,
+                        qty: 1,
+                      });
+
+                      window.dispatchEvent(
+                        new CustomEvent("toast", {
+                          detail: { message: "Agregado al carrito", kind: "success" },
+                        })
+                      );
+                    }}
+                    className={[
+                      "shrink-0 rounded-full px-5 py-3 text-sm font-black text-white transition active:scale-[0.98]",
+                      stock > 0 && selectedVariant?.sku
+                        ? "bg-[#ee078e]"
+                        : "bg-white/20 cursor-not-allowed",
+                    ].join(" ")}
+                  >
+                    Agregar
+                  </button>
+                </div>
               </div>
             </div>
+
 
             {/* CTA movido a barra flotante inferior */}
           </section>
@@ -725,58 +714,6 @@ export default function ProductPageClient({
           ) : null}
         </div>
       </div>
-
-      {/* CTA flotante inferior */}
-    <div className="sticky bottom-[72px] z-40 mt-6 border-t border-white/10 bg-black/95 p-3 backdrop-blur supports-[backdrop-filter]:bg-black/80">
-  <div className="mx-auto flex max-w-[520px] items-center justify-between gap-3">
-    <div className="min-w-0">
-      <div className="text-lg font-black text-white">
-        {formatPrice(price)}
-      </div>
-      <div className="text-xs font-semibold">
-        {stock > 0 ? (
-          <span className="text-green-400">✔ En stock</span>
-        ) : (
-          <span className="text-red-400">✖ Sin stock</span>
-        )}
-        <span className="ml-2 text-white/60">
-          {isWholesale ? "Mayorista" : "Minorista"}
-        </span>
-      </div>
     </div>
-
-    <button
-      type="button"
-      disabled={!selectedVariant?.sku || stock <= 0}
-      onClick={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (!selectedVariant?.sku) return;
-
-        addItem({
-          productId: (productFixed as any).id,
-          variant: selectedVariant,
-          qty: 1,
-        });
-
-        window.dispatchEvent(
-          new CustomEvent("toast", {
-            detail: { message: "Agregado al carrito", kind: "success" },
-          })
-        );
-      }}
-      className={[
-        "shrink-0 rounded-full px-5 py-3 text-sm font-black text-white transition active:scale-[0.98]",
-        stock > 0 && selectedVariant?.sku
-          ? "bg-[#ee078e]"
-          : "bg-white/20 cursor-not-allowed",
-      ].join(" ")}
-    >
-      Agregar
-    </button>
-  </div>
-</div>
-      </div>
-  
-  );
-}
+   );
+ }
