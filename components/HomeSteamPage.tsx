@@ -318,56 +318,50 @@ export default function HomeSteamPage({ products }: { products: Product[] }) {
       <SearchBar className="mt-3" />
 
       {/* Título */}
-  <section className="pt-4 pb-5">
-  <div className="relative overflow-hidden rounded-3xl h-[200px]">
+ <section className="pt-2 pb-5">
+  <div className="relative overflow-hidden rounded-3xl h-[250px]">
 
     {/* IMAGEN FULL */}
     <img
       src="/home/promo-hero.jpg"
       alt="Compra desde el celular"
-      className="absolute inset-0 w-full h-full object-cover"
+      className="absolute inset-0 h-full w-full object-cover"
     />
 
     {/* DEGRADE */}
-    <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent" />
+    <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/65 to-transparent" />
 
     {/* CONTENIDO */}
-    <div className="relative z-10 h-full flex flex-col justify-center p-5 text-white">
-
+    <div className="relative z-10 flex h-full flex-col justify-center p-5 text-white">
       <img
-  src="/brand/sh-logo-dark.png"
-  alt="SH Rosario"
-  className="h-6 w-auto opacity-90"
-/>
+        src="/brand/sh-logo-dark.png"
+        alt="SH Rosario"
+        className="h-8 w-auto opacity-95"
+      />
 
-      <div className="mt-2 text-xl font-black leading-tight max-w-[22ch]">
+      <div className="mt-3 max-w-[16ch] text-2xl font-black leading-tight">
         Comprá productos profesionales desde tu celular
       </div>
 
-      <div className="mt-1 text-sm text-white/80 max-w-[26ch]">
+      <div className="mt-2 max-w-[24ch] text-sm text-white/80">
         Armá tu pedido en minutos, sin perder tiempo en el salón
       </div>
 
       <Link
         href="/catalog"
-        className="mt-4 inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-sm font-bold text-black w-fit"
+        className="mt-4 inline-flex w-fit items-center justify-center rounded-full bg-white px-5 py-2.5 text-base font-bold text-black"
       >
         Ver productos →
       </Link>
 
+      <div className="mt-4 flex flex-wrap gap-2 text-xs text-white/70">
+        <span>Envíos</span>
+        <span>•</span>
+        <span>Stock real</span>
+        <span>•</span>
+        <span>Compra simple</span>
+      </div>
     </div>
-  
-
-
-    {/* BENEFICIOS */}
-    <div className="mt-4 flex flex-wrap gap-3 text-xs text-white/60">
-      <span>Envíos</span>
-      <span>•</span>
-      <span>Stock real</span>
-      <span>•</span>
-      <span>Compra simple</span>
-    </div>
-
   </div>
 </section>
       {/* Tiles */}
