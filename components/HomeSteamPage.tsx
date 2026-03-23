@@ -324,7 +324,7 @@ export default function HomeSteamPage({ products }: { products: Product[] }) {
     {/* LOGO */}
     <div className="flex items-center gap-3">
       <img
-        src="/brand/sh-logo.png"
+        src="/brand/sh-logo-dark.png"
         alt="SH Rosario"
         className="h-10 w-auto"
       />
