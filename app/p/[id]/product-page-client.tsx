@@ -727,55 +727,56 @@ export default function ProductPageClient({
       </div>
 
       {/* CTA flotante inferior */}
-      <div className="fixed bottom-[72px] left-0 right-0 z-50 border-t border-white/10 bg-black/95 p-3 backdrop-blur supports-[backdrop-filter]:bg-black/80">
-        <div className="mx-auto flex max-w-[520px] items-center justify-between gap-3">
-          <div className="min-w-0">
-            <div className="text-lg font-black text-white">
-              {formatPrice(price)}
-            </div>
-            <div className="text-xs font-semibold">
-              {stock > 0 ? (
-                <span className="text-green-400">✔ En stock</span>
-              ) : (
-                <span className="text-red-400">✖ Sin stock</span>
-              )}
-              <span className="ml-2 text-white/60">
-                {isWholesale ? "Mayorista" : "Minorista"}
-              </span>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            disabled={!selectedVariant?.sku || stock <= 0}
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              if (!selectedVariant?.sku) return;
-
-              addItem({
-                productId: (productFixed as any).id,
-                variant: selectedVariant,
-                qty: 1,
-              });
-
-              window.dispatchEvent(
-                new CustomEvent("toast", {
-                  detail: { message: "Agregado al carrito", kind: "success" },
-                })
-              );
-            }}
-            className={[
-              "shrink-0 rounded-full px-5 py-3 text-sm font-black text-white transition active:scale-[0.98]",
-              stock > 0 && selectedVariant?.sku
-                ? "bg-[#ee078e]"
-                : "bg-white/20 cursor-not-allowed",
-            ].join(" ")}
-          >
-            Agregar
-          </button>
-        </div>
+    <div className="sticky bottom-[72px] z-40 mt-6 border-t border-white/10 bg-black/95 p-3 backdrop-blur supports-[backdrop-filter]:bg-black/80">
+  <div className="mx-auto flex max-w-[520px] items-center justify-between gap-3">
+    <div className="min-w-0">
+      <div className="text-lg font-black text-white">
+        {formatPrice(price)}
+      </div>
+      <div className="text-xs font-semibold">
+        {stock > 0 ? (
+          <span className="text-green-400">✔ En stock</span>
+        ) : (
+          <span className="text-red-400">✖ Sin stock</span>
+        )}
+        <span className="ml-2 text-white/60">
+          {isWholesale ? "Mayorista" : "Minorista"}
+        </span>
       </div>
     </div>
+
+    <button
+      type="button"
+      disabled={!selectedVariant?.sku || stock <= 0}
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!selectedVariant?.sku) return;
+
+        addItem({
+          productId: (productFixed as any).id,
+          variant: selectedVariant,
+          qty: 1,
+        });
+
+        window.dispatchEvent(
+          new CustomEvent("toast", {
+            detail: { message: "Agregado al carrito", kind: "success" },
+          })
+        );
+      }}
+      className={[
+        "shrink-0 rounded-full px-5 py-3 text-sm font-black text-white transition active:scale-[0.98]",
+        stock > 0 && selectedVariant?.sku
+          ? "bg-[#ee078e]"
+          : "bg-white/20 cursor-not-allowed",
+      ].join(" ")}
+    >
+      Agregar
+    </button>
+  </div>
+</div>
+      </div>
+  
   );
 }
