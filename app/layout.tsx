@@ -31,7 +31,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <ClientShell>
             {isProd ? <NextTopLoader showSpinner={false} /> : null}
           <ThemeToggle />
-            <AppBootSplash logoSrc="/brand/sh-logo.png" />
+           <AppBootSplash
+  logoLightSrc="/brand/sh-logo-light.png"
+  logoDarkSrc="/brand/sh-logo-dark.png"
+/>
 
             <AppTransitions>{children}</AppTransitions>
             <PwaInstallPrompt />
