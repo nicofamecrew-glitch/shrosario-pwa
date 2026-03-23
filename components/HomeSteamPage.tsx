@@ -318,25 +318,21 @@ export default function HomeSteamPage({ products }: { products: Product[] }) {
       <SearchBar className="mt-3" />
 
       {/* Título */}
-     <section className="pt-4 pb-5">
-  <div className="relative overflow-hidden rounded-3xl border border-[#e5e7eb] bg-[#111] px-5 py-6 text-white dark:border-white/10 dark:bg-white/5">
+  <section className="pt-4 pb-5">
+  <div className="relative overflow-hidden rounded-3xl h-[200px]">
 
-    {/* LOGO */}
-   <section className="mt-5">
-  <div className="relative overflow-hidden rounded-3xl">
-
-    {/* IMAGEN */}
+    {/* IMAGEN FULL */}
     <img
       src="/home/promo-hero.jpg"
       alt="Compra desde el celular"
-      className="absolute inset-0 h-full w-full object-cover"
+      className="absolute inset-0 w-full h-full object-cover"
     />
 
-    {/* DEGRADE (clave) */}
+    {/* DEGRADE */}
     <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent" />
 
     {/* CONTENIDO */}
-    <div className="relative z-10 p-5 text-white">
+    <div className="relative z-10 h-full flex flex-col justify-center p-5 text-white">
 
       <div className="text-xs uppercase tracking-[0.2em] text-white/70">
         SH Rosario
@@ -352,14 +348,14 @@ export default function HomeSteamPage({ products }: { products: Product[] }) {
 
       <Link
         href="/catalog"
-        className="mt-4 inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-sm font-bold text-black"
+        className="mt-4 inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-sm font-bold text-black w-fit"
       >
         Ver productos →
       </Link>
 
     </div>
-  </div>
-</section>
+  
+
 
     {/* BENEFICIOS */}
     <div className="mt-4 flex flex-wrap gap-3 text-xs text-white/60">
