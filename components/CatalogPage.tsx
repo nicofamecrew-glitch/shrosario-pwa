@@ -5,74 +5,16 @@ import type { Product } from "@/lib/types";
 import { useCartStore } from "@/lib/store";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import productsJson from "@/data/products.json";
+
 import Filters from "@/components/Filters";
 import ProductCard from "@/components/ProductCard";
 import WholesaleGate from "@/components/WholesaleGate";
 
-function buildJsonIndex() {
-  const jsonList = productsJson as any[];
 
-  const byId = new Map<string, any>();
-  const byIdSku = new Map<string, Map<string, any>>();
-  const byIdSize = new Map<string, Map<string, any>>();
 
-  for (const p of jsonList) {
-    const pid = String(p?.id ?? "");
-    if (!pid) continue;
 
-    byId.set(pid, p);
 
-    const skuMap = new Map<string, any>();
-    const sizeMap = new Map<string, any>();
-
-    for (const v of p?.variants ?? []) {
-      if (v?.sku) skuMap.set(String(v.sku), v);
-      if (v?.size) sizeMap.set(String(v.size), v);
-    }
-
-    byIdSku.set(pid, skuMap);
-    byIdSize.set(pid, sizeMap);
-  }
-
-  return { byId, byIdSku, byIdSize };
-}
-
-function mergeImagesFast(
-  fromSheets: Product[],
-  idx: ReturnType<typeof buildJsonIndex>
-): Product[] {
-  return fromSheets.map((p) => {
-    const pid = String((p as any)?.id ?? "");
-    const jp = idx.byId.get(pid);
-    if (!jp) return p;
-
-    const skuMap = idx.byIdSku.get(pid);
-    const sizeMap = idx.byIdSize.get(pid);
-
-    const mergedVariants = (p as any).variants?.map((v: any) => {
-      const jv =
-        (v?.sku && skuMap?.get(String(v.sku))) ||
-        (v?.size && sizeMap?.get(String(v.size))) ||
-        null;
-
-      return {
-        ...v,
-        image: v?.image ?? jv?.image,
-        imageUrl: v?.imageUrl ?? jv?.imageUrl,
-        img: v?.img ?? jv?.img,
-        images: v?.images ?? jv?.images,
-      };
-    });
-
-    return {
-      ...p,
-      image: (p as any).image ?? jp?.image,
-      images: (p as any).images ?? jp?.images,
-      variants: mergedVariants ?? (p as any).variants,
-    } as Product;
-  });
-}
+   
 
 export default function CatalogPage({ products }: { products: Product[] }) {
   const sp = useSearchParams();
@@ -106,15 +48,13 @@ useEffect(() => {
   const PAGE_SIZE = 20;
   const [visible, setVisible] = useState(PAGE_SIZE);
 
-   const jsonIndex = useMemo(() => buildJsonIndex(), []);
+   
 
   const preparedProducts = useMemo(() => {
-    const merged = mergeImagesFast(products, jsonIndex);
-
     const seen = new Set<string>();
     const out: Product[] = [];
 
-    for (const p of merged) {
+    for (const p of products) {
       const sku0 = (p as any)?.variants?.[0]?.sku ?? "";
       const key = `${(p as any)?.id ?? ""}::${sku0}`;
       if (seen.has(key)) continue;
@@ -123,7 +63,7 @@ useEffect(() => {
     }
 
     return out;
-  }, [products, jsonIndex]);
+  }, [products]);
 
 
    const filteredProducts = useMemo(() => {
