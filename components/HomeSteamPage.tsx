@@ -322,43 +322,44 @@ export default function HomeSteamPage({ products }: { products: Product[] }) {
   <div className="relative overflow-hidden rounded-3xl border border-[#e5e7eb] bg-[#111] px-5 py-6 text-white dark:border-white/10 dark:bg-white/5">
 
     {/* LOGO */}
-    <div className="flex items-center gap-3">
-      <img
-        src="/brand/sh-logo-dark.png"
-        alt="SH Rosario"
-        className="h-10 w-auto"
-      />
-      <div className="text-xs uppercase tracking-[0.18em] text-white/60">
-        Distribuidora oficial
+   <section className="mt-5">
+  <div className="relative overflow-hidden rounded-3xl">
+
+    {/* IMAGEN */}
+    <img
+      src="/home/promo-hero.jpg"
+      alt="Compra desde el celular"
+      className="absolute inset-0 h-full w-full object-cover"
+    />
+
+    {/* DEGRADE (clave) */}
+    <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent" />
+
+    {/* CONTENIDO */}
+    <div className="relative z-10 p-5 text-white">
+
+      <div className="text-xs uppercase tracking-[0.2em] text-white/70">
+        SH Rosario
       </div>
-    </div>
 
-    {/* TITULO */}
-    <h1 className="mt-4 text-2xl font-black tracking-tight">
-      Productos capilares para profesionales
-    </h1>
+      <div className="mt-2 text-xl font-black leading-tight max-w-[22ch]">
+        Comprá productos profesionales desde tu celular
+      </div>
 
-    {/* SUB */}
-    <p className="mt-2 max-w-[34ch] text-sm text-white/75">
-      Comprá rápido, encontrá marcas clave y armá tu pedido desde el celular.
-    </p>
+      <div className="mt-1 text-sm text-white/80 max-w-[26ch]">
+        Armá tu pedido en minutos, sin perder tiempo en el salón
+      </div>
 
-    {/* BOTONES */}
-    <div className="mt-5 flex flex-wrap gap-2">
       <Link
         href="/catalog"
-        className="catalog-btn inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-sm font-bold text-[#111] active:scale-[0.98]"
+        className="mt-4 inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-sm font-bold text-black"
       >
-        Ver catálogo
+        Ver productos →
       </Link>
 
-      <Link
-        href="/catalog?tag=oferta"
-        className="inline-flex items-center justify-center rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white active:scale-[0.98]"
-      >
-        Ver ofertas
-      </Link>
     </div>
+  </div>
+</section>
 
     {/* BENEFICIOS */}
     <div className="mt-4 flex flex-wrap gap-3 text-xs text-white/60">
