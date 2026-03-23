@@ -68,11 +68,12 @@ export default function AppBootSplash({
       {/* logo */}
       <div className="relative flex items-center justify-center">
         <div
-          className={[
-            "overflow-hidden transition-all duration-[1100ms] ease-[cubic-bezier(0.22,1,0.36,1)]",
-            entered ? "w-[176px] opacity-100" : "w-0 opacity-0",
-          ].join(" ")}
-        >
+  className={[
+    "transition-all duration-[1100ms] ease-[cubic-bezier(0.22,1,0.36,1)]",
+    entered ? "opacity-100" : "opacity-0",
+  ].join(" ")}
+>
+        
                   <img
             src={logoLightSrc}
             alt="SH Rosario"
