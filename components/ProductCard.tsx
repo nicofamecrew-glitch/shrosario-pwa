@@ -176,9 +176,14 @@ const canAdd = !!variantSku && (remainingStock === null ? true : remainingStock 
   if (selectedVariant?.image) return selectedVariant.image;
   if (selectedVariant?.imageUrl) return selectedVariant.imageUrl;
   if (selectedVariant?.img) return selectedVariant.img;
+  if (Array.isArray(selectedVariant?.images) && selectedVariant.images[0]) {
+    return selectedVariant.images[0];
+  }
 
-  return (product as any)?.defaultImage ?? "/product/placeholder.png";
-}, [product, selectedVariant]);
+  if ((product as any)?.defaultImage) return (product as any).defaultImage;
+
+  return getProductImage(product as any, selectedVariant as any, selectedIndex);
+}, [product, selectedVariant, selectedIndex]);
 
   return (
   <div className="group h-full [perspective:1200px]">
