@@ -318,25 +318,36 @@ export default function HomeSteamPage({ products }: { products: Product[] }) {
       <SearchBar className="mt-3" />
 
       {/* Título */}
-      <section className="pt-4 pb-5">
-  <div className="overflow-hidden rounded-3xl border border-[#e5e7eb] bg-[#111] px-5 py-6 text-white dark:border-white/10 dark:bg-white/5">
-    
-    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/70">
-      SH Rosario
-    </p>
+     <section className="pt-4 pb-5">
+  <div className="relative overflow-hidden rounded-3xl border border-[#e5e7eb] bg-[#111] px-5 py-6 text-white dark:border-white/10 dark:bg-white/5">
 
-    <h1 className="mt-2 text-2xl font-black tracking-tight">
+    {/* LOGO */}
+    <div className="flex items-center gap-3">
+      <img
+        src="/brand/sh-logo.png"
+        alt="SH Rosario"
+        className="h-10 w-auto"
+      />
+      <div className="text-xs uppercase tracking-[0.18em] text-white/60">
+        Distribuidora oficial
+      </div>
+    </div>
+
+    {/* TITULO */}
+    <h1 className="mt-4 text-2xl font-black tracking-tight">
       Productos capilares para profesionales
     </h1>
 
+    {/* SUB */}
     <p className="mt-2 max-w-[34ch] text-sm text-white/75">
       Comprá rápido, encontrá marcas clave y armá tu pedido desde el celular.
     </p>
 
-    <div className="mt-4 flex flex-wrap gap-2">
+    {/* BOTONES */}
+    <div className="mt-5 flex flex-wrap gap-2">
       <Link
         href="/catalog"
-        className="inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-sm font-bold text-[#111] active:scale-[0.98]"
+        className="catalog-btn inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-sm font-bold text-[#111] active:scale-[0.98]"
       >
         Ver catálogo
       </Link>
@@ -349,7 +360,8 @@ export default function HomeSteamPage({ products }: { products: Product[] }) {
       </Link>
     </div>
 
-    <div className="mt-4 flex flex-wrap gap-3 text-xs text-white/65">
+    {/* BENEFICIOS */}
+    <div className="mt-4 flex flex-wrap gap-3 text-xs text-white/60">
       <span>Envíos</span>
       <span>•</span>
       <span>Stock real</span>
@@ -359,7 +371,6 @@ export default function HomeSteamPage({ products }: { products: Product[] }) {
 
   </div>
 </section>
-
       {/* Tiles */}
       <section className="space-y-3">
         {actionTiles.map((t) => (
