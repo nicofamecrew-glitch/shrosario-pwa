@@ -1,5 +1,6 @@
 import { google } from "googleapis";
 import "server-only";
+import productsJson from "@/data/products.json";
 
 function getCredentials() {
   const raw = process.env.GOOGLE_SHEETS_SA_B64;
@@ -43,6 +44,134 @@ function normalizeTags(raw: any): string[] {
 function toNum(v: any): number {
   const n = Number(String(v ?? "").replace(",", "."));
   return Number.isFinite(n) ? n : 0;
+}
+
+function buildJsonIndex() {
+  const jsonList = productsJson as any[];
+
+  const byId = new Map<string, any>();
+  const byIdSku = new Map<string, Map<string, any>>();
+  const byIdSize = new Map<string, Map<string, any>>();
+
+  for (const p of jsonList) {
+    const pid = String(p?.id ?? "").trim();
+    if (!pid) continue;
+
+    byId.set(pid, p);
+
+    const skuMap = new Map<string, any>();
+    const sizeMap = new Map<string, any>();
+
+    for (const v of p?.variants ?? []) {
+      const sku = String(v?.sku ?? "").trim();
+      const size = String(v?.size ?? "").trim();
+
+      if (sku) skuMap.set(sku, v);
+      if (size) sizeMap.set(size.toLowerCase(), v);
+    }
+
+    byIdSku.set(pid, skuMap);
+    byIdSize.set(pid, sizeMap);
+  }
+
+  return { byId, byIdSku, byIdSize };
+}
+
+function dedupeVariants(raw: any[]) {
+  const seen = new Set<string>();
+  const out: any[] = [];
+
+  for (const v of raw ?? []) {
+    const sku = String(v?.sku ?? "").trim();
+    const size = String(v?.size ?? "").trim();
+
+    if (!sku && !size) continue;
+
+    const key = sku ? `sku:${sku}` : `size:${size.toLowerCase()}`;
+    if (seen.has(key)) continue;
+
+    seen.add(key);
+    out.push(v);
+  }
+
+  return out;
+}
+
+const BRAND_LOGOS: Record<string, string> = {
+  vexa: "/brands/vexa.png",
+  ossono: "/brands/ossono.png",
+  fidelite: "/brands/fidelite.png",
+  coalix: "/brands/coalix.png",
+  "lisse extreme": "/brands/lisse-extreme.png",
+};
+
+function getInitialColor(product: any) {
+  const brand = String(product?.brand ?? "").trim().toLowerCase();
+
+  if (brand === "vexa") return "#ee078e";
+  if (brand === "ossono") return "#bc4598";
+  if (brand === "coalix") return "#3e3e47";
+  if (brand === "fidelite") return "#d53721";
+
+  return "#111111";
+}
+
+function prepareCatalogProducts(fromSheets: any[]) {
+  const idx = buildJsonIndex();
+
+  return fromSheets.map((p: any) => {
+    const pid = String(p?.id ?? "").trim();
+    const jp = idx.byId.get(pid);
+
+    const skuMap = idx.byIdSku.get(pid);
+    const sizeMap = idx.byIdSize.get(pid);
+
+    const mergedVariants = dedupeVariants(
+      (p?.variants ?? []).map((v: any) => {
+        const sku = String(v?.sku ?? "").trim();
+        const size = String(v?.size ?? "").trim();
+
+        const jv =
+          (sku && skuMap?.get(sku)) ||
+          (size && sizeMap?.get(size.toLowerCase())) ||
+          null;
+
+        return {
+          ...v,
+          image: v?.image ?? jv?.image ?? null,
+          imageUrl: v?.imageUrl ?? jv?.imageUrl ?? null,
+          img: v?.img ?? jv?.img ?? null,
+          images: v?.images ?? jv?.images ?? null,
+        };
+      })
+    );
+
+    const defaultVariant = mergedVariants[0] ?? null;
+
+    const defaultImage =
+      defaultVariant?.image ||
+      defaultVariant?.imageUrl ||
+      defaultVariant?.img ||
+      (Array.isArray(defaultVariant?.images) ? defaultVariant.images[0] : null) ||
+      p?.image ||
+      jp?.image ||
+      (Array.isArray(p?.images) ? p.images[0] : null) ||
+      (Array.isArray(jp?.images) ? jp.images[0] : null) ||
+      "/product/placeholder.png";
+
+    const brandKey = String(p?.brand ?? "").trim().toLowerCase();
+
+    return {
+      ...p,
+      image: p?.image ?? jp?.image ?? defaultImage,
+      images: p?.images ?? jp?.images ?? [],
+      variants: mergedVariants,
+      defaultVariantIndex: 0,
+      defaultImage,
+      brandLogo: BRAND_LOGOS[brandKey] ?? null,
+      initialColor: getInitialColor(p),
+    };
+  });
 }
 
 // ----------------------
@@ -147,8 +276,9 @@ export async function getCatalog() {
     return _catalogInFlight;
   }
 
-  _catalogInFlight = (async () => {
-    const fresh = await loadCatalogFromSheets();
+   _catalogInFlight = (async () => {
+    const raw = await loadCatalogFromSheets();
+    const fresh = prepareCatalogProducts(raw);
     _catalogCache = fresh;
     _catalogCacheAt = Date.now();
     return fresh;
