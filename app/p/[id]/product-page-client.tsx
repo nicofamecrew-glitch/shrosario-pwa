@@ -10,7 +10,7 @@ import { brandAccentFrom } from "@/lib/brandAccent";
 import { calcAllPlans } from "@/lib/mpFees";
 import Image from "next/image";
 import FavoriteHeart from "@/components/ui/FavoriteHeart";
-import { getProductImage } from "@/lib/productImage";
+
 
 type Rule = { keys: string[]; color: string };
 
@@ -234,18 +234,34 @@ export default function ProductPageClient({
 
   const productColor = useMemo(() => resolveProductColor(productFixed as any), [productFixed]);
 
-    const gallery = useMemo(() => {
-    const main = getProductImage(productFixed as any, selectedVariant as any, selectedIndex);
+     const gallery = useMemo(() => {
+    const p: any = productFixed ?? {};
+    const v: any = selectedVariant ?? {};
 
-    const variantImages: string[] = Array.isArray((selectedVariant as any)?.images)
-      ? (selectedVariant as any).images.filter(Boolean)
-      : [];
+    const productImages: string[] = Array.isArray(p?.images) ? p.images.filter(Boolean) : [];
+    const variantImages: string[] = Array.isArray(v?.images) ? v.images.filter(Boolean) : [];
 
-    const productImages: string[] = Array.isArray((productFixed as any)?.images)
-      ? (productFixed as any).images.filter(Boolean)
-      : [];
+    // 1) En detalle, priorizamos la imagen del producto por índice de variante
+    const mainFromProduct =
+      productImages[selectedIndex] ||
+      productImages[0] ||
+      p?.image ||
+      p?.imageUrl ||
+      p?.img ||
+      "";
 
-    const rest = [...variantImages, ...productImages].filter(Boolean).filter((img) => img !== main);
+    // 2) Si la variante tiene imagen directa REAL, la usamos solo si existe
+    const directVariantImage =
+      v?.image ||
+      v?.imageUrl ||
+      v?.img ||
+      "";
+
+    const main = directVariantImage || mainFromProduct || "/product/placeholder.png";
+
+    const rest = [...productImages, ...variantImages]
+      .filter(Boolean)
+      .filter((img) => img !== main);
 
     return [main, ...rest];
   }, [productFixed, selectedVariant, selectedIndex]);
@@ -382,7 +398,7 @@ export default function ProductPageClient({
 
       {/* CONTENT */}
       <div className="w-full bg-white">
-        <div className="mx-auto max-w-[520px] px-4 pb-36">
+        <div className="mx-auto max-w-[520px] px-4 pb-44">
           <section className="-mt-8 rounded-[18px] rounded-t-none bg-[#d2d2d2] p-5">
             <div className="text-3xl font-extrabold leading-tight text-zinc-900">
               {(productFixed as any)?.name}
@@ -711,7 +727,7 @@ export default function ProductPageClient({
       </div>
 
       {/* CTA flotante inferior */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-black/95 p-3 backdrop-blur supports-[backdrop-filter]:bg-black/80">
+      <div className="fixed bottom-[72px] left-0 right-0 z-50 border-t border-white/10 bg-black/95 p-3 backdrop-blur supports-[backdrop-filter]:bg-black/80">
         <div className="mx-auto flex max-w-[520px] items-center justify-between gap-3">
           <div className="min-w-0">
             <div className="text-lg font-black text-white">
