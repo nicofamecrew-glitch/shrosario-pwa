@@ -29,15 +29,24 @@ export default function WelcomeClient() {
     <main className="min-h-[100svh] flex items-center justify-center px-6 bg-[hsl(var(--app-bg))] text-[hsl(var(--app-fg))]">
       <div className="w-full max-w-sm flex flex-col items-center gap-8">
         {/* Logo */}
-        <div className="flex flex-col items-center gap-3">
-          <Image
-            src="/brand/sh-logo.png"
-            alt="SH Rosario"
-            width={220}
-            height={220}
-            priority
-          />
-        </div>
+       <div className="flex flex-col items-center gap-3">
+  <Image
+    src="/brand/sh-logo-light.png"
+    alt="SH Rosario"
+    width={220}
+    height={220}
+    priority
+    className="block dark:hidden"
+  />
+  <Image
+    src="/brand/sh-logo-dark.png"
+    alt="SH Rosario"
+    width={220}
+    height={220}
+    priority
+    className="hidden dark:block"
+  />
+</div>
 
         {/* Botón Google */}
        <button
