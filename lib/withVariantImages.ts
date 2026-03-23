@@ -94,38 +94,58 @@ export function withVariantImages(fromSheets: Product[]): Product[] {
     );
 
     /* ========= variantes ========= */
-    const mergedVariants = (pAny?.variants ?? []).map((v: any) => {
+       const mergedVariants = (pAny?.variants ?? []).map((v: any, idx: number) => {
       const jv =
         jp?.variants?.find((x: any) => norm(x?.sku) === norm(v?.sku)) ??
         jp?.variants?.find((x: any) => norm(x?.size) === norm(v?.size)) ??
         null;
 
-      const imageFromSku = firstStr(v?.image_url);
-      const imageFromVariant = pickFirstImage(v);
-      const imageFromJson = pickFirstImage(jv);
+      const variantOwnImages = normImages(
+        v?.images,
+        v?.image,
+        v?.image_url,
+        v?.imageUrl,
+        v?.img
+      );
+
+      const jsonVariantImages = normImages(
+        jv?.images,
+        jv?.image,
+        jv?.image_url,
+        jv?.imageUrl,
+        jv?.img
+      );
+
+      const fallbackProductImages = productImages.length
+        ? productImages
+        : ["/product/placeholder.png"];
+
+      const finalImages =
+        variantOwnImages.length > 0
+          ? variantOwnImages
+          : jsonVariantImages.length > 0
+          ? jsonVariantImages
+          : fallbackProductImages;
 
       const resolved =
-        imageFromSku ||
-        imageFromVariant ||
-        imageFromJson ||
-        productImages[0] ||
+        finalImages[idx] ||
+        finalImages[0] ||
         "/product/placeholder.png";
 
       return {
         ...v,
 
-        /** 🔥 FUENTE DE VERDAD */
+        /** fuente de verdad */
         _resolvedImage: resolved,
 
-        /** legacy / compat */
-        image_url: imageFromSku ?? undefined,
+        /** compat */
+        image_url: firstStr(v?.image_url) ?? firstStr(jv?.image_url) ?? undefined,
         image: resolved,
-        images: [resolved],
-        imageUrl: v?.imageUrl ?? jv?.imageUrl,
-        img: v?.img ?? jv?.img,
+        images: finalImages,
+        imageUrl: firstStr(v?.imageUrl) ?? firstStr(jv?.imageUrl) ?? undefined,
+        img: firstStr(v?.img) ?? firstStr(jv?.img) ?? undefined,
       };
     });
-
     return {
       ...p,
       id: String(getSheetId(pAny) || pAny.id || jp?.id || "").trim(),
