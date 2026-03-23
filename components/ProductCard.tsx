@@ -165,18 +165,21 @@ const canAdd = !!variantSku && (remainingStock === null ? true : remainingStock 
     return selectedVariant ? getVariantPrice(selectedVariant as any, isWholesale) : 0;
   }, [selectedVariant, isWholesale]);
 
- const productColor = useMemo(
-  () => resolveProductColor(product, selectedVariant),
-  [product, selectedVariant]
-);
+ const productColor = useMemo(() => {
+  return (product as any)?.initialColor ?? "#111111";
+}, [product]);
+
 
 
   // ✅ UNA SOLA FUENTE: getProductImage()
   const imgSrc = useMemo(() => {
-    return getProductImage(product as any, selectedVariant as any, selectedIndex);
-  }, [product, selectedVariant, selectedIndex]);
+  if (selectedVariant?.image) return selectedVariant.image;
+  if (selectedVariant?.imageUrl) return selectedVariant.imageUrl;
+  if (selectedVariant?.img) return selectedVariant.img;
 
- 
+  return (product as any)?.defaultImage ?? "/product/placeholder.png";
+}, [product, selectedVariant]);
+
   return (
   <div className="group h-full [perspective:1200px]">
   <div className="relative flex h-full min-h-[430px] flex-col overflow-hidden rounded-3xl border border-white/10 bg-[#f5f5f5] shadow-[0_12px_30px_rgba(0,0,0,0.28)] transition-all duration-300 ease-out will-change-transform group-hover:-translate-y-1 group-hover:shadow-[0_22px_50px_rgba(0,0,0,0.38)] sm:group-hover:[transform:rotateX(4deg)_rotateY(-5deg)_translateY(-4px)]">
@@ -255,9 +258,9 @@ isJar ? "p-3 scale-[1.10]" : "p-1 scale-[1.38]",
       <div className="relative z-10 flex flex-1 flex-col px-4 pb-4 pt-2">
        {/* brand */}
 <div className="flex items-center gap-2">
-  {product.brand && BRAND_LOGOS[product.brand.toLowerCase()] ? (
-    <img
-      src={BRAND_LOGOS[product.brand.toLowerCase()]}
+  {(product as any)?.brandLogo ? (
+  <img
+    src={(product as any).brandLogo}
       alt={product.brand}
       className="h-16 w-auto opacity-80"
     />
