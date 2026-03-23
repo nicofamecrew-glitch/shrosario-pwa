@@ -333,11 +333,7 @@ export default function HomeSteamPage({ products }: { products: Product[] }) {
 
     {/* CONTENIDO */}
     <div className="relative z-10 flex h-full flex-col justify-center p-5 text-white">
-      <img
-        src="/brand/sh-logo-dark.png"
-        alt="SH Rosario"
-        className="h-8 w-auto opacity-95"
-      />
+     
 
       <div className="mt-3 max-w-[16ch] text-2xl font-black leading-tight">
         Comprá productos profesionales desde tu celular
