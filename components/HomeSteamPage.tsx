@@ -335,7 +335,7 @@ export default function HomeSteamPage({ products }: { products: Product[] }) {
     <div className="relative z-10 h-full flex flex-col justify-center p-5 text-white">
 
       <img
-  src="/brand/sh-logo.png"
+  src="/brand/sh-logo-dark.png"
   alt="SH Rosario"
   className="h-6 w-auto opacity-90"
 />
