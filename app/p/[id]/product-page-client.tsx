@@ -10,6 +10,7 @@ import { brandAccentFrom } from "@/lib/brandAccent";
 import { calcAllPlans } from "@/lib/mpFees";
 import Image from "next/image";
 import FavoriteHeart from "@/components/ui/FavoriteHeart";
+import { getProductImage } from "@/lib/productImage";
 
 type Rule = { keys: string[]; color: string };
 
@@ -36,7 +37,10 @@ const BRAND_LINE_COLORS: Record<string, Rule[]> = {
     { keys: ["hidratation", "hidratación"], color: "#ccd6ae" },
     { keys: ["resistence", "resistance", "cristal argan"], color: "#e6bdaf" },
     { keys: ["curly", "rulos"], color: "#bdd3b2" },
-    { keys: ["for men", "spray", "laca", "protector", "brillo", "acido hialuronico"],color: "#3e3e47" },
+    {
+      keys: ["for men", "spray", "laca", "protector", "brillo", "acido hialuronico"],
+      color: "#3e3e47",
+    },
     { keys: ["docta"], color: "#d97e3e" },
     { keys: ["activador"], color: "#d97e3e" },
     { keys: ["clinical detox"], color: "#9fd0cd" },
@@ -67,16 +71,14 @@ function normText(s: string) {
 function getSeparatorBySize(size: any, brand?: string) {
   const s = String(size ?? "").trim();
 
-  // prioridad por lo que realmente existe en el string
   if (s.includes("/")) return "/";
   if (s.includes("_")) return "_";
   if (s.includes(".")) return ".";
   if (s.includes(",")) return ",";
 
-  // fallback suave por marca (opcional)
   const b = normText(brand ?? "");
   if (b.includes("fidelite")) return ".";
-  if (b.includes("ossono")) return "."; // más realista que ","
+  if (b.includes("ossono")) return ".";
   return null;
 }
 
@@ -112,36 +114,27 @@ export default function ProductPageClient({
     [bestSellers]
   );
 
-  // -----------------------
-  // STATE
-  // -----------------------
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [activeImage, setActiveImage] = useState(0);
 
-  // Zipnova (informativo en /p)
   const [zipCp, setZipCp] = useState("");
   const [zipLoading, setZipLoading] = useState(false);
   const [zipError, setZipError] = useState("");
   const [zipOptions, setZipOptions] = useState<any[]>([]);
 
-  // -----------------------
-  // MATRIX HELPERS
-  // -----------------------
   const BASE_LEVELS = ["0", "1", "3", "4", "5", "6", "7", "8", "9", "10", "100", ".", "11"];
 
   function baseLevelOfSize(size: any) {
-  const s = String(size ?? "").trim();
-  const sep = getSeparatorBySize(s);
-  return sep ? s.split(sep)[0] : s;
-}
+    const s = String(size ?? "").trim();
+    const sep = getSeparatorBySize(s);
+    return sep ? s.split(sep)[0] : s;
+  }
 
-function isBaseTone(size: any) {
-  const s = String(size ?? "").trim();
-  const sep = getSeparatorBySize(s);
-  return !sep; // si no hay separador => base
-}
-
-
+  function isBaseTone(size: any) {
+    const s = String(size ?? "").trim();
+    const sep = getSeparatorBySize(s);
+    return !sep;
+  }
 
   function isColorLevelsProduct(product: any) {
     const id = normText(String(product?.id ?? ""));
@@ -149,7 +142,6 @@ function isBaseTone(size: any) {
     const line = normText(String(product?.line ?? ""));
     const brand = normText(String(product?.brand ?? ""));
 
-    // Caso específico: Color Master Fidelité
     if (
       brand.includes("fidelite") &&
       (id.includes("color-master") || name.includes("color") || line.includes("color"))
@@ -157,16 +149,11 @@ function isBaseTone(size: any) {
       return true;
     }
 
-    // Regla genérica: muchas variantes con "/"
     const vars = Array.isArray(product?.variants) ? product.variants : [];
     const hasSep = vars.filter((v: any) => /[\/_. ,]/.test(String(v?.size ?? ""))).length;
-return vars.length >= 20 && hasSep >= 10;
-
+    return vars.length >= 20 && hasSep >= 10;
   }
 
-  // -----------------------
-  // VARIANTS (dedupe)
-  // -----------------------
   const variantsRaw = (productFixed as any)?.variants ?? [];
 
   const variants = useMemo(() => {
@@ -187,7 +174,6 @@ return vars.length >= 20 && hasSep >= 10;
 
   const variantsByBase = useMemo(() => {
     const map = new Map<string, any[]>();
-    const brand = String((productFixed as any)?.brand ?? "");
 
     for (const v of variants) {
       const b = baseLevelOfSize(v.size);
@@ -210,24 +196,21 @@ return vars.length >= 20 && hasSep >= 10;
     }
 
     return map;
-  }, [variants, productFixed?.brand]);
+  }, [variants]);
 
   const [baseSelected, setBaseSelected] = useState<string>(() => {
     const v0 = variants[selectedIndex];
-    const brand = String((productFixed as any)?.brand ?? "");
     const b0 = v0 ? baseLevelOfSize(v0.size) : "7";
     return BASE_LEVELS.includes(b0) ? b0 : "7";
   });
 
   useEffect(() => {
     const v0 = variants[0];
-    const brand = String((productFixed as any)?.brand ?? "");
     const b0 = v0 ? baseLevelOfSize(v0.size) : "7";
     const next = BASE_LEVELS.includes(b0) ? b0 : "7";
     setBaseSelected(next);
   }, [productFixed?.id, productFixed?.brand, variants]);
 
-  // reset al cambiar producto
   useEffect(() => {
     setSelectedIndex(0);
     setActiveImage(0);
@@ -235,9 +218,6 @@ return vars.length >= 20 && hasSep >= 10;
     setZipOptions([]);
   }, [productFixed?.id]);
 
-  // -----------------------
-  // DERIVADOS
-  // -----------------------
   const selectedVariant = useMemo(() => {
     return variants[selectedIndex] ?? variants[0] ?? null;
   }, [variants, selectedIndex]);
@@ -254,30 +234,20 @@ return vars.length >= 20 && hasSep >= 10;
 
   const productColor = useMemo(() => resolveProductColor(productFixed as any), [productFixed]);
 
-  const gallery = useMemo(() => {
-    const v: any = selectedVariant ?? {};
-    const p: any = productFixed ?? {};
+    const gallery = useMemo(() => {
+    const main = getProductImage(productFixed as any, selectedVariant as any, selectedIndex);
 
-    const vImgs: string[] = Array.isArray(v?.images) ? v.images.filter(Boolean) : [];
-    const vFirst =
-      (typeof v?.image === "string" && v.image) ||
-      (typeof v?.imageUrl === "string" && v.imageUrl) ||
-      (typeof v?.img === "string" && v.img) ||
-      vImgs[0];
+    const variantImages: string[] = Array.isArray((selectedVariant as any)?.images)
+      ? (selectedVariant as any).images.filter(Boolean)
+      : [];
 
-    if (vFirst) return [vFirst, ...vImgs.filter((x: string) => x !== vFirst)];
+    const productImages: string[] = Array.isArray((productFixed as any)?.images)
+      ? (productFixed as any).images.filter(Boolean)
+      : [];
 
-    const pImgs: string[] = Array.isArray(p?.images) ? p.images.filter(Boolean) : [];
-    const pFirst =
-      pImgs[selectedIndex] ||
-      pImgs[0] ||
-      (typeof p?.image === "string" && p.image) ||
-      (typeof p?.imageUrl === "string" && p.imageUrl) ||
-      (typeof p?.img === "string" && p.img);
+    const rest = [...variantImages, ...productImages].filter(Boolean).filter((img) => img !== main);
 
-    if (pFirst) return [pFirst];
-
-    return ["/product/placeholder.png"];
+    return [main, ...rest];
   }, [productFixed, selectedVariant, selectedIndex]);
 
   const heroSrc = useMemo(() => {
@@ -372,7 +342,7 @@ return vars.length >= 20 && hasSep >= 10;
 
       {/* HERO */}
       <div className="w-full bg-white">
-        <div className="relative mx-auto max-w-[520px] ">
+        <div className="relative mx-auto max-w-[520px]">
           <div
             className="pointer-events-none absolute right-0 top-0 h-full w-[62%]"
             style={{
@@ -412,7 +382,7 @@ return vars.length >= 20 && hasSep >= 10;
 
       {/* CONTENT */}
       <div className="w-full bg-white">
-        <div className="mx-auto max-w-[520px] px-4 pb-28">
+        <div className="mx-auto max-w-[520px] px-4 pb-36">
           <section className="-mt-8 rounded-[18px] rounded-t-none bg-[#d2d2d2] p-5">
             <div className="text-3xl font-extrabold leading-tight text-zinc-900">
               {(productFixed as any)?.name}
@@ -422,7 +392,6 @@ return vars.length >= 20 && hasSep >= 10;
               {(productFixed as any)?.line}
             </div>
 
-            {/* VARIANTS: matrix si corresponde, sino pills normales */}
             {variants.length ? (
               isColorLevels ? (
                 <div className="mt-4">
@@ -473,9 +442,7 @@ return vars.length >= 20 && hasSep >= 10;
 
                   <div className="flex flex-wrap gap-3">
                     {(variantsByBase.get(baseSelected) ?? [])
-                      .filter((v: any) =>
-                        !isBaseTone(v.size)
-                      )
+                      .filter((v: any) => !isBaseTone(v.size))
                       .slice()
                       .sort((a: any, c: any) =>
                         String(a.size ?? "").localeCompare(String(c.size ?? ""), "es", {
@@ -547,7 +514,6 @@ return vars.length >= 20 && hasSep >= 10;
               )
             ) : null}
 
-            {/* Marca */}
             <div className="mt-3 flex items-center">
               <img
                 src={`/brands/${normText((productFixed as any).brand)}.png`}
@@ -556,7 +522,6 @@ return vars.length >= 20 && hasSep >= 10;
               />
             </div>
 
-            {/* Precio */}
             <div className="mt-6">
               <div
                 className="inline-flex items-center rounded-full border-2 bg-black px-8 py-4 text-4xl font-black text-white"
@@ -575,7 +540,6 @@ return vars.length >= 20 && hasSep >= 10;
               </div>
             </div>
 
-            {/* Cuotas */}
             <div className="mt-8">
               <div className="flex items-center justify-between">
                 <div className="text-2xl font-extrabold text-zinc-900">Cuotas</div>
@@ -621,7 +585,6 @@ return vars.length >= 20 && hasSep >= 10;
               </div>
             </div>
 
-            {/* Envío Zipnova */}
             <div className="mt-6">
               <div className="rounded-[18px] bg-[#c2c2c2] p-4 shadow-[0_10px_22px_rgba(0,0,0,0.08)]">
                 <div className="flex items-center justify-between">
@@ -679,37 +642,9 @@ return vars.length >= 20 && hasSep >= 10;
               </div>
             </div>
 
-            {/* CTA */}
-            <button
-              type="button"
-              disabled={!selectedVariant?.sku || stock <= 0}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                if (!selectedVariant?.sku) return;
-
-                addItem({
-                productId: (productFixed as any).id,
-                variant: selectedVariant, // pasa el objeto Variant completo
-                qty: 1,                   // usa qty en lugar de quantity
-                });
-
-                window.dispatchEvent(
-                  new CustomEvent("toast", {
-                    detail: { message: "Agregado al carrito", kind: "success" },
-                  })
-                );
-              }}
-              className={[
-                "mt-8 w-full rounded-full bg-black py-5 text-2xl font-black text-white",
-                "disabled:opacity-40 disabled:cursor-not-allowed",
-              ].join(" ")}
-            >
-              Agregar al carrito
-            </button>
+            {/* CTA movido a barra flotante inferior */}
           </section>
 
-          {/* Descripción */}
           <section className="mt-8">
             <div className="text-xl font-extrabold">Descripción</div>
 
@@ -750,7 +685,6 @@ return vars.length >= 20 && hasSep >= 10;
             </div>
           </section>
 
-          {/* Lo más vendido */}
           {bestSellersFixed.length > 0 ? (
             <section className="mt-10">
               <div className="text-xl font-extrabold">Lo más vendido…</div>
@@ -773,6 +707,57 @@ return vars.length >= 20 && hasSep >= 10;
               </div>
             </section>
           ) : null}
+        </div>
+      </div>
+
+      {/* CTA flotante inferior */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-black/95 p-3 backdrop-blur supports-[backdrop-filter]:bg-black/80">
+        <div className="mx-auto flex max-w-[520px] items-center justify-between gap-3">
+          <div className="min-w-0">
+            <div className="text-lg font-black text-white">
+              {formatPrice(price)}
+            </div>
+            <div className="text-xs font-semibold">
+              {stock > 0 ? (
+                <span className="text-green-400">✔ En stock</span>
+              ) : (
+                <span className="text-red-400">✖ Sin stock</span>
+              )}
+              <span className="ml-2 text-white/60">
+                {isWholesale ? "Mayorista" : "Minorista"}
+              </span>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            disabled={!selectedVariant?.sku || stock <= 0}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              if (!selectedVariant?.sku) return;
+
+              addItem({
+                productId: (productFixed as any).id,
+                variant: selectedVariant,
+                qty: 1,
+              });
+
+              window.dispatchEvent(
+                new CustomEvent("toast", {
+                  detail: { message: "Agregado al carrito", kind: "success" },
+                })
+              );
+            }}
+            className={[
+              "shrink-0 rounded-full px-5 py-3 text-sm font-black text-white transition active:scale-[0.98]",
+              stock > 0 && selectedVariant?.sku
+                ? "bg-[#ee078e]"
+                : "bg-white/20 cursor-not-allowed",
+            ].join(" ")}
+          >
+            Agregar
+          </button>
         </div>
       </div>
     </div>
