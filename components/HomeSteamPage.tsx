@@ -318,14 +318,47 @@ export default function HomeSteamPage({ products }: { products: Product[] }) {
       <SearchBar className="mt-3" />
 
       {/* Título */}
-      <section className="pt-4 pb-4">
-        <h1 className="text-2xl font-black tracking-tight text-[#111] dark:text-white">
-          ¿Qué querés pedir hoy?
-        </h1>
-        <p className="mt-2 text-sm text-[#6b7280] dark:text-white/60">
-          Entrás, elegís, mandás el pedido. Listo.
-        </p>
-      </section>
+      <section className="pt-4 pb-5">
+  <div className="overflow-hidden rounded-3xl border border-[#e5e7eb] bg-[#111] px-5 py-6 text-white dark:border-white/10 dark:bg-white/5">
+    
+    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/70">
+      SH Rosario
+    </p>
+
+    <h1 className="mt-2 text-2xl font-black tracking-tight">
+      Productos capilares para profesionales
+    </h1>
+
+    <p className="mt-2 max-w-[34ch] text-sm text-white/75">
+      Comprá rápido, encontrá marcas clave y armá tu pedido desde el celular.
+    </p>
+
+    <div className="mt-4 flex flex-wrap gap-2">
+      <Link
+        href="/catalog"
+        className="inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-sm font-bold text-[#111] active:scale-[0.98]"
+      >
+        Ver catálogo
+      </Link>
+
+      <Link
+        href="/catalog?tag=oferta"
+        className="inline-flex items-center justify-center rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white active:scale-[0.98]"
+      >
+        Ver ofertas
+      </Link>
+    </div>
+
+    <div className="mt-4 flex flex-wrap gap-3 text-xs text-white/65">
+      <span>Envíos</span>
+      <span>•</span>
+      <span>Stock real</span>
+      <span>•</span>
+      <span>Compra simple</span>
+    </div>
+
+  </div>
+</section>
 
       {/* Tiles */}
       <section className="space-y-3">
