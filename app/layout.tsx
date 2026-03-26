@@ -2,6 +2,7 @@ import "./globals.css";
 import Providers from "./providers";
 import ClientShell from "@/app/ClientShell";
 import Script from "next/script";
+import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import NextTopLoader from "nextjs-toploader";
 import AppTransitions from "@/components/AppTransitions";
@@ -10,40 +11,45 @@ import AppBootSplash from "@/components/AppBootSplash";
 import ThemeToggle from "@/components/ThemeToggle";
 import PwaInstallPrompt from "@/components/PwaInstallPrompt";
 
+export const metadata: Metadata = {
+  title: "SH Rosario",
+  description: "PWA de SH Rosario",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "SH Rosario",
+  },
+};
+
 const inter = Poppins({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800", "900"],
   display: "swap",
 });
 
-
-
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const isProd = process.env.NODE_ENV === "production";
- 
+
   return (
     <html lang="es" suppressHydrationWarning>
-
-
-  <body className={`${inter.className} min-h-screen bg-[hsl(var(--app-bg))] text-[hsl(var(--app-fg))]`}>
- 
+      <body
+        className={`${inter.className} min-h-screen bg-[hsl(var(--app-bg))] text-[hsl(var(--app-fg))]`}
+      >
         <Providers>
           <ClientShell>
             {isProd ? <NextTopLoader showSpinner={false} /> : null}
-          <ThemeToggle />
-           <AppBootSplash
-  logoLightSrc="/brand/sh-logo-light.png"
-  logoDarkSrc="/brand/sh-logo-dark.png"
-/>
-
+            <ThemeToggle />
+            <AppBootSplash
+              logoLightSrc="/brand/sh-logo-light.png"
+              logoDarkSrc="/brand/sh-logo-dark.png"
+            />
             <AppTransitions>{children}</AppTransitions>
             <PwaInstallPrompt />
             {isProd ? null : <NavDebug />}
           </ClientShell>
         </Providers>
-        
 
-        {/* Mercado Pago SDK */}
         <Script
           src="https://sdk.mercadopago.com/js/v2"
           strategy="afterInteractive"
