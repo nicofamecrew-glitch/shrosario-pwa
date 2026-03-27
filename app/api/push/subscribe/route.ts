@@ -7,6 +7,8 @@ export async function POST(req: Request) {
   try {
     const subscription = await req.json();
 
+    console.log("[subscribe] body:", subscription);
+
     if (!subscription?.endpoint) {
       return NextResponse.json(
         { ok: false, error: "Missing subscription endpoint" },
@@ -22,16 +24,16 @@ export async function POST(req: Request) {
         is_active: true,
       });
 
-    if (error) throw error;
+    if (error) {
+      console.error("[subscribe] supabase error:", error);
+      throw error;
+    }
 
     return NextResponse.json({ ok: true });
   } catch (e: any) {
-    console.error("POST /api/push/subscribe error:", e);
+    console.error("[subscribe] route error:", e);
     return NextResponse.json(
-      {
-        ok: false,
-        error: e?.message || "Internal error",
-      },
+      { ok: false, error: e?.message || "Internal error" },
       { status: 500 }
     );
   }

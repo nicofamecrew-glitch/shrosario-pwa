@@ -10,6 +10,8 @@ function urlBase64ToUint8Array(base64String: string) {
 export default function EnablePush() {
   async function subscribe() {
     try {
+      console.log("[push] click");
+
       if (!("serviceWorker" in navigator)) {
         alert("Este navegador no soporta service worker");
         return;
@@ -21,14 +23,19 @@ export default function EnablePush() {
       }
 
       const permission = await Notification.requestPermission();
+      console.log("[push] permission:", permission);
+
       if (permission !== "granted") {
         alert("No se concedió permiso para notificaciones");
         return;
       }
 
       const reg = await navigator.serviceWorker.ready;
+      console.log("[push] sw ready:", reg);
 
       const existing = await reg.pushManager.getSubscription();
+      console.log("[push] existing:", existing);
+
       const sub =
         existing ??
         (await reg.pushManager.subscribe({
@@ -38,30 +45,30 @@ export default function EnablePush() {
           ),
         }));
 
+      console.log("[push] sub:", sub);
+
       const res = await fetch("/api/push/subscribe", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(sub),
       });
 
       const data = await res.json();
+      console.log("[push] subscribe response:", res.status, data);
 
       if (!res.ok || !data?.ok) {
-        console.error("subscribe failed", data);
         alert("No se pudo activar push");
         return;
       }
 
       alert("Notificaciones activadas");
     } catch (e) {
-      console.error("EnablePush error:", e);
+      console.error("[push] error:", e);
       alert("Error activando notificaciones");
     }
   }
 
-  return (
-    <button onClick={subscribe}>
-      Activar notificaciones
-    </button>
-  );
+  return <button onClick={subscribe}>Activar notificaciones</button>;
 }
