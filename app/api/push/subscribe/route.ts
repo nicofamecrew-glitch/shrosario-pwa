@@ -1,15 +1,24 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/lib/supabase-server";
 
+export const runtime = "nodejs";
+
 export async function POST(req: Request) {
   try {
-    const sub = await req.json();
+    const subscription = await req.json();
+
+    if (!subscription?.endpoint) {
+      return NextResponse.json(
+        { ok: false, error: "Missing subscription endpoint" },
+        { status: 400 }
+      );
+    }
 
     const { error } = await supabaseAdmin
       .from("push_subscriptions")
       .insert({
-        subscription: sub,
-        role: "admin", // por ahora solo vos
+        role: "admin",
+        subscription,
         is_active: true,
       });
 
@@ -17,7 +26,13 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ ok: true });
   } catch (e: any) {
-    console.error("subscribe error:", e);
-    return NextResponse.json({ ok: false }, { status: 500 });
+    console.error("POST /api/push/subscribe error:", e);
+    return NextResponse.json(
+      {
+        ok: false,
+        error: e?.message || "Internal error",
+      },
+      { status: 500 }
+    );
   }
 }
