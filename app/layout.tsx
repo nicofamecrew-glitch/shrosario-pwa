@@ -10,6 +10,7 @@ import NavDebug from "@/components/dev/NavDebug";
 import AppBootSplash from "@/components/AppBootSplash";
 import ThemeToggle from "@/components/ThemeToggle";
 import PwaInstallPrompt from "@/components/PwaInstallPrompt";
+import EnablePush from "@/components/EnablePush";
 
 export const metadata: Metadata = {
   title: "SH Rosario",
@@ -46,6 +47,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             />
             <AppTransitions>{children}</AppTransitions>
             <PwaInstallPrompt />
+            <EnablePush />
             {isProd ? null : <NavDebug />}
           </ClientShell>
         </Providers>
