@@ -7,8 +7,6 @@ export async function POST(req: Request) {
   try {
     const subscription = await req.json();
 
-    console.log("[subscribe] body:", subscription);
-
     if (!subscription?.endpoint) {
       return NextResponse.json(
         { ok: false, error: "Missing subscription endpoint" },
@@ -19,19 +17,16 @@ export async function POST(req: Request) {
     const { error } = await supabaseAdmin
       .from("push_subscriptions")
       .insert({
-        role: "admin",
+        role: "public",
         subscription,
         is_active: true,
       });
 
-    if (error) {
-      console.error("[subscribe] supabase error:", error);
-      throw error;
-    }
+    if (error) throw error;
 
     return NextResponse.json({ ok: true });
   } catch (e: any) {
-    console.error("[subscribe] route error:", e);
+    console.error("POST /api/push/subscribe error:", e);
     return NextResponse.json(
       { ok: false, error: e?.message || "Internal error" },
       { status: 500 }

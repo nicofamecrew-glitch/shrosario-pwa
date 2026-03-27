@@ -2,41 +2,61 @@ import { NextResponse } from "next/server";
 import webpush from "web-push";
 import { supabaseAdmin } from "@/lib/lib/supabase-server";
 
+export const runtime = "nodejs";
+
 webpush.setVapidDetails(
-  "mailto:tu@email.com",
+  "mailto:admin@shrosario.store",
   process.env.VAPID_PUBLIC_KEY!,
   process.env.VAPID_PRIVATE_KEY!
 );
 
-export async function POST() {
+export async function POST(req: Request) {
   try {
+    const { title, body, url } = await req.json();
+
+    if (!title || !body) {
+      return NextResponse.json(
+        { ok: false, error: "Faltan title o body" },
+        { status: 400 }
+      );
+    }
+
     const { data: subs, error } = await supabaseAdmin
       .from("push_subscriptions")
-      .select("subscription")
-      .eq("is_active", true);
+      .select("id, subscription")
+      .eq("is_active", true)
+      .eq("role", "public");
 
     if (error) throw error;
-
-    console.log("[push] subs:", subs?.length);
 
     for (const row of subs || []) {
       try {
         await webpush.sendNotification(
           row.subscription,
           JSON.stringify({
-            title: "🔥 SH Rosario",
-            body: "Si te llegó esto, ya está funcionando",
-            url: "/",
+            title,
+            body,
+            url: url || "/",
           })
         );
       } catch (err: any) {
         console.error("[push] send error:", err?.message || err);
+
+        if (err?.statusCode === 404 || err?.statusCode === 410) {
+          await supabaseAdmin
+            .from("push_subscriptions")
+            .update({ is_active: false })
+            .eq("id", row.id);
+        }
       }
     }
 
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true, sent: subs?.length || 0 });
   } catch (e: any) {
     console.error("[push] route error:", e);
-    return NextResponse.json({ ok: false }, { status: 500 });
+    return NextResponse.json(
+      { ok: false, error: e?.message || "Internal error" },
+      { status: 500 }
+    );
   }
 }
