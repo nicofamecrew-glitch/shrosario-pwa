@@ -38,7 +38,7 @@ export async function POST(req: Request) {
       .from("push_subscriptions")
       .select("id, subscription")
       .eq("is_active", true)
-      .eq("role", "public");
+      .in("role", ["public", "admin"]);
 
     if (error) throw error;
 
