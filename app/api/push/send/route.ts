@@ -10,6 +10,19 @@ webpush.setVapidDetails(
   process.env.VAPID_PRIVATE_KEY!
 );
 
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "https://admin.appshrosario.store",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
+};
+
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: corsHeaders,
+  });
+}
+
 export async function POST(req: Request) {
   try {
     const { title, body, url } = await req.json();
@@ -17,7 +30,7 @@ export async function POST(req: Request) {
     if (!title || !body) {
       return NextResponse.json(
         { ok: false, error: "Faltan title o body" },
-        { status: 400 }
+        { status: 400, headers: corsHeaders }
       );
     }
 
@@ -51,12 +64,15 @@ export async function POST(req: Request) {
       }
     }
 
-    return NextResponse.json({ ok: true, sent: subs?.length || 0 });
+    return NextResponse.json(
+      { ok: true, sent: subs?.length || 0 },
+      { headers: corsHeaders }
+    );
   } catch (e: any) {
     console.error("[push] route error:", e);
     return NextResponse.json(
       { ok: false, error: e?.message || "Internal error" },
-      { status: 500 }
+      { status: 500, headers: corsHeaders }
     );
   }
 }

@@ -5,7 +5,7 @@ export const runtime = "nodejs";
 
 export async function POST(req: Request) {
   try {
-    const subscription = await req.json();
+    const { subscription, phone } = await req.json();
 
     if (!subscription?.endpoint) {
       return NextResponse.json(
@@ -19,6 +19,7 @@ export async function POST(req: Request) {
       .insert({
         role: "public",
         subscription,
+        phone: phone || null,
         is_active: true,
       });
 

@@ -37,51 +37,58 @@ export default function EnablePush() {
   }, []);
 
   async function subscribe() {
-    try {
-      setLoading(true);
+  try {
+    setLoading(true);
 
-      const permission = await Notification.requestPermission();
-      if (permission !== "granted") {
-        alert("No se concedió permiso para notificaciones");
-        return;
-      }
-
-      const reg = await navigator.serviceWorker.ready;
-
-      const existing = await reg.pushManager.getSubscription();
-      const sub =
-        existing ??
-        (await reg.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(
-            process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!
-          ),
-        }));
-
-      const res = await fetch("/api/push/subscribe", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(sub),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok || !data?.ok) {
-        alert("No se pudo activar notificaciones");
-        return;
-      }
-
-      setEnabled(true);
-      alert("Avisos activados");
-    } catch (e) {
-      console.error("[push] error:", e);
-      alert("Error activando notificaciones");
-    } finally {
-      setLoading(false);
+    const permission = await Notification.requestPermission();
+    if (permission !== "granted") {
+      alert("No se concedió permiso para notificaciones");
+      return;
     }
+
+    const reg = await navigator.serviceWorker.ready;
+
+    const existing = await reg.pushManager.getSubscription();
+    const sub =
+      existing ??
+      (await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(
+          process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!
+        ),
+      }));
+
+    const profile = JSON.parse(
+      localStorage.getItem("sh_checkout_profile_v1") || "{}"
+    );
+
+    const res = await fetch("/api/push/subscribe", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        subscription: sub,
+        phone: profile.phone || "",
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data?.ok) {
+      alert("No se pudo activar notificaciones");
+      return;
+    }
+
+    setEnabled(true);
+    alert("Avisos activados");
+  } catch (e) {
+    console.error("[push] error:", e);
+    alert("Error activando notificaciones");
+  } finally {
+    setLoading(false);
   }
+}
 
   if (!supported) return null;
 
