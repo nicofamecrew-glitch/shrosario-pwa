@@ -27,6 +27,46 @@ function normalizePhone(v: unknown) {
   return String(v ?? "").replace(/\D/g, "");
 }
 
+function phoneVariants(v: unknown) {
+  const raw = normalizePhone(v);
+  if (!raw) return [];
+
+  const out = new Set<string>();
+  out.add(raw);
+
+  // sin 54
+  if (raw.startsWith("54")) out.add(raw.slice(2));
+
+  // sin 0 inicial
+  if (raw.startsWith("0")) out.add(raw.slice(1));
+
+  // combinadas
+  let base = raw;
+  if (base.startsWith("54")) base = base.slice(2);
+  if (base.startsWith("0")) base = base.slice(1);
+  out.add(base);
+
+  // sufijos útiles para Argentina
+  if (base.length >= 8) out.add(base.slice(-8));
+  if (base.length >= 10) out.add(base.slice(-10));
+
+  return Array.from(out).filter(Boolean);
+}
+
+function phonesMatch(a: unknown, b: unknown) {
+  const av = phoneVariants(a);
+  const bv = phoneVariants(b);
+
+  for (const x of av) {
+    for (const y of bv) {
+      if (x === y) return true;
+      if (x.length >= 8 && y.length >= 8 && x.slice(-8) === y.slice(-8)) return true;
+    }
+  }
+
+  return false;
+}
+
 export async function GET(req: Request) {
   try {
     const sheetId = process.env.GOOGLE_SHEETS_SHEET_ID;
@@ -81,11 +121,10 @@ export async function GET(req: Request) {
     // W shipping_eta
     // X shipping_meta
 
-        const orders = rows
+            const orders = rows
       .filter((row) => {
-        const rowPhone = normalizePhone(row?.[7]); // H = telefono
-        const queryPhone = normalizePhone(phone);
-        const matchesPhone = !!queryPhone && rowPhone === queryPhone;
+        const rowPhone = safeStr(row?.[7]); // H = telefono
+        const matchesPhone = !!phone && phonesMatch(rowPhone, phone);
         return matchesPhone;
       })
       .map((row) => ({
@@ -102,7 +141,7 @@ export async function GET(req: Request) {
       orders,
       debug: {
         phoneReceived: phone,
-        phoneNormalized: normalizePhone(phone),
+        phoneVariants: phoneVariants(phone),
         totalRows: rows.length,
       },
     });
