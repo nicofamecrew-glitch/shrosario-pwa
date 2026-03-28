@@ -88,6 +88,7 @@ export default function OrdersPage() {
         });
 
         const data = await res.json().catch(() => null);
+                console.log("[orders/list] response", data);
 
         if (!alive) return;
 

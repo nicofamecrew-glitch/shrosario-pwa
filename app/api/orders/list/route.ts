@@ -23,6 +23,10 @@ function safeStr(v: unknown) {
   return String(v ?? "").trim();
 }
 
+function normalizePhone(v: unknown) {
+  return String(v ?? "").replace(/\D/g, "");
+}
+
 export async function GET(req: Request) {
   try {
     const sheetId = process.env.GOOGLE_SHEETS_SHEET_ID;
@@ -77,10 +81,11 @@ export async function GET(req: Request) {
     // W shipping_eta
     // X shipping_meta
 
-    const orders = rows
+        const orders = rows
       .filter((row) => {
-        const rowPhone = safeStr(row?.[7]); // H = telefono
-        const matchesPhone = !!phone && rowPhone === phone;
+        const rowPhone = normalizePhone(row?.[7]); // H = telefono
+        const queryPhone = normalizePhone(phone);
+        const matchesPhone = !!queryPhone && rowPhone === queryPhone;
         return matchesPhone;
       })
       .map((row) => ({
@@ -92,7 +97,15 @@ export async function GET(req: Request) {
         priceMode: safeStr(row?.[4]) as "mayorista" | "minorista" | "", // E
       }));
 
-    return NextResponse.json({ ok: true, orders });
+      return NextResponse.json({
+      ok: true,
+      orders,
+      debug: {
+        phoneReceived: phone,
+        phoneNormalized: normalizePhone(phone),
+        totalRows: rows.length,
+      },
+    });
   } catch (e: any) {
     console.error("GET /api/orders/list ERROR:", e);
     return NextResponse.json(
