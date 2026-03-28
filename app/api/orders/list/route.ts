@@ -23,6 +23,11 @@ function safeStr(v: unknown) {
   return String(v ?? "").trim();
 }
 
+function lastDigits(v: unknown, n = 8) {
+  const s = String(v ?? "").replace(/\D/g, "");
+  return s.slice(-n);
+}
+
 function normalizePhone(v: unknown) {
   return String(v ?? "").replace(/\D/g, "");
 }
@@ -122,11 +127,12 @@ export async function GET(req: Request) {
     // X shipping_meta
 
             const orders = rows
-      .filter((row) => {
-        const rowPhone = safeStr(row?.[7]); // H = telefono
-        const matchesPhone = !!phone && phonesMatch(rowPhone, phone);
-        return matchesPhone;
-      })
+  .filter((row) => {
+    const rowPhone = lastDigits(row?.[7]); // H = telefono
+    const queryPhone = lastDigits(phone);
+
+    return rowPhone && queryPhone && rowPhone === queryPhone;
+  })
       .map((row) => ({
         createdAt: safeStr(row?.[0]),   // A
         id: safeStr(row?.[1]),          // B
