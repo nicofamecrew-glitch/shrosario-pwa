@@ -242,14 +242,14 @@ export async function POST(req: Request) {
         });
 
         // 2) Supabase
-        const { data: updatedOrder, error: supabaseOrderError } = await supabaseAdmin
+               const { data: updatedOrder, error: supabaseOrderError } = await supabaseAdmin
           .from("orders")
           .update({
             status: "Pagado",
             external_ref: orderRef,
           })
           .eq("order_code", orderRef)
-          .select("id, order_code, status, external_ref")
+          .select("id, order_code, status, external_ref, device_id")
           .maybeSingle();
 
         if (supabaseOrderError) {
@@ -270,7 +270,6 @@ export async function POST(req: Request) {
           orderRef,
           paymentId,
         });
-
         if (!updatedOrder) {
           console.warn("Pago aprobado pero no encontré la orden en Supabase", {
             orderRef,
@@ -280,7 +279,46 @@ export async function POST(req: Request) {
           console.log("Pedido marcado como PAGADO en Supabase ✅", {
             orderId: updatedOrder.order_code,
             status: updatedOrder.status,
+            deviceId: updatedOrder.device_id ?? null,
           });
+
+          if (updatedOrder.device_id) {
+            try {
+              const pushRes = await fetch(`${url.origin}/api/push/send`, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  deviceId: updatedOrder.device_id,
+                  title: "Pedido confirmado 👌",
+                  body: "Recibimos tu pago y ya estamos preparando tu pedido.",
+                  url: "/account/orders",
+                }),
+              });
+
+              const pushJson = await pushRes.json().catch(() => null);
+
+              console.log("[MP WEBHOOK] push result", {
+                ok: pushRes.ok,
+                status: pushRes.status,
+                pushJson,
+                orderRef,
+                paymentId,
+              });
+            } catch (pushErr) {
+              console.error("[MP WEBHOOK] push send failed", {
+                orderRef,
+                paymentId,
+                pushErr,
+              });
+            }
+          } else {
+            console.warn("[MP WEBHOOK] orden pagada sin device_id", {
+              orderRef,
+              paymentId,
+            });
+          }
         }
 
         console.log("Pedido marcado como PAGADO ✅", { orderId: orderRef });

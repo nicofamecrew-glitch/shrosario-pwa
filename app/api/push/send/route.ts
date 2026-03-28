@@ -25,8 +25,7 @@ export async function OPTIONS() {
 
 export async function POST(req: Request) {
   try {
-    const { title, body, url, image, phone, role } = await req.json();
-
+       const { title, body, url, image, phone, role, deviceId } = await req.json();
     if (!title || !body) {
       return NextResponse.json(
         { ok: false, error: "Faltan title o body" },
@@ -39,17 +38,19 @@ export async function POST(req: Request) {
       .select("id, subscription, phone, role")
       .eq("is_active", true);
 
-    // 1) Envío dirigido por teléfono
-    if (phone) {
+       // 1) Envío dirigido por deviceId
+    if (deviceId) {
+      query = query.eq("device_id", String(deviceId).trim());
+    }
+    // 2) Envío dirigido por teléfono
+    else if (phone) {
       query = query.eq("phone", String(phone).trim());
     }
-    // 2) Envío por rol (admin/public)
+    // 3) Envío por rol (admin/public)
     else if (role) {
       query = query.eq("role", String(role).trim());
     }
-    // 3) Si no viene ni phone ni role, manda a todos los activos
-    // (dejado solo por compatibilidad / pruebas)
-
+    // 4) Si no viene nada, manda a todos los activos
     const { data: subs, error } = await query;
 
     if (error) throw error;
