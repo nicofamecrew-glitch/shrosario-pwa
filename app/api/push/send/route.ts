@@ -25,7 +25,7 @@ export async function OPTIONS() {
 
 export async function POST(req: Request) {
   try {
-    const { title, body, url } = await req.json();
+    const { title, body, url, image } = await req.json();
 
     if (!title || !body) {
       return NextResponse.json(
@@ -50,6 +50,7 @@ export async function POST(req: Request) {
             title,
             body,
             url: url || "/",
+            ...(image ? { image } : {}),
           })
         );
       } catch (err: any) {
