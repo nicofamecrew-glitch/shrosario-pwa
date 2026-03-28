@@ -51,37 +51,45 @@ export async function GET(req: Request) {
 
     const rows = res.data.values ?? [];
 
-    // Suposición actual de columnas:
-    // A createdAt
-    // B orderId
-    // C status
-    // E total
-    // G phone
-    // H city
-    // I shipmentId (si existe)
-    // J priceMode (si existe)
-    // K email (si existe)  <-- AJUSTAR si tu columna real es otra
-    //
-    // OJO: si email no está todavía guardado en Orders, esta parte no va a encontrar nada por email.
-    // En ese caso seguirá funcionando por phone.
+        // Columnas reales en Orders:
+    // A fecha
+    // B Numero de orden
+    // C external_reference
+    // D estado
+    // E concepto
+    // F precio final
+    // G nombre
+    // H telefono
+    // I ciudad
+    // J direccion
+    // K cuit
+    // L tipo
+    // M detalle
+    // N payment_id
+    // O payment_status
+    // P shipment_id
+    // Q shipment_status
+    // R shipping_cost
+    // S shipping_provider
+    // T shipping_option_id
+    // U shipping_option_name
+    // V shipping_price
+    // W shipping_eta
+    // X shipping_meta
 
     const orders = rows
       .filter((row) => {
-        const rowPhone = safeStr(row?.[6]); // G
-        const rowEmail = safeStr(row?.[10]).toLowerCase(); // K (ajustar si hace falta)
-
-        const matchesEmail = !!email && rowEmail === email.toLowerCase();
+        const rowPhone = safeStr(row?.[7]); // H = telefono
         const matchesPhone = !!phone && rowPhone === phone;
-
-        return matchesEmail || matchesPhone;
+        return matchesPhone;
       })
       .map((row) => ({
-        createdAt: safeStr(row?.[0]),
-        id: safeStr(row?.[1]),
-        status: safeStr(row?.[2]),
-        total: Number(row?.[4] ?? 0),
-        shipmentId: safeStr(row?.[8]), // I si existe
-        priceMode: safeStr(row?.[9]) as "mayorista" | "minorista" | "",
+        createdAt: safeStr(row?.[0]),   // A
+        id: safeStr(row?.[1]),          // B
+        status: safeStr(row?.[3]),      // D
+        total: Number(row?.[5] ?? 0),   // F
+        shipmentId: safeStr(row?.[15]), // P
+        priceMode: safeStr(row?.[4]) as "mayorista" | "minorista" | "", // E
       }));
 
     return NextResponse.json({ ok: true, orders });
