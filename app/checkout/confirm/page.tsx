@@ -23,6 +23,20 @@ function getDraftId() {
   }
 }
 
+function getDeviceId() {
+  try {
+    const KEY = "sh_device_id_v1";
+    let id = localStorage.getItem(KEY);
+    if (!id) {
+      id = crypto.randomUUID();
+      localStorage.setItem(KEY, id);
+    }
+    return id;
+  } catch {
+    return "";
+  }
+}
+
 function createFreshDraftId() {
   const created = `DRAFT-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
   localStorage.setItem(DRAFT_KEY, created);
@@ -49,6 +63,7 @@ interface OrderItem {
 
 interface Order {
   orderId: string;
+  deviceId?: string;
   items: OrderItem[];
   priceMode: "minorista" | "mayorista";
   fullName: string;
@@ -172,30 +187,30 @@ export default function ConfirmOrderPage() {
       }
       const draftId = createFreshDraftId();
       const shippingSel = readShippingSelection();
+      const deviceId = getDeviceId();
+      const cleanPhone = phone.trim();
       
-      const order: Order = {
-  orderId: draftId, // ✅ este es el Numero de orden
-  items: orderItems,
-  priceMode,
-  fullName: fullName.trim(),
-  phone: phone.trim(),
-  city: city.trim(),
-  address: address.trim(),
-  notes: notes.trim(),
-
-  // ✅ opcional: pegamos envío seleccionado si existe
-  shipping: shippingSel
-    ? {
-        method: shippingSel.method,
-        label: shippingSel.label,
-        cost: shippingSel.cost,
-        zipcode: shippingSel.zipcode,
-        notes: shippingSel.notes,
-        updatedAt: shippingSel.updatedAt,
-      }
-    : null,
-};
-
+          const order: Order = {
+        orderId: draftId,
+        deviceId,
+        items: orderItems,
+        priceMode,
+        fullName: fullName.trim(),
+        phone: cleanPhone,
+        city: city.trim(),
+        address: address.trim(),
+        notes: notes.trim(),
+        shipping: shippingSel
+          ? {
+              method: shippingSel.method,
+              label: shippingSel.label,
+              cost: shippingSel.cost,
+              zipcode: shippingSel.zipcode,
+              notes: shippingSel.notes,
+              updatedAt: shippingSel.updatedAt,
+            }
+          : null,
+      };
       const res = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

@@ -184,6 +184,7 @@ export async function POST(req: Request) {
     const orderId = ensureOrderId(order);
     const priceMode = order?.priceMode ?? "";
     const status = order?.status ?? "Pendiente";
+    const deviceId = String(order?.deviceId ?? "").trim();
 
     const customer = order?.customer ?? {};
     const fullName = customer?.fullName ?? order?.fullName ?? "Cliente app";
@@ -326,7 +327,7 @@ export async function POST(req: Request) {
     let duplicated = false;
 
     if (!existingOrder?.id) {
-      const { data: insertedOrder, error: orderInsertError } =
+            const { data: insertedOrder, error: orderInsertError } =
         await supabaseAdmin
           .from("orders")
           .insert({
@@ -336,6 +337,7 @@ export async function POST(req: Request) {
             price_mode: priceMode || null,
             total,
             customer_id: customerId,
+            device_id: deviceId || null,
             created_at: createdAt,
           })
           .select("id")
@@ -346,7 +348,7 @@ export async function POST(req: Request) {
     } else {
       duplicated = true;
       dbOrderId = existingOrder.id;
-
+      
       const { error: orderUpdateError } = await supabaseAdmin
         .from("orders")
         .update({
@@ -355,6 +357,7 @@ export async function POST(req: Request) {
           price_mode: priceMode || null,
           total,
           customer_id: customerId,
+          device_id: deviceId || null,
         })
         .eq("id", dbOrderId);
 
