@@ -8,7 +8,7 @@ import NextTopLoader from "nextjs-toploader";
 import AppTransitions from "@/components/AppTransitions";
 import NavDebug from "@/components/dev/NavDebug";
 import AppBootSplash from "@/components/AppBootSplash";
-import ThemeToggle from "@/components/ThemeToggle";
+
 import PwaInstallPrompt from "@/components/PwaInstallPrompt";
 import EnablePush from "@/components/EnablePush";
 import PushSwRegister from "@/components/PushSwRegister";
@@ -41,7 +41,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Providers>
           <ClientShell>
   {isProd ? <NextTopLoader showSpinner={false} /> : null}
-  <ThemeToggle />
+  
   <AppBootSplash
     logoLightSrc="/brand/sh-logo-light.png"
     logoDarkSrc="/brand/sh-logo-dark.png"
