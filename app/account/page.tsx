@@ -9,6 +9,7 @@ const items = [
   { href: "/account/orders", title: "Mis pedidos", subtitle: "Historial y estados" },
   { href: "/account/favorites", title: "Favoritos", subtitle: "Guardados para después" },
   { href: "/account/wholesale", title: "Mayorista", subtitle: "Acceso y condiciones" },
+  { href: "/account/config", title: "Configuración", subtitle: "Tema, notificaciones e instalación" },
   { href: "/help", title: "Ayuda", subtitle: "Envíos, pagos y contacto" },
 ];
 

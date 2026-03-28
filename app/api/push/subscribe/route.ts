@@ -5,7 +5,7 @@ export const runtime = "nodejs";
 
 export async function POST(req: Request) {
   try {
-    const { subscription, phone } = await req.json();
+    const { subscription, phone, deviceId } = await req.json();
 
     if (!subscription?.endpoint) {
       return NextResponse.json(
@@ -14,14 +14,32 @@ export async function POST(req: Request) {
       );
     }
 
+    if (!deviceId) {
+      return NextResponse.json(
+        { ok: false, error: "Missing deviceId" },
+        { status: 400 }
+      );
+    }
+
+    const endpoint = String(subscription.endpoint).trim();
+    const cleanPhone = String(phone ?? "").trim() || null;
+    const cleanDeviceId = String(deviceId).trim();
+
     const { error } = await supabaseAdmin
       .from("push_subscriptions")
-      .insert({
-        role: "public",
-        subscription,
-        phone: phone || null,
-        is_active: true,
-      });
+      .upsert(
+        {
+          role: "public",
+          endpoint,
+          subscription,
+          phone: cleanPhone,
+          device_id: cleanDeviceId,
+          is_active: true,
+        },
+        {
+          onConflict: "endpoint",
+        }
+      );
 
     if (error) throw error;
 
