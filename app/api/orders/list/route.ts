@@ -23,54 +23,21 @@ function safeStr(v: unknown) {
   return String(v ?? "").trim();
 }
 
-function lastDigits(v: unknown, n = 8) {
+function lastDigitsVariants(v: unknown) {
   const s = String(v ?? "").replace(/\D/g, "");
-  return s.slice(-n);
+  if (!s) return [];
+
+  const set = new Set<string>();
+
+  // últimos 8 (principal)
+  if (s.length >= 8) set.add(s.slice(-8));
+
+  // últimos 7 (backup)
+  if (s.length >= 7) set.add(s.slice(-7));
+
+  return Array.from(set);
 }
 
-function normalizePhone(v: unknown) {
-  return String(v ?? "").replace(/\D/g, "");
-}
-
-function phoneVariants(v: unknown) {
-  const raw = normalizePhone(v);
-  if (!raw) return [];
-
-  const out = new Set<string>();
-  out.add(raw);
-
-  // sin 54
-  if (raw.startsWith("54")) out.add(raw.slice(2));
-
-  // sin 0 inicial
-  if (raw.startsWith("0")) out.add(raw.slice(1));
-
-  // combinadas
-  let base = raw;
-  if (base.startsWith("54")) base = base.slice(2);
-  if (base.startsWith("0")) base = base.slice(1);
-  out.add(base);
-
-  // sufijos útiles para Argentina
-  if (base.length >= 8) out.add(base.slice(-8));
-  if (base.length >= 10) out.add(base.slice(-10));
-
-  return Array.from(out).filter(Boolean);
-}
-
-function phonesMatch(a: unknown, b: unknown) {
-  const av = phoneVariants(a);
-  const bv = phoneVariants(b);
-
-  for (const x of av) {
-    for (const y of bv) {
-      if (x === y) return true;
-      if (x.length >= 8 && y.length >= 8 && x.slice(-8) === y.slice(-8)) return true;
-    }
-  }
-
-  return false;
-}
 
 export async function GET(req: Request) {
   try {
@@ -126,13 +93,12 @@ export async function GET(req: Request) {
     // W shipping_eta
     // X shipping_meta
 
-            const orders = rows
-  .filter((row) => {
-    const rowPhone = lastDigits(row?.[7]); // H = telefono
-    const queryPhone = lastDigits(phone);
+          const orders = rows.filter((row) => {
+  const rowVariants = lastDigitsVariants(row?.[7]); // H
+  const queryVariants = lastDigitsVariants(phone);
 
-    return rowPhone && queryPhone && rowPhone === queryPhone;
-  })
+  return rowVariants.some(rv => queryVariants.includes(rv));
+})
       .map((row) => ({
         createdAt: safeStr(row?.[0]),   // A
         id: safeStr(row?.[1]),          // B
@@ -147,7 +113,7 @@ export async function GET(req: Request) {
       orders,
       debug: {
         phoneReceived: phone,
-        phoneVariants: phoneVariants(phone),
+       phoneVariants: lastDigitsVariants(phone),
         totalRows: rows.length,
       },
     });
