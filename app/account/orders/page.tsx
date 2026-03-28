@@ -51,9 +51,9 @@ export default function OrdersPage() {
   const primaryButton =
     "mt-6 w-full rounded-full bg-[hsl(var(--app-fg))] px-4 py-3 font-bold text-[hsl(var(--app-bg))] transition hover:opacity-90";
 
-  const phone = useMemo(() => {
+    const phone = useMemo(() => {
     try {
-      const raw = localStorage.getItem("sh_profile_v1");
+      const raw = localStorage.getItem("sh_checkout_profile_v1");
       const prof = raw ? JSON.parse(raw) : null;
       return safeStr(prof?.phone);
     } catch {
@@ -75,7 +75,7 @@ export default function OrdersPage() {
 
         if (!email && !phone) {
           setOrders([]);
-          setDebug("No hay email de sesión ni phone en sh_profile_v1");
+          setDebug("No hay email de sesión ni phone en sh_checkout_profile_v1");
           return;
         }
 
