@@ -25,7 +25,7 @@ export async function OPTIONS() {
 
 export async function POST(req: Request) {
   try {
-    const { title, body, url, image } = await req.json();
+    const { title, body, url, image, phone, role } = await req.json();
 
     if (!title || !body) {
       return NextResponse.json(
@@ -34,13 +34,28 @@ export async function POST(req: Request) {
       );
     }
 
-    const { data: subs, error } = await supabaseAdmin
+    let query = supabaseAdmin
       .from("push_subscriptions")
-      .select("id, subscription")
-      .eq("is_active", true)
-      .in("role", ["public", "admin"]);
+      .select("id, subscription, phone, role")
+      .eq("is_active", true);
+
+    // 1) Envío dirigido por teléfono
+    if (phone) {
+      query = query.eq("phone", String(phone).trim());
+    }
+    // 2) Envío por rol (admin/public)
+    else if (role) {
+      query = query.eq("role", String(role).trim());
+    }
+    // 3) Si no viene ni phone ni role, manda a todos los activos
+    // (dejado solo por compatibilidad / pruebas)
+
+    const { data: subs, error } = await query;
 
     if (error) throw error;
+
+    let sent = 0;
+    let deactivated = 0;
 
     for (const row of subs || []) {
       try {
@@ -53,6 +68,7 @@ export async function POST(req: Request) {
             ...(image ? { image } : {}),
           })
         );
+        sent += 1;
       } catch (err: any) {
         console.error("[push] send error:", err?.message || err);
 
@@ -61,12 +77,19 @@ export async function POST(req: Request) {
             .from("push_subscriptions")
             .update({ is_active: false })
             .eq("id", row.id);
+
+          deactivated += 1;
         }
       }
     }
 
     return NextResponse.json(
-      { ok: true, sent: subs?.length || 0 },
+      {
+        ok: true,
+        sent,
+        matched: subs?.length || 0,
+        deactivated,
+      },
       { headers: corsHeaders }
     );
   } catch (e: any) {
