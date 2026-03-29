@@ -6,9 +6,10 @@ self.addEventListener("push", (event) => {
     icon: "/icon-192.png",
     badge: "/badge-72.png",
     data: { url: data.url || "/" },
+    tag: "sh-rosario-push",
+    renotify: true,
   };
 
-  // 👇 solo agrega image si viene del backend
   if (data.image) {
     options.image = data.image;
   }
