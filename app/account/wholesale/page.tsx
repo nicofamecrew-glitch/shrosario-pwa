@@ -14,6 +14,28 @@ function onlyDigits(s: string) {
   return s.replace(/\D/g, "");
 }
 
+function getDeviceId() {
+  if (typeof window === "undefined") return "";
+  return localStorage.getItem("sh_device_id_v1") || "";
+}
+
+function isValidPhone(phone: string) {
+  const digits = phone.replace(/\D/g, "");
+
+  if (digits.length < 8) return false;
+
+  // ❌ todos iguales (11111111, 00000000)
+  if (/^(\d)\1+$/.test(digits)) return false;
+
+  // ❌ secuencia ascendente simple (12345678)
+  if ("0123456789".includes(digits)) return false;
+
+  // ❌ secuencia descendente (98765432)
+  if ("9876543210".includes(digits)) return false;
+
+  return true;
+}
+
 type RemoteWholesaleStatus = "none" | "pending" | "approved" | "rejected";
 
 type RemoteWholesaleRequest = {
@@ -57,7 +79,7 @@ export default function WholesalePage() {
     cuitDigits.length >= 11 &&
     razonSocial.trim().length >= 3 &&
     ciudad.trim().length >= 2 &&
-    phoneDigits.length >= 8;
+    isValidPhone(phoneDigits)
 
   const page =
     "min-h-[100svh] px-4 pt-16 pb-24 bg-[hsl(var(--app-bg))] text-[hsl(var(--app-fg))]";
@@ -274,59 +296,62 @@ if (!lookupCuit && !lookupPhone) {
         <form
           className="mt-6 space-y-4"
           onSubmit={async (e) => {
-            e.preventDefault();
-            if (!canSubmit) return;
+  e.preventDefault();
+  if (!canSubmit) return;
 
-            const res = await fetch("/api/wholesale", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                cuit: cuitDigits,
-                razonSocial: razonSocial.trim(),
-                condicionFiscal,
-                ciudad: ciudad.trim(),
-                telefono: phoneDigits,
-              }),
-            });
+  const device_id = getDeviceId();
 
-            if (!res.ok) {
-              window.dispatchEvent(
-                new CustomEvent("toast", {
-                  detail: {
-                    message: "No pudimos enviar la solicitud. Probá de nuevo.",
-                    kind: "error",
-                  },
-                })
-              );
-              return;
-            }
+  const res = await fetch("/api/wholesale", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      cuit: cuitDigits,
+      razonSocial: razonSocial.trim(),
+      condicionFiscal,
+      ciudad: ciudad.trim(),
+      telefono: phoneDigits,
+      device_id,
+    }),
+  });
 
-            submit({
-              cuit: cuitDigits,
-              razonSocial: razonSocial.trim(),
-              condicionFiscal,
-              ciudad: ciudad.trim(),
-              telefono: phoneDigits,
-            });
+  if (!res.ok) {
+    window.dispatchEvent(
+      new CustomEvent("toast", {
+        detail: {
+          message: "No pudimos enviar la solicitud. Probá de nuevo.",
+          kind: "error",
+        },
+      })
+    );
+    return;
+  }
 
-            setRemoteStatus("pending");
-            setRemoteRequest({
-              cuit: cuitDigits,
-              razonSocial: razonSocial.trim(),
-              condicionFiscal,
-              ciudad: ciudad.trim(),
-              telefono: phoneDigits,
-            });
+  submit({
+    cuit: cuitDigits,
+    razonSocial: razonSocial.trim(),
+    condicionFiscal,
+    ciudad: ciudad.trim(),
+    telefono: phoneDigits,
+  });
 
-            window.dispatchEvent(
-              new CustomEvent("toast", {
-                detail: {
-                  message: "Solicitud enviada",
-                  kind: "success",
-                },
-              })
-            );
-          }}
+  setRemoteStatus("pending");
+  setRemoteRequest({
+    cuit: cuitDigits,
+    razonSocial: razonSocial.trim(),
+    condicionFiscal,
+    ciudad: ciudad.trim(),
+    telefono: phoneDigits,
+  });
+
+  window.dispatchEvent(
+    new CustomEvent("toast", {
+      detail: {
+        message: "Solicitud enviada",
+        kind: "success",
+      },
+    })
+  );
+}}
         >
           <div>
             <label className={label}>CUIT (11 dígitos, sin guiones)</label>
@@ -337,7 +362,11 @@ if (!lookupCuit && !lookupPhone) {
               className={input}
               placeholder="Ej: 20301234567"
             />
-            <p className={help}>Ingresalo solo con números, sin puntos ni guiones.</p>
+            {telefono && !isValidPhone(phoneDigits) && (
+  <p className="mt-1 text-xs text-red-400">
+    Ingresá un teléfono válido
+  </p>
+)}
           </div>
 
           <div>

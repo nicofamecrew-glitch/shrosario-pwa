@@ -18,7 +18,7 @@ export async function POST(req: Request) {
 
     await sheets.spreadsheets.values.append({
       spreadsheetId: process.env.GOOGLE_SHEETS_SPREADSHEET_ID,
-      range: "'SH Rosario - Mayoristas'!A:G",
+      range: "'SH Rosario - Mayoristas'!A:H",
       valueInputOption: "USER_ENTERED",
       requestBody: {
         values: [[
@@ -29,6 +29,7 @@ export async function POST(req: Request) {
           body.condicionFiscal,
           body.ciudad,
           body.telefono,
+          body.device_id || "",
         ]],
       },
     });
