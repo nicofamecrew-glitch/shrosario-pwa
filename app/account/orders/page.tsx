@@ -107,7 +107,7 @@ export default function OrdersPage() {
         });
 
         const data = await res.json().catch(() => null);
-        setDebug(JSON.stringify(data?.debug || {}, null, 2));
+        
                 console.log("[orders/list] response", data);
 
         if (!alive) return;
@@ -211,12 +211,6 @@ export default function OrdersPage() {
         </button>
       </div>
      
-            {debug ? (
-        <pre className={`mt-3 break-words whitespace-pre-wrap text-[10px] ${mutedSoft}`}>
-          {debug}
-        </pre>
-      ) : null}
-
       <div className="mt-4 space-y-3">
         {orders
           .slice()
