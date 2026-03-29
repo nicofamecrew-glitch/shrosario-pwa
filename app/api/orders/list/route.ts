@@ -4,6 +4,7 @@ export const revalidate = 0;
 
 import { NextResponse } from "next/server";
 import { google } from "googleapis";
+import { supabaseAdmin } from "@/lib/lib/supabase-server";
 
 function getGoogleClient() {
   const b64 = process.env.GOOGLE_SHEETS_SA_B64;
@@ -29,15 +30,20 @@ function lastDigitsVariants(v: unknown) {
 
   const set = new Set<string>();
 
-  // últimos 8 (principal)
   if (s.length >= 8) set.add(s.slice(-8));
-
-  // últimos 7 (backup)
   if (s.length >= 7) set.add(s.slice(-7));
 
   return Array.from(set);
 }
 
+type OrderOut = {
+  createdAt: string;
+  id: string;
+  status: string;
+  total: number;
+  shipmentId: string;
+  priceMode: "mayorista" | "minorista" | "";
+};
 
 export async function GET(req: Request) {
   try {
@@ -47,73 +53,94 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const phone = safeStr(searchParams.get("phone"));
     const email = safeStr(searchParams.get("email"));
+    const deviceId = safeStr(searchParams.get("device_id"));
 
-    if (!phone && !email) {
+    if (!deviceId && !phone && !email) {
       return NextResponse.json(
-        { ok: false, error: "Missing phone or email" },
+        { ok: false, error: "Missing device_id, phone or email" },
         { status: 400 }
       );
     }
 
     const auth = getGoogleClient();
     const sheets = google.sheets({ version: "v4", auth });
-
     const TAB = "Orders";
 
     const res = await sheets.spreadsheets.values.get({
       spreadsheetId: sheetId,
-      range: `${TAB}!A2:Z`,
+      range: `${TAB}!A2:X`,
     });
 
     const rows = res.data.values ?? [];
 
-        // Columnas reales en Orders:
-    // A fecha
-    // B Numero de orden
-    // C external_reference
-    // D estado
-    // E concepto
-    // F precio final
-    // G nombre
-    // H telefono
-    // I ciudad
-    // J direccion
-    // K cuit
-    // L tipo
-    // M detalle
-    // N payment_id
-    // O payment_status
-    // P shipment_id
-    // Q shipment_status
-    // R shipping_cost
-    // S shipping_provider
-    // T shipping_option_id
-    // U shipping_option_name
-    // V shipping_price
-    // W shipping_eta
-    // X shipping_meta
+    // Mapa por order id para enriquecer con shipment_id desde Sheets
+    const sheetByOrderId = new Map<string, any[]>();
+    for (const row of rows) {
+      const orderId = safeStr(row?.[1]); // B Numero de orden
+      if (orderId) sheetByOrderId.set(orderId, row);
+    }
 
-          const orders = rows.filter((row) => {
-  const rowVariants = lastDigitsVariants(row?.[7]); // H
-  const queryVariants = lastDigitsVariants(phone);
+    let orders: OrderOut[] = [];
+    let source = "";
 
-  return rowVariants.some(rv => queryVariants.includes(rv));
-})
-      .map((row) => ({
-        createdAt: safeStr(row?.[0]),   // A
-        id: safeStr(row?.[1]),          // B
-        status: safeStr(row?.[3]),      // D
-        total: Number(row?.[5] ?? 0),   // F
-        shipmentId: safeStr(row?.[15]), // P
-        priceMode: safeStr(row?.[4]) as "mayorista" | "minorista" | "", // E
-      }));
+    // 1) PRIORIDAD ABSOLUTA: device_id en Supabase
+    if (deviceId) {
+      const { data: dbOrders, error } = await supabaseAdmin
+        .from("orders")
+        .select("order_code, created_at, status, total, price_mode, device_id")
+        .eq("device_id", deviceId)
+        .order("created_at", { ascending: false });
 
-      return NextResponse.json({
+      if (error) throw error;
+
+      if (Array.isArray(dbOrders) && dbOrders.length > 0) {
+        orders = dbOrders.map((o: any) => {
+          const row = sheetByOrderId.get(safeStr(o.order_code));
+
+          return {
+            createdAt: safeStr(o.created_at),
+            id: safeStr(o.order_code),
+            status: safeStr(o.status),
+            total: Number(o.total ?? 0),
+            shipmentId: safeStr(row?.[15]), // P shipment_id en Sheets
+            priceMode: safeStr(o.price_mode) as "mayorista" | "minorista" | "",
+          };
+        });
+
+        source = "supabase:device_id";
+      }
+    }
+
+    // 2) FALLBACK: teléfono contra Sheets
+    if (!orders.length && phone) {
+      const queryVariants = lastDigitsVariants(phone);
+
+      orders = rows
+        .filter((row) => {
+          const rowVariants = lastDigitsVariants(row?.[7]); // H telefono
+          return rowVariants.some((rv) => queryVariants.includes(rv));
+        })
+        .map((row) => ({
+          createdAt: safeStr(row?.[0]), // A fecha
+          id: safeStr(row?.[1]), // B Numero de orden
+          status: safeStr(row?.[3]), // D estado
+          total: Number(row?.[5] ?? 0), // F precio final
+          shipmentId: safeStr(row?.[15]), // P shipment_id
+          priceMode: safeStr(row?.[4]) as "mayorista" | "minorista" | "", // E
+        }))
+        .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+
+      source = "sheets:phone_fallback";
+    }
+
+    return NextResponse.json({
       ok: true,
       orders,
       debug: {
+        source,
+        deviceIdReceived: deviceId,
         phoneReceived: phone,
-       phoneVariants: lastDigitsVariants(phone),
+        phoneVariants: lastDigitsVariants(phone),
         totalRows: rows.length,
       },
     });

@@ -33,6 +33,14 @@ function safeStr(v: any) {
   return String(v ?? "").trim();
 }
 
+function getDeviceId() {
+  try {
+    return safeStr(localStorage.getItem("sh_device_id_v1"));
+  } catch {
+    return "";
+  }
+}
+
 export default function OrdersPage() {
   const router = useRouter();
   const { data: session, status: sessionStatus } = useSession();
@@ -51,17 +59,23 @@ export default function OrdersPage() {
   const primaryButton =
     "mt-6 w-full rounded-full bg-[hsl(var(--app-fg))] px-4 py-3 font-bold text-[hsl(var(--app-bg))] transition hover:opacity-90";
 
-    const phone = useMemo(() => {
-  try {
-    const raw = localStorage.getItem("sh_checkout_profile_v1");
-    const prof = raw ? JSON.parse(raw) : null;
-    const currentPhone = safeStr(prof?.phone);
-    console.log("PHONE ACTUAL:", currentPhone);
-    return currentPhone;
-  } catch {
-    return "";
-  }
-}, []);
+     const deviceId = useMemo(() => {
+    const id = getDeviceId();
+    console.log("DEVICE_ID ACTUAL:", id);
+    return id;
+  }, []);
+
+  const phone = useMemo(() => {
+    try {
+      const raw = localStorage.getItem("sh_checkout_profile_v1");
+      const prof = raw ? JSON.parse(raw) : null;
+      const currentPhone = safeStr(prof?.phone);
+      console.log("PHONE ACTUAL:", currentPhone);
+      return currentPhone;
+    } catch {
+      return "";
+    }
+  }, []);
 
   const email = safeStr(session?.user?.email);
 
@@ -75,13 +89,16 @@ export default function OrdersPage() {
         setLoading(true);
         setDebug("");
 
-        if (!email && !phone) {
+               if (!deviceId && !email && !phone) {
           setOrders([]);
-          setDebug("No hay email de sesión ni phone en sh_checkout_profile_v1");
+          setDebug(
+            "No hay device_id, email de sesión ni phone en sh_checkout_profile_v1"
+          );
           return;
         }
 
         const qs = new URLSearchParams();
+        if (deviceId) qs.set("device_id", deviceId);
         if (email) qs.set("email", email);
         if (phone) qs.set("phone", phone);
 
@@ -145,7 +162,7 @@ export default function OrdersPage() {
     return () => {
       alive = false;
     };
-  }, [email, phone, sessionStatus]);
+   }, [deviceId, email, phone, sessionStatus]);
 
   if (loading || sessionStatus === "loading") {
     return (
