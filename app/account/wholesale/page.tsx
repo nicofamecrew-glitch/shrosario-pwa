@@ -16,7 +16,15 @@ function onlyDigits(s: string) {
 
 function getDeviceId() {
   if (typeof window === "undefined") return "";
-  return localStorage.getItem("sh_device_id_v1") || "";
+
+  let id = localStorage.getItem("sh_device_id_v1");
+
+  if (!id) {
+    id = crypto.randomUUID();
+    localStorage.setItem("sh_device_id_v1", id);
+  }
+
+  return id;
 }
 
 function isValidPhone(phone: string) {
