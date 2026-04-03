@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import ProductCard from "@/components/ProductCard";
 import { withVariantImages } from "@/lib/withVariantImages";
 import type { Product } from "@/lib/types";
+import EnablePush from "@/components/EnablePush";
 
 function normalizeTags(tags?: string[] | string): string[] {
   if (!tags) return [];
@@ -243,31 +244,31 @@ export default function HomeSteamPage({ products }: { products: Product[] }) {
   );
 
   const actionTiles = [
-    {
-      title: "Más vendidos",
-      subtitle: "Lo que más se mueve",
-      href: "/catalog?sort=best",
-      imageSrc: "/home/tiles/best.webp",
-    },
-    {
-      title: "Gangas",
-      subtitle: "Ofertas y oportunidades",
-      href: "/catalog?tag=oferta",
-      imageSrc: "/home/tiles/deals.webp",
-    },
-    {
-      title: "Combos",
-      subtitle: "Arma el pedido más rápido",
-      href: "/catalog?tag=combo",
-      imageSrc: "/home/tiles/combos.webp",
-    },
-    {
-      title: "Novedades",
-      subtitle: "Recién llegados",
-      href: "/catalog?sort=new",
-      imageSrc: "/home/tiles/new.webp",
-    },
-  ];
+  {
+    title: "Más vendidos",
+    subtitle: "Lo que más se mueve",
+    href: "/catalog?tag=mas-vendido",
+    imageSrc: "/home/tiles/best.webp",
+  },
+  {
+    title: "Gangas",
+    subtitle: "Ofertas y oportunidades",
+    href: "/catalog?tag=gangas",
+    imageSrc: "/home/tiles/deals.webp",
+  },
+  {
+    title: "Combos",
+    subtitle: "Arma el pedido más rápido",
+    href: "/catalog?tag=combo",
+    imageSrc: "/home/tiles/combos.webp",
+  },
+  {
+    title: "Novedades",
+    subtitle: "Recién llegados",
+    href: "/catalog?tag=nuevo",
+    imageSrc: "/home/tiles/new.webp",
+  },
+];
 
   const brands = [
     {

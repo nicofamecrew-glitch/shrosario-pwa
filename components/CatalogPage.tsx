@@ -19,6 +19,7 @@ import WholesaleGate from "@/components/WholesaleGate";
 export default function CatalogPage({ products }: { products: Product[] }) {
   const sp = useSearchParams();
   const brandFromUrl = sp.get("brand") || "all";
+  const tagFromUrl = sp.get("tag") || "all";
 
   const qRaw = sp.get("q") || "";
 
@@ -35,14 +36,16 @@ export default function CatalogPage({ products }: { products: Product[] }) {
   const [brand, setBrand] = useState(brandFromUrl);
   const [category, setCategory] = useState("all");
   const [size, setSize] = useState("all");
-  const [type, setType] = useState("all");
+  const [type, setType] = useState(tagFromUrl);
 
   const { isWholesale } = useCartStore();
 
 useEffect(() => {
   setBrand(brandFromUrl);
 }, [brandFromUrl]);
-
+useEffect(() => {
+  setType(tagFromUrl);
+}, [tagFromUrl]);
 
   // Render parcial (evita stutter en móvil)
   const PAGE_SIZE = 20;
@@ -88,9 +91,13 @@ useEffect(() => {
         (product as any).variants?.some((variant: any) => variant.size === size);
 
       const tags = Array.isArray((product as any).tags) ? (product as any).tags : [];
-      const matchesType =
-        type === "all" ||
-        tags.map((t: any) => norm(String(t))).includes(norm(type));
+      const normTags = tags.map((t: any) => norm(String(t)));
+
+const matchesType =
+  type === "all" ||
+  (type === "gangas"
+    ? normTags.includes("oferta") || normTags.includes("ganga")
+    : normTags.includes(norm(type)));
 
       const matchesQ = !q
         ? true

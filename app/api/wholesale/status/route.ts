@@ -71,6 +71,7 @@ export async function GET(req: NextRequest) {
     // E condicion_fiscal
     // F ciudad
     // G telefono
+    // H device_id (agregado en v1)
     const matches = rows.filter((row) => {
       const rowCuit = normalizeDigits(row?.[2]);
       const rowPhone = normalizeDigits(row?.[6]);
