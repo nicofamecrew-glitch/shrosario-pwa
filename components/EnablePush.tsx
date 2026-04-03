@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, BellRing } from "lucide-react";
+import { Bell, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
 function urlBase64ToUint8Array(base64String: string) {
@@ -14,6 +14,8 @@ export default function EnablePush() {
   const [supported, setSupported] = useState(false);
   const [loading, setLoading] = useState(false);
   const [enabled, setEnabled] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     setSupported(
@@ -22,13 +24,30 @@ export default function EnablePush() {
         "PushManager" in window
     );
 
+    const pushEnabled = localStorage.getItem("push_enabled_v1") === "true";
+    const pushDismissed = localStorage.getItem("push_dismissed_v1") === "true";
+
+    if (pushEnabled) setEnabled(true);
+    if (pushDismissed) setDismissed(true);
+
     async function checkExisting() {
-      if (!("serviceWorker" in navigator)) return;
+      if (!("serviceWorker" in navigator)) {
+        setReady(true);
+        return;
+      }
+
       try {
         const reg = await navigator.serviceWorker.ready;
         const existing = await reg.pushManager.getSubscription();
-        setEnabled(!!existing);
-      } catch {}
+        if (existing) {
+          setEnabled(true);
+          localStorage.setItem("push_enabled_v1", "true");
+        }
+      } catch (e) {
+        console.error("[push] checkExisting error:", e);
+      } finally {
+        setReady(true);
+      }
     }
 
     checkExisting();
@@ -84,9 +103,8 @@ export default function EnablePush() {
       }
 
       setEnabled(true);
-
-      // 👇 lo guardamos para no mostrar más el cartel
       localStorage.setItem("push_enabled_v1", "true");
+      localStorage.removeItem("push_dismissed_v1");
 
       alert("Avisos activados");
     } catch (e) {
@@ -97,15 +115,28 @@ export default function EnablePush() {
     }
   }
 
-  // 👇 si ya está activado → NO renderiza nada
-  if (!supported || enabled || localStorage.getItem("push_enabled_v1") === "true") {
+  function handleDismiss() {
+    setDismissed(true);
+    localStorage.setItem("push_dismissed_v1", "true");
+  }
+
+  if (!ready || !supported || enabled || dismissed) {
     return null;
   }
 
   return (
     <div className="fixed bottom-24 left-4 right-4 z-50 md:left-auto md:right-6 md:w-[340px]">
-      <div className="rounded-2xl border border-white/10 bg-black/75 p-4 text-white shadow-2xl backdrop-blur-xl">
-        <div className="flex items-start gap-3">
+      <div className="relative rounded-2xl border border-white/10 bg-black/75 p-4 text-white shadow-2xl backdrop-blur-xl">
+        <button
+          type="button"
+          onClick={handleDismiss}
+          aria-label="Cerrar"
+          className="absolute right-3 top-3 rounded-full p-1 text-white/70 transition hover:bg-white/10 hover:text-white"
+        >
+          <X className="h-4 w-4" />
+        </button>
+
+        <div className="flex items-start gap-3 pr-8">
           <div className="mt-0.5 rounded-xl bg-white/10 p-2">
             <Bell className="h-5 w-5" />
           </div>
@@ -115,7 +146,8 @@ export default function EnablePush() {
               Recibí novedades y promociones
             </p>
             <p className="mt-1 text-xs text-white/70">
-              Activá las notificaciones para enterarte de lanzamientos, promos y reposiciones.
+              Activá las notificaciones para enterarte de lanzamientos, promos y
+              reposiciones.
             </p>
           </div>
         </div>
