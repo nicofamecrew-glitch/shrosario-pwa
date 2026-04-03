@@ -93,11 +93,20 @@ useEffect(() => {
       const tags = Array.isArray((product as any).tags) ? (product as any).tags : [];
       const normTags = tags.map((t: any) => norm(String(t)));
 
+const hasAnyTag = (...expected: string[]) =>
+  expected.some((tag) => normTags.includes(norm(tag)));
+
 const matchesType =
   type === "all" ||
   (type === "gangas"
-    ? normTags.includes("oferta") || normTags.includes("ganga")
-    : normTags.includes(norm(type)));
+    ? hasAnyTag("oferta", "ganga", "deal", "deals")
+    : type === "nuevo"
+    ? hasAnyTag("nuevo", "new")
+    : type === "mas-vendido"
+    ? hasAnyTag("mas-vendido", "bestseller", "best-seller", "best seller")
+    : type === "combo"
+    ? hasAnyTag("combo", "combos")
+    : hasAnyTag(type));
 
       const matchesQ = !q
         ? true
