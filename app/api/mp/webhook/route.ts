@@ -214,123 +214,164 @@ export async function POST(req: Request) {
       );
     }
 
-        try {
-      const orderRef = String(real.payment.external_reference ?? externalRef ?? "");
+     try {
+  const orderRef = String(
+    real.payment.external_reference ?? externalRef ?? ""
+  );
 
-      if (orderRef) {
-        // 1) Sheets
-        await updateOrderStatusInSheets({
-          orderId: orderRef,
+  if (orderRef) {
+    // 1) Sheets
+    await updateOrderStatusInSheets({
+      orderId: orderRef,
+      status: "Pagado",
+      externalReference: orderRef,
+      paymentId: String(paymentId),
+      paymentStatus: String(real.payment.status),
+    });
+
+    console.log("[MP WEBHOOK] Sheets updated OK", {
+      orderRef,
+      paymentId,
+      paymentStatus: real?.payment?.status ?? null,
+    });
+
+    // 2) Supabase
+    const { data: updatedOrder, error: supabaseOrderError } =
+      await supabaseAdmin
+        .from("orders")
+        .update({
           status: "Pagado",
-          externalReference: orderRef,
-          paymentId: String(paymentId),
-          paymentStatus: String(real.payment.status),
-        });
+          external_ref: orderRef,
+        })
+        .eq("order_code", orderRef)
+        .select("id, order_code, status, external_ref, device_id")
+        .maybeSingle();
 
-              console.log("[MP WEBHOOK] Sheets updated OK", {
-          orderRef,
-          paymentId,
-          paymentStatus: real?.payment?.status ?? null,
-        });
+    if (supabaseOrderError) {
+      console.error("[MP WEBHOOK] Supabase update error", {
+        message: supabaseOrderError.message,
+        details: supabaseOrderError.details ?? null,
+        hint: supabaseOrderError.hint ?? null,
+        code: supabaseOrderError.code ?? null,
+        orderRef,
+        paymentId,
+      });
 
-        console.log("[MP WEBHOOK] updating Supabase order", {
-          orderRef,
-          paymentId,
-          targetTable: "orders",
-          matchField: "order_code",
-          newStatus: "Pagado",
-        });
-
-        // 2) Supabase
-               const { data: updatedOrder, error: supabaseOrderError } = await supabaseAdmin
-          .from("orders")
-          .update({
-            status: "Pagado",
-            external_ref: orderRef,
-          })
-          .eq("order_code", orderRef)
-          .select("id, order_code, status, external_ref, device_id")
-          .maybeSingle();
-
-        if (supabaseOrderError) {
-          console.error("[MP WEBHOOK] Supabase update error", {
-            message: supabaseOrderError.message,
-            details: supabaseOrderError.details ?? null,
-            hint: supabaseOrderError.hint ?? null,
-            code: supabaseOrderError.code ?? null,
-            orderRef,
-            paymentId,
-          });
-          throw supabaseOrderError;
-        }
-
-              console.log("[MP WEBHOOK] Supabase update result", {
-          found: !!updatedOrder,
-          updatedOrder: updatedOrder ?? null,
-          orderRef,
-          paymentId,
-        });
-        if (!updatedOrder) {
-          console.warn("Pago aprobado pero no encontré la orden en Supabase", {
-            orderRef,
-            paymentId,
-          });
-        } else {
-          console.log("Pedido marcado como PAGADO en Supabase ✅", {
-            orderId: updatedOrder.order_code,
-            status: updatedOrder.status,
-            deviceId: updatedOrder.device_id ?? null,
-          });
-
-          if (updatedOrder.device_id) {
-            try {
-              const pushRes = await fetch(`${url.origin}/api/push/send`, {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                  deviceId: updatedOrder.device_id,
-                  title: "Pedido confirmado 👌",
-                  body: "Recibimos tu pago y ya estamos preparando tu pedido.",
-                  url: "/account/orders",
-                }),
-              });
-
-              const pushJson = await pushRes.json().catch(() => null);
-
-              console.log("[MP WEBHOOK] push result", {
-                ok: pushRes.ok,
-                status: pushRes.status,
-                pushJson,
-                orderRef,
-                paymentId,
-              });
-            } catch (pushErr) {
-              console.error("[MP WEBHOOK] push send failed", {
-                orderRef,
-                paymentId,
-                pushErr,
-              });
-            }
-          } else {
-            console.warn("[MP WEBHOOK] orden pagada sin device_id", {
-              orderRef,
-              paymentId,
-            });
-          }
-        }
-
-        console.log("Pedido marcado como PAGADO ✅", { orderId: orderRef });
-      } else {
-        console.warn("Pago aprobado pero sin external_reference", { paymentId });
-      }
-    } catch (e) {console.error("[MP WEBHOOK] order update failed", e);
-      return NextResponse.json(
-        { ok: false, error: "order_update_failed" },
-        { status: 200 }
-      );
+      throw supabaseOrderError;
     }
+
+    if (!updatedOrder) {
+      console.warn(
+        "Pago aprobado pero no encontré la orden en Supabase",
+        {
+          orderRef,
+          paymentId,
+        }
+      );
+    } else {
+      console.log("Pedido marcado como PAGADO en Supabase ✅", {
+        orderId: updatedOrder.order_code,
+        status: updatedOrder.status,
+        deviceId: updatedOrder.device_id ?? null,
+      });
+
+      // Push al cliente
+      if (updatedOrder.device_id) {
+        try {
+          const pushRes = await fetch(`${url.origin}/api/push/send`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              deviceId: updatedOrder.device_id,
+              title: "Pedido confirmado 👌",
+              body: "Recibimos tu pago y ya estamos preparando tu pedido.",
+              url: "/account/orders",
+            }),
+          });
+
+          const pushJson = await pushRes.json().catch(() => null);
+
+          console.log("[MP WEBHOOK] push result", {
+            ok: pushRes.ok,
+            status: pushRes.status,
+            pushJson,
+            orderRef,
+            paymentId,
+          });
+        } catch (pushErr) {
+          console.error("[MP WEBHOOK] push send failed", {
+            orderRef,
+            paymentId,
+            pushErr,
+          });
+        }
+      } else {
+        console.warn("[MP WEBHOOK] orden pagada sin device_id", {
+          orderRef,
+          paymentId,
+        });
+      }
+
+      // Push al admin
+      try {
+        const adminPushRes = await fetch(
+          "https://admin.appshrosario.store/api/admin/push/notify",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "x-push-secret":
+                process.env.INTERNAL_PUSH_SECRET || "",
+            },
+            body: JSON.stringify({
+              title: "💳 Pago aprobado",
+              body: `Pedido ${updatedOrder.order_code} ya fue abonado`,
+              url: "/admin/pedidos",
+            }),
+          }
+        );
+
+        const adminPushData = await adminPushRes
+          .json()
+          .catch(() => null);
+
+        if (!adminPushRes.ok || !adminPushData?.ok) {
+          console.error(
+            "ADMIN PAYMENT PUSH ERROR:",
+            adminPushData
+          );
+        }
+      } catch (adminPushError) {
+        console.error(
+          "ADMIN PAYMENT PUSH ERROR:",
+          adminPushError
+        );
+      }
+    }
+
+    console.log("Pedido marcado como PAGADO ✅", {
+      orderId: orderRef,
+    });
+  } else {
+    console.warn(
+      "Pago aprobado pero sin external_reference",
+      { paymentId }
+    );
+  }
+} catch (e) {
+  console.error("[MP WEBHOOK] order update failed", e);
+
+  return NextResponse.json(
+    {
+      ok: false,
+      error: "order_update_failed",
+    },
+    { status: 200 }
+  );
+}
+
 
     return NextResponse.json({ ok: true, processed: true }, { status: 200 });
   } catch (e) {
@@ -340,4 +381,5 @@ export async function POST(req: Request) {
       { status: 500 }
     );
   }
-}
+}     
+
