@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { google } from "googleapis";
-import { sendPushToToken } from "@/lib/server/push";
+
 
 export async function POST(req: Request) {
   try {
@@ -34,19 +34,33 @@ export async function POST(req: Request) {
       },
     });
 
-    const adminPushToken = process.env.ADMIN_PUSH_TOKEN;
-
-    if (adminPushToken) {
-      try {
-        await sendPushToToken({
-          token: adminPushToken,
-          title: "🟣 Nueva solicitud mayorista",
-          body: `${body.razonSocial} · ${body.ciudad}`,
-        });
-      } catch (pushErr) {
-        console.error("WHOLESALE PUSH ERROR:", pushErr);
-      }
+  try {
+  const pushRes = await fetch(
+    "https://admin.appshrosario.store/api/admin/push/notify",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-push-secret": process.env.INTERNAL_PUSH_SECRET || "",
+      },
+      body: JSON.stringify({
+        title: "🏪 Nueva solicitud mayorista",
+        body: `${body.razonSocial || "Un cliente"} · ${
+          body.ciudad || "Sin ciudad"
+        }`,
+        url: "/admin/mayorista",
+      }),
     }
+  );
+
+  const pushData = await pushRes.json();
+
+  if (!pushRes.ok || !pushData?.ok) {
+    console.error("WHOLESALE PUSH ERROR:", pushData);
+  }
+} catch (pushErr) {
+  console.error("WHOLESALE PUSH ERROR:", pushErr);
+}
 
     return NextResponse.json({ ok: true });
   } catch (err) {
