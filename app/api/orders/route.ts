@@ -460,6 +460,36 @@ export async function POST(req: Request) {
     }
 
     await appendOrderItems(sheets, sheetId, orderId, items);
+ 
+    if (!duplicated) {
+  try {
+    const pushRes = await fetch(
+      "https://admin.appshrosario.store/api/admin/push/notify",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-push-secret": process.env.INTERNAL_PUSH_SECRET || "",
+        },
+        body: JSON.stringify({
+          title: "🛒 Nuevo pedido",
+          body: `${fullName} realizó un pedido por $${total.toLocaleString(
+            "es-AR"
+          )}`,
+          url: "/admin/pedidos",
+        }),
+      }
+    );
+
+    const pushData = await pushRes.json();
+
+    if (!pushRes.ok || !pushData?.ok) {
+      console.error("ERROR NOTIFICANDO PEDIDO:", pushData);
+    }
+  } catch (pushError) {
+    console.error("ERROR PUSH NUEVO PEDIDO:", pushError);
+  }
+}
 
     return NextResponse.json({
       ok: true,
