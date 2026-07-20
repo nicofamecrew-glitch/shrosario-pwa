@@ -110,7 +110,7 @@ export default function PromoPopup({
           <div className="flex items-start justify-between gap-3">
             <div>
               <div className="inline-flex items-center rounded-full bg-[#ee078e]/90 px-3 py-1 text-xs font-extrabold text-white">
-                PROMO ACTIVA
+                NOS VEMOS EN ESTILO & COLOR
               </div>
               <h3 className="mt-3 text-xl font-extrabold leading-tight text-white">
                 {title}
