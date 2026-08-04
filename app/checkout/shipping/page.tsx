@@ -70,26 +70,15 @@ export default function ShippingPage() {
   const freeShippingThreshold = 80000;
 
   const cartTotal = useMemo(() => {
-    return items.reduce((acc: number, it: any) => {
-      const qty = Number(it?.quantity ?? 1);
-      const direct = Number(it?.unitPrice ?? it?.price ?? 0);
+  return items.reduce((acc, item) => {
+    if (!item.variant) return acc;
 
-      if (Number.isFinite(direct) && direct > 0) {
-        return acc + direct * qty;
-      }
+    const qty = item.qty;
+    const unit = getVariantPrice(item.variant, isWholesale);
 
-      const productId = String(it?.productId ?? "");
-      const variantSku = String(it?.variantSku ?? "");
-      const p = byId?.[productId];
-      if (!p) return acc;
-
-      const v = findVariant(p, variantSku);
-      if (!v) return acc;
-
-      const unit = Number(getVariantPrice(v, isWholesale) ?? 0);
-      return acc + unit * qty;
-    }, 0);
-  }, [items, byId, isWholesale]);
+    return acc + unit * qty;
+  }, 0);
+}, [items, isWholesale]);
 
   const draftId = useMemo(() => {
     if (typeof window === "undefined") return "";
@@ -122,12 +111,10 @@ export default function ShippingPage() {
           draftId,
           destination: { zipcode: cp },
           declared_value: Math.round(cartTotal),
-          items: items.map((it: any) => ({
-            sku: String(it?.variantSku ?? it?.sku ?? it?.id ?? it?.productId ?? "")
-              .trim()
-              .toUpperCase(),
-            qty: Number(it?.quantity ?? 1),
-          })),
+          items: items.map((it) => ({
+  sku: String(it.variant?.sku ?? "").trim().toUpperCase(),
+  qty: it.qty,
+})),
         }),
       });
 
