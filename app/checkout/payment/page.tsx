@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCartStore } from "@/lib/store";
 import { useCatalogStore } from "@/lib/lib/catalogStore";
-import { findVariant, getVariantPrice } from "@/lib/pricing";
+import { getVariantPrice } from "@/lib/pricing";
 
 const PROFILE_KEY = "sh_checkout_profile_v1";
 const SHIPPING_KEY = "sh_shipping_v1";
@@ -57,25 +57,13 @@ const btnPrimary =
   const [submitting, setSubmitting] = useState(false);
 
   // Total productos (fallback si shipping no trae total)
-  const cartTotalFallback = useMemo(() => {
-    return items.reduce((acc: number, it: any) => {
-      const qty = Math.max(1, Number(it?.quantity ?? 1));
-      const direct = Number(it?.unitPrice ?? it?.price ?? 0);
+ const cartTotalFallback = useMemo(() => {
+  return items.reduce((acc, item) => {
+    if (!item.variant) return acc;
 
-      if (Number.isFinite(direct) && direct > 0) return acc + direct * qty;
-
-      const productId = String(it?.productId ?? "");
-      const variantSku = String(it?.variantSku ?? it?.sku ?? "");
-      const p = byId?.[productId];
-      if (!p) return acc;
-
-      const v = findVariant(p, variantSku);
-      if (!v) return acc;
-
-      const unit = Number(getVariantPrice(v, isWholesale) ?? 0);
-      return acc + unit * qty;
-    }, 0);
-  }, [items, byId, isWholesale]);
+    return acc + getVariantPrice(item.variant, isWholesale) * item.qty;
+  }, 0);
+}, [items, isWholesale]);
 
   const cartTotal = Number(shipping?.total ?? cartTotalFallback);
   const shippingCost = Number(shipping?.cost ?? 0);
@@ -190,28 +178,18 @@ try {
 }
       // Items para MP (precios reales)
       const itemsMP = items
-        .map((it: any) => {
-          const qty = Math.max(1, Number(it?.quantity ?? 1));
-          const direct = Number(it?.unitPrice ?? it?.price ?? 0);
+  .map((item: any) => {
+    if (!item.variant) return null;
 
-          let unit = direct;
-          if (!Number.isFinite(unit) || unit <= 0) {
-            const productId = String(it?.productId ?? "");
-            const variantSku = String(it?.variantSku ?? it?.sku ?? "");
-            const p = byId?.[productId];
-            const v = p ? findVariant(p, variantSku) : null;
-            unit = v ? Number(getVariantPrice(v, isWholesale) ?? 0) : 0;
-          }
-
-          return {
-            productId: String(it?.productId ?? ""),
-            title: it?.name || it?.title || it?.productId,
-            quantity: qty,
-            unit_price: unit,
-          };
-        })
-        .filter((it) => Number(it.unit_price) > 0 && Number(it.quantity) > 0);
-
+    return {
+      productId: item.productId,
+      title: item.variant.name ?? item.productId,
+      quantity: item.qty,
+      unit_price: getVariantPrice(item.variant, isWholesale),
+    };
+  })
+  .filter(Boolean);
+       
       // Sumamos envío como ítem
       if (shippingCost > 0) {
         itemsMP.push({
