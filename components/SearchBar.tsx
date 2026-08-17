@@ -21,12 +21,6 @@ export default function SearchBar({
     router.push(`/catalog?q=${encodeURIComponent(query)}`);
   };
 
-  const chips = [
-    { label: "🔥 Más vendidos", href: "/catalog?q=bestseller" },
-    { label: "🎁 Combos", href: "/catalog?q=combo" },
-    { label: "🆕 Novedades", href: "/catalog?q=new" },
-    { label: "📚 Catálogo", href: "/catalog" },
-  ];
 
   return (
     <div className={className}>
@@ -76,24 +70,6 @@ export default function SearchBar({
         >
           Buscar
         </button>
-      </div>
-
-      {/* chips rápidos */}
-      <div className="mt-3 flex flex-wrap gap-2">
-        {chips.map((c) => (
-          <button
-            key={c.label}
-            type="button"
-            onClick={() => router.push(c.href)}
-            className={[
-              "shrink-0 rounded-full px-3 py-1.5 text-xs font-medium active:scale-[0.98] transition-transform",
-              "border border-black/10 bg-white text-black",
-              "dark:border-white/10 dark:bg-white/10 dark:text-white/90",
-            ].join(" ")}
-          >
-            {c.label}
-          </button>
-        ))}
       </div>
     </div>
   );

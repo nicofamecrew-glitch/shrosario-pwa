@@ -8,7 +8,8 @@ import { useRouter } from "next/navigation";
 import ProductCard from "@/components/ProductCard";
 import { withVariantImages } from "@/lib/withVariantImages";
 import type { Product } from "@/lib/types";
-import EnablePush from "@/components/EnablePush";
+import HomeProductCard from "@/components/HomeProductCard";
+
 
 function normalizeTags(tags?: string[] | string): string[] {
   if (!tags) return [];
@@ -68,49 +69,31 @@ function ActionTile({
   return (
     <Link
       href={href}
-      className={[
-        "group relative block overflow-hidden rounded-3xl",
-        // light
-        "border border-[#e5e7eb] bg-white",
-        // dark
-        "dark:border-white/10 dark:bg-white/5",
-        "min-h-[180px]",
-        "active:scale-[0.995] transition-transform",
-      ].join(" ")}
+      className="group relative block aspect-[2/3] overflow-hidden rounded-2xl bg-black active:scale-[0.97] transition-transform"
     >
-      {/* Fondo/imagen */}
-      <div className="absolute inset-0">
-        {imageSrc ? (
-          <img
-            src={imageSrc}
-            alt={title}
-            className="h-full w-full object-cover opacity-90 dark:opacity-70"
-            loading="lazy"
-          />
-        ) : (
-          <div className="h-full w-full bg-gradient-to-br from-black/5 to-black/0 dark:from-white/5 dark:to-white/0" />
-        )}
+      {imageSrc ? (
+        <img
+          src={imageSrc}
+          alt={title}
+          className="absolute inset-0 h-full w-full object-cover"
+          loading="lazy"
+        />
+      ) : null}
 
-        {/* overlay para legibilidad en ambos */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/30 to-transparent dark:from-black/75 dark:via-black/35" />
-      </div>
+      {/* degradado para leer el texto */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/10 to-transparent" />
 
-      {/* Texto */}
-      <div className="relative z-10 flex h-full flex-col justify-between p-5">
-        <div>
-          <div className="text-lg font-black tracking-tight text-white">
-            {title}
+      {/* texto inferior */}
+      <div className="absolute inset-x-0 bottom-0 z-10 px-1.5 pb-2 text-center">
+        <div className="text-[10px] font-black uppercase leading-tight text-white">
+          {title}
+        </div>
+
+        {subtitle ? (
+          <div className="mt-0.5 line-clamp-1 text-[7px] font-medium leading-tight text-[#ff1493]">
+            {subtitle}
           </div>
-          {subtitle ? (
-            <div className="mt-1 text-sm text-white/75">{subtitle}</div>
-          ) : null}
-        </div>
-
-        <div className="inline-flex items-center gap-2">
-          <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white/90">
-            Ver →
-          </span>
-        </div>
+        ) : null}
       </div>
     </Link>
   );
@@ -123,12 +106,13 @@ function BrandGrid({
   brands: { key: string; label: string; imageSrc?: string; href: string }[];
 }) {
   return (
-    <section className="mt-10">
+    <section className="mt-8">
       <div className="flex items-end justify-between gap-3">
         <div className="min-w-0">
           <h2 className="text-base font-semibold tracking-tight text-[#111] dark:text-white">
             Comprar por marca
           </h2>
+
           <p className="mt-0.5 text-xs text-[#6b7280] dark:text-white/60">
             Entrás directo al catálogo filtrado
           </p>
@@ -136,42 +120,38 @@ function BrandGrid({
 
         <Link
           href="/catalog"
-          className="shrink-0 inline-flex items-center justify-center rounded-full border border-[#e5e7eb] bg-white px-3 py-1.5 text-xs font-semibold text-[#ee078e] active:scale-[0.98] dark:border-white/15 dark:bg-white/5 dark:text-white/80"
+          className="shrink-0 rounded-full border border-[#e5e7eb] bg-white px-3 py-1.5 text-xs font-semibold text-[#ee078e] active:scale-[0.98] dark:border-white/15 dark:bg-white/5 dark:text-white/80"
         >
           Ver todas
         </Link>
       </div>
 
-      <div className="mt-3 grid grid-cols-2 gap-3">
+      <div className="-mx-4 mt-3 flex gap-3 overflow-x-auto px-4 pb-2 scrollbar-hide">
         {brands.map((b) => (
           <Link
             key={b.key}
             href={b.href}
-            className={[
-              "relative overflow-hidden rounded-3xl",
-              "border border-[#e5e7eb] bg-white",
-              "dark:border-white/10 dark:bg-white/5",
-              "aspect-square",
-              "active:scale-[0.995] transition-transform",
-            ].join(" ")}
+            className="relative h-[160px] min-w-[120px] overflow-hidden rounded-2xl border border-[#e5e7eb] bg-white active:scale-[0.98] dark:border-white/10 dark:bg-white/5"
           >
-            <div className="absolute inset-0">
-              {b.imageSrc ? (
-                <img
-                  src={b.imageSrc}
-                  alt={b.label}
-                  className="h-full w-full object-cover opacity-95 dark:opacity-80"
-                  loading="lazy"
-                />
-              ) : (
-                <div className="h-full w-full bg-gradient-to-br from-black/5 to-black/0 dark:from-white/5 dark:to-white/0" />
-              )}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent dark:from-black/70 dark:via-black/15" />
-            </div>
+            {b.imageSrc ? (
+              <img
+                src={b.imageSrc}
+                alt={b.label}
+                className="absolute inset-0 h-full w-full object-cover"
+                loading="lazy"
+              />
+            ) : null}
 
-            <div className="relative z-10 flex h-full flex-col justify-end p-4">
-              <div className="text-sm font-black text-white">{b.label}</div>
-              <div className="mt-1 text-xs text-white/75">Ver productos →</div>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
+
+            <div className="absolute inset-x-0 bottom-0 z-10 p-3">
+              <div className="text-sm font-black text-white">
+                {b.label}
+              </div>
+
+              <div className="mt-0.5 text-[10px] text-white/75">
+                Ver productos →
+              </div>
             </div>
           </Link>
         ))}
@@ -179,7 +159,6 @@ function BrandGrid({
     </section>
   );
 }
-
 function BrandCarousel({
   title,
   href,
@@ -213,29 +192,32 @@ function BrandCarousel({
         </Link>
       </div>
 
-      <div className="mt-3">
-        <LoopRow
-          items={items}
-          renderItem={(p: Product, idx: number) => (
-            <div
-              key={`${p.id}-${idx}`}
-              className="min-w-[240px] max-w-[240px] snap-start"
-              onClick={(e) => {
-                const target = e.target as HTMLElement | null;
-                if (target?.closest("[data-no-nav]")) return;
-                onOpen(p.id);
-              }}
-            >
-              <ProductCard product={p as any} />
-            </div>
-          )}
-        />
-      </div>
+      <div className="-mx-4 mt-3 flex gap-3 overflow-x-auto px-4 pb-2 scrollbar-hide">
+  {items.slice(0, 6).map((p: Product) => (
+    <div
+      key={p.id}
+      className="min-w-[155px] max-w-[155px] shrink-0"
+      onClick={(e) => {
+        const target = e.target as HTMLElement | null;
+        if (target?.closest("[data-no-nav]")) return;
+        onOpen(p.id);
+      }}
+    >
+      <HomeProductCard product={p as any} />
+    </div>
+  ))}
+</div>
     </section>
   );
 }
 
-export default function HomeSteamPage({ products }: { products: Product[] }) {
+export default function HomeSteamPage({
+  products,
+  userName,
+}: {
+  products: Product[];
+  userName: string | null;
+}) {
   const router = useRouter();
   const { items: blocks, loading } = useHomeBlocks();
 
@@ -243,30 +225,30 @@ export default function HomeSteamPage({ products }: { products: Product[] }) {
     Array.isArray(products) ? (products as any) : []
   );
 
-  const actionTiles = [
+ const actionTiles = [
   {
-    title: "Más vendidos",
-    subtitle: "Lo que más se mueve",
-    href: "/catalog?tag=mas-vendido",
+    title: "Ofertas Relámpago",
+    subtitle: "15% OFF · Por tiempo limitado",
+    href: "/flash",
     imageSrc: "/home/tiles/best.webp",
   },
   {
-    title: "Gangas",
-    subtitle: "Ofertas y oportunidades",
-    href: "/catalog?tag=gangas",
-    imageSrc: "/home/tiles/deals.webp",
-  },
-  {
     title: "Combos",
-    subtitle: "Arma el pedido más rápido",
+    subtitle: "Llevá más, pagá menos",
     href: "/catalog?tag=combo",
     imageSrc: "/home/tiles/combos.webp",
   },
   {
     title: "Novedades",
-    subtitle: "Recién llegados",
+    subtitle: "Lo último en SH",
     href: "/catalog?tag=nuevo",
     imageSrc: "/home/tiles/new.webp",
+  },
+  {
+    title: "Recomprar",
+    subtitle: "Repetí tus favoritos",
+    href: "/account/orders",
+    imageSrc: "/home/tiles/deals.webp",
   },
 ];
 
@@ -316,6 +298,13 @@ export default function HomeSteamPage({ products }: { products: Product[] }) {
 
   return (
     <main className="min-h-screen bg-white px-4 pb-24 pt-16 text-[#111] dark:bg-black dark:text-white">
+      <div className="mb-3 flex items-center justify-between">
+  <div>
+    <p className="text-xl font-bold">
+      Hola{userName ? `, ${userName.split(" ")[0]}` : ""}
+    </p>
+  </div>
+</div>
       <SearchBar className="mt-3" />
 
       {/* Título */}
@@ -362,7 +351,7 @@ export default function HomeSteamPage({ products }: { products: Product[] }) {
   </div>
 </section>
       {/* Tiles */}
-      <section className="space-y-3">
+      <section className="grid grid-cols-4 gap-2 pt-4">
         {actionTiles.map((t) => (
           <ActionTile
             key={t.title}
@@ -446,24 +435,21 @@ export default function HomeSteamPage({ products }: { products: Product[] }) {
                   ) : null}
                 </div>
 
-                <div className="mt-3">
-                  <LoopRow
-                    items={items.slice(0, Number(block?.limit) || 5)}
-                    renderItem={(p: Product, idx: number) => (
-                      <div
-                        key={`${p.id}-${idx}`}
-                        className="min-w-[240px] max-w-[240px] snap-start"
-                        onClick={(e) => {
-                          const target = e.target as HTMLElement | null;
-                          if (target?.closest("[data-no-nav]")) return;
-                          router.push(`/p/${p.id}`);
-                        }}
-                      >
-                        <ProductCard product={p as any} />
-                      </div>
-                    )}
-                  />
-                </div>
+                <div className="-mx-4 mt-3 flex gap-3 overflow-x-auto px-4 pb-2 scrollbar-hide">
+  {items.slice(0, 6).map((p: Product) => (
+    <div
+      key={p.id}
+      className="min-w-[155px] max-w-[155px] shrink-0"
+      onClick={(e) => {
+        const target = e.target as HTMLElement | null;
+        if (target?.closest("[data-no-nav]")) return;
+        router.push(`/p/${p.id}`);
+      }}
+    >
+      <HomeProductCard product={p as any} />
+    </div>
+  ))}
+</div>
               </div>
             );
           })
