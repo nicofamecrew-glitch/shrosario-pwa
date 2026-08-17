@@ -23,6 +23,7 @@ export default async function Page() {
     <div className="min-h-screen bg-[hsl(var(--app-bg))] text-[hsl(var(--app-fg))]">
       <HomeSteamPage
         products={products as any}
+        userName={session?.user?.name ?? null}
       />
 
       <PromoPopup

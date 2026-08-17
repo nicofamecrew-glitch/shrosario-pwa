@@ -1,19 +1,28 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import type { Product } from "@/lib/types";
 import { useCartStore } from "@/lib/store";
 import { formatPrice, getVariantPrice } from "@/lib/pricing";
 import { getProductImage } from "@/lib/productImage";
 import { Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 type Props = {
   product: Product;
 };
 
 export default function HomeProductCard({ product }: Props) {
-  const { addItem, isWholesale, getStockBySku, getQtyBySku } =
-    useCartStore();
+  const router = useRouter();
+
+  const {
+    addItem,
+    isWholesale,
+    getStockBySku,
+    getQtyBySku,
+  } = useCartStore();
+
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
   const variants = useMemo(() => {
     const raw = Array.isArray((product as any)?.variants)
@@ -21,46 +30,64 @@ export default function HomeProductCard({ product }: Props) {
       : [];
 
     const seen = new Set<string>();
+    const result: any[] = [];
 
-    return raw.filter((v: any) => {
+    for (const v of raw) {
       const sku = String(v?.sku ?? "").trim();
       const size = String(v?.size ?? "").trim();
 
-      if (!sku && !size) return false;
+      if (!sku && !size) continue;
 
       const key = sku
         ? `sku:${sku}`
         : `size:${size.toLowerCase()}`;
 
-      if (seen.has(key)) return false;
+      if (seen.has(key)) continue;
 
       seen.add(key);
-      return true;
-    });
+      result.push(v);
+    }
+
+    return result;
   }, [product]);
 
-  const variant = variants[0] ?? null;
-  const sku = variant?.sku ?? "";
+  const variant =
+    variants[selectedIndex] ??
+    variants[0] ??
+    null;
+
+  const sku = String(variant?.sku ?? "");
 
   const price = variant
     ? getVariantPrice(variant, isWholesale)
     : 0;
 
-  const stock = sku ? getStockBySku(sku) : null;
-  const inCart = sku ? getQtyBySku(sku) : 0;
+  const stock = sku
+    ? getStockBySku(sku)
+    : null;
+
+  const inCart = sku
+    ? getQtyBySku(sku)
+    : 0;
 
   const remaining =
-    stock === null ? null : Math.max(0, stock - inCart);
+    stock === null
+      ? null
+      : Math.max(0, stock - inCart);
 
   const canAdd =
-    !!sku && (remaining === null || remaining > 0);
+    !!sku &&
+    (remaining === null || remaining > 0);
 
   const imgSrc = useMemo(() => {
     if (variant?.image) return variant.image;
     if (variant?.imageUrl) return variant.imageUrl;
     if (variant?.img) return variant.img;
 
-    if (Array.isArray(variant?.images) && variant.images[0]) {
+    if (
+      Array.isArray(variant?.images) &&
+      variant.images[0]
+    ) {
       return variant.images[0];
     }
 
@@ -68,16 +95,30 @@ export default function HomeProductCard({ product }: Props) {
       return (product as any).defaultImage;
     }
 
-    return getProductImage(product as any, variant as any, 0);
-  }, [product, variant]);
+    return getProductImage(
+      product as any,
+      variant as any,
+      selectedIndex
+    );
+  }, [product, variant, selectedIndex]);
 
-  const handleAdd = (e: React.MouseEvent) => {
+  const shownVariants = variants.slice(0, 3);
+  const remainingVariants = Math.max(
+    0,
+    variants.length - 3
+  );
+
+  const handleAdd = (
+    e: React.MouseEvent<HTMLButtonElement>
+  ) => {
     e.preventDefault();
     e.stopPropagation();
 
     if (!canAdd || !variant) return;
 
-    if (navigator?.vibrate) navigator.vibrate(18);
+    if (navigator?.vibrate) {
+      navigator.vibrate(18);
+    }
 
     addItem({
       productId: product.id,
@@ -89,7 +130,7 @@ export default function HomeProductCard({ product }: Props) {
   return (
     <article
       className="
-        relative flex h-[230px] flex-col overflow-hidden
+        relative flex h-[250px] flex-col overflow-hidden
         rounded-[20px]
         border border-black/10 bg-white
         shadow-[0_4px_14px_rgba(0,0,0,0.06)]
@@ -111,20 +152,22 @@ export default function HomeProductCard({ product }: Props) {
       {/* IMAGEN */}
       <div
         className="
-          relative flex h-[135px] shrink-0
+          relative flex h-[130px] shrink-0
           items-center justify-center
           bg-[#f5f5f5] p-3
           dark:bg-[#1b1b1b]
         "
       >
         <img
+          key={`${product.id}-${selectedIndex}-${imgSrc}`}
           src={imgSrc}
           alt={product?.name ?? "Producto"}
           loading="lazy"
           decoding="async"
           className="h-full w-full object-contain"
           onError={(e) => {
-            e.currentTarget.src = "/product/placeholder.png";
+            e.currentTarget.src =
+              "/product/placeholder.png";
           }}
         />
       </div>
@@ -141,23 +184,68 @@ export default function HomeProductCard({ product }: Props) {
           {product.name}
         </h3>
 
-        <div className="mt-auto flex items-end justify-between gap-2">
-          <span
-            className="
-              max-w-[80px] truncate
-              text-[11px] font-medium
-              text-black/45 dark:text-white/45
-            "
-          >
-            {variant?.size ?? product?.brand ?? ""}
-          </span>
+        {/* VARIANTES */}
+        {variants.length > 0 && (
+          <div className="mt-2 flex items-center gap-1 overflow-hidden">
+            {shownVariants.map(
+              (v: any, index: number) => {
+                const active =
+                  index === selectedIndex;
 
+                return (
+                  <button
+                    key={`${product.id}-${v.sku}-${index}`}
+                    type="button"
+                    data-no-nav
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setSelectedIndex(index);
+                    }}
+                    className={[
+                      "max-w-[58px] truncate rounded-full px-2 py-1",
+                      "text-[9px] font-bold transition",
+                      active
+                        ? "bg-[#ee078e] text-white"
+                        : "bg-black/5 text-black/55 dark:bg-white/10 dark:text-white/60",
+                    ].join(" ")}
+                  >
+                    {v.size}
+                  </button>
+                );
+              }
+            )}
+
+            {remainingVariants > 0 && (
+              <button
+                type="button"
+                data-no-nav
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  router.push(`/p/${product.id}`);
+                }}
+                className="
+                  shrink-0 rounded-full
+                  bg-black/5 px-2 py-1
+                  text-[9px] font-bold text-black/55
+                  dark:bg-white/10 dark:text-white/60
+                "
+              >
+                +{remainingVariants}
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* BOTÓN */}
+        <div className="mt-auto flex items-end justify-end">
           <button
             type="button"
             data-no-nav
             disabled={!canAdd}
             onClick={handleAdd}
-            aria-label="Agregar al carrito"
+            aria-label={`Agregar ${variant?.size ?? ""} al carrito`}
             className={[
               "grid h-9 w-9 shrink-0 place-items-center rounded-full",
               "transition active:scale-90",
