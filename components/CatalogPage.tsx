@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
 import Filters from "@/components/Filters";
-import ProductCard from "@/components/ProductCard";
+import ProductCardCatalog from "@/components/ProductCardCatalog";
 import WholesaleGate from "@/components/WholesaleGate";
 
 
@@ -205,7 +205,7 @@ className="mt-4 inline-flex items-center justify-center rounded-full border bord
                         if (el.closest("[data-no-nav]")) e.preventDefault();
                       }}
                     >
-                      <ProductCard product={product} />
+                      <ProductCardCatalog product={product} />
                     </Link>
                   );
                 })}

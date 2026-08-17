@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import type { Product } from "@/lib/types";
-import ProductCard from "@/components/ProductCard";
+import ProductCardCatalog from "@/components/ProductCardCatalog";
 
 export default function ProductGrid({ products }: { products: Product[] }) {
   return (
@@ -18,7 +18,7 @@ export default function ProductGrid({ products }: { products: Product[] }) {
             if (el.closest("[data-no-nav]")) e.preventDefault();
           }}
         >
-          <ProductCard product={product} />
+          <ProductCardCatalog product={product} />
         </Link>
       ))}
     </div>
