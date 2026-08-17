@@ -53,6 +53,14 @@ const WHOLESALE_MIN_TOTAL = 500000;
 const wholesaleReady = total >= WHOLESALE_MIN_TOTAL;
 const missingWholesale = Math.max(0, WHOLESALE_MIN_TOTAL - total);
 const blockWholesaleCheckout = isWholesale && !wholesaleReady;
+const FREE_SHIPPING_MIN = 80000;
+const freeShippingReady = total >= FREE_SHIPPING_MIN;
+const missingFreeShipping = Math.max(0, FREE_SHIPPING_MIN - total);
+
+const freeShippingProgress = Math.min(
+  100,
+  (total / FREE_SHIPPING_MIN) * 100
+);
 
 const ctaDisabled = !hasItems || !hasCatalog || blockWholesaleCheckout;
 
@@ -221,6 +229,36 @@ const ctaDisabled = !hasItems || !hasCatalog || blockWholesaleCheckout;
           className="shrink-0 border-t border-black/10 bg-white p-6 pt-4 dark:border-white/10 dark:bg-black"
           style={{ paddingBottom: "calc(110px + env(safe-area-inset-bottom))" }}
         >
+          {!isWholesale && hasItems && (
+  <div className="mb-4 rounded-2xl border border-black/10 bg-black/5 p-4 dark:border-white/10 dark:bg-white/5">
+    <div className="flex items-center justify-between gap-3">
+      <div>
+        <div className="text-sm font-semibold">
+          {freeShippingReady
+            ? "Tenés envío gratis"
+            : "Envío gratis desde $80.000"}
+        </div>
+
+        {!freeShippingReady && (
+          <div className="mt-0.5 text-xs text-black/50 dark:text-white/50">
+            Te faltan {formatPrice(missingFreeShipping)}
+          </div>
+        )}
+      </div>
+
+      <div className="text-xs font-bold text-[#ee078e]">
+        {Math.round(freeShippingProgress)}%
+      </div>
+    </div>
+
+    <div className="mt-3 h-2 overflow-hidden rounded-full bg-black/10 dark:bg-white/10">
+      <div
+        className="h-full rounded-full bg-[#ee078e] transition-all duration-300"
+        style={{ width: `${freeShippingProgress}%` }}
+      />
+    </div>
+  </div>
+)}
           {/* TOTAL */}
           <div className="rounded-xl border border-black/10 bg-black/5 p-4 dark:border-white/10 dark:bg-white/5"
 >

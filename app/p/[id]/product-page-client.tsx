@@ -4,12 +4,13 @@ import { useEffect, useMemo, useState } from "react";
 import type { Product } from "@/lib/types";
 import { useCartStore, useFavoritesStore } from "@/lib/store";
 import { formatPrice, getVariantPrice } from "@/lib/pricing";
-import ProductCard from "@/components/ProductCard";
+import HomeProductCard from "@/components/HomeProductCard";
 import { withVariantImagesOne, withVariantImages } from "@/lib/withVariantImages";
 import { brandAccentFrom } from "@/lib/brandAccent";
 import { calcAllPlans } from "@/lib/mpFees";
 import Image from "next/image";
 import FavoriteHeart from "@/components/ui/FavoriteHeart";
+
 
 
 type Rule = { keys: string[]; color: string };
@@ -113,7 +114,7 @@ export default function ProductPageClient({
     () => withVariantImages(bestSellers as any),
     [bestSellers]
   );
-
+  const [showPlans, setShowPlans] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [activeImage, setActiveImage] = useState(0);
 
@@ -352,14 +353,6 @@ export default function ProductPageClient({
       {/* HERO */}
       <div className="w-full bg-white">
         <div className="relative mx-auto max-w-[520px]">
-          <div
-            className="pointer-events-none absolute right-0 top-0 h-full w-[62%]"
-            style={{
-              background: productColor,
-              clipPath: "polygon(45% 0%, 100% 0%, 100% 100%, 0% 62%)",
-            }}
-          />
-
           <div className="relative flex items-center justify-center px-6 py-8">
             <img
               key={`${(productFixed as any)?.id}-${selectedIndex}-${activeImage}-${heroSrc}`}
@@ -392,14 +385,20 @@ export default function ProductPageClient({
       {/* CONTENT */}
       <div className="w-full bg-white">
         <div className="mx-auto max-w-[520px] px-4 pb-44">
-          <section className="-mt-8 rounded-[18px] rounded-t-none bg-[#d2d2d2] p-5">
-            <div className="text-3xl font-extrabold leading-tight text-zinc-900">
-              {(productFixed as any)?.name}
-            </div>
+          <section className="-mt-6 rounded-t-[28px] bg-white p-5 text-black dark:bg-[#0b0b0b] dark:text-white">
+           <div className="text-xs font-bold uppercase tracking-[0.18em] text-[#ee078e]">
+  {(productFixed as any)?.brand}
+</div>
 
-            <div className="mt-1 text-lg font-semibold tracking-wide text-black/70">
-              {(productFixed as any)?.line}
-            </div>
+<div className="mt-2 text-2xl font-black leading-tight text-black dark:text-white">
+  {(productFixed as any)?.name}
+</div>
+
+{(productFixed as any)?.line ? (
+  <div className="mt-1 text-sm font-medium text-black/50 dark:text-white/50">
+    {(productFixed as any)?.line}
+  </div>
+) : null}
 
             {variants.length ? (
               isColorLevels ? (
@@ -509,10 +508,11 @@ export default function ProductPageClient({
                             setZipOptions([]);
                           }}
                           className={[
-                            "rounded-full px-4 py-2 text-sm font-extrabold border",
-                            active ? "text-white border-black" : "bg-white text-black/80 border-black/10",
-                          ].join(" ")}
-                          style={active ? { background: productColor } : undefined}
+  "rounded-full px-4 py-2 text-sm font-bold border transition",
+  active
+    ? "bg-black text-white border-black dark:bg-white dark:text-black dark:border-white"
+    : "bg-white text-black/60 border-black/10 dark:bg-white/5 dark:text-white/60 dark:border-white/10",
+].join(" ")}
                         >
                           {v.size ?? "—"}
                         </button>
@@ -523,78 +523,117 @@ export default function ProductPageClient({
               )
             ) : null}
 
-            <div className="mt-3 flex items-center">
-              <img
-                src={`/brands/${normText((productFixed as any).brand)}.png`}
-                alt={(productFixed as any).brand}
-                className="h-32 w-auto drop-shadow-[0_1px_2px_rgba(0,0,0,0.35)]"
-              />
-            </div>
+         <div className="mt-6 flex items-end justify-between gap-4 border-t border-black/10 pt-5 dark:border-white/10">
+  <div>
+    <div className="text-[11px] font-semibold uppercase tracking-wide text-black/40 dark:text-white/40">
+      Precio
+    </div>
 
+    <div className="mt-1 text-3xl font-black tracking-tight text-black dark:text-white">
+      {formatPrice(price)}
+    </div>
+
+    <div className="mt-1 text-xs font-medium text-black/45 dark:text-white/45">
+      {isWholesale ? "Precio mayorista" : "Precio minorista"}
+    </div>
+  </div>
+
+  <div
+    className={[
+      "rounded-full px-3 py-1.5 text-xs font-bold",
+      stock > 0
+        ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
+        : "bg-red-500/10 text-red-700 dark:text-red-300",
+    ].join(" ")}
+  >
+    {stock > 0 ? "En stock" : "Sin stock"}
+  </div>
+</div>
             <div className="mt-6">
-              <div
-                className="inline-flex items-center rounded-full border-2 bg-black px-8 py-4 text-4xl font-black text-white"
-                style={{ borderColor: productColor }}
-              >
-                {formatPrice(price)}
+  <div className="rounded-2xl border border-black/10 bg-black/[0.03] p-4 dark:border-white/10 dark:bg-white/[0.05]">
+    
+    <div className="flex items-center justify-between gap-4">
+      <div>
+        <div className="text-sm font-bold text-black dark:text-white">
+          Opciones de pago
+        </div>
+
+        {mpPlans.length > 0 && (
+          <div className="mt-1 text-xs text-black/50 dark:text-white/50">
+            Hasta 12 cuotas con Mercado Pago
+          </div>
+        )}
+      </div>
+
+      <Image
+        src="/brands/mercado-pago.png"
+        alt="Mercado Pago"
+        width={100}
+        height={30}
+        className="h-8 w-auto object-contain"
+      />
+    </div>
+
+    <button
+      type="button"
+      onClick={() => setShowPlans((prev) => !prev)}
+      className="mt-4 flex w-full items-center justify-between border-t border-black/10 pt-3 text-sm font-bold text-black dark:border-white/10 dark:text-white"
+    >
+      <span>
+        {showPlans ? "Ocultar cuotas" : "Ver cuotas"}
+      </span>
+
+      <span
+        className={[
+          "transition-transform",
+          showPlans ? "rotate-180" : "",
+        ].join(" ")}
+      >
+        ↓
+      </span>
+    </button>
+
+    {showPlans && (
+      <div className="mt-3 space-y-2">
+        <div className="flex items-center justify-between rounded-xl bg-white px-3 py-2 dark:bg-white/5">
+          <span className="text-sm font-semibold text-black/60 dark:text-white/60">
+            Contado
+          </span>
+
+          <span className="text-sm font-black text-black dark:text-white">
+            {formatPrice(price)}
+          </span>
+        </div>
+
+        {mpPlans.map((p: any) => (
+          <div
+            key={p.installments}
+            className="flex items-center justify-between rounded-xl bg-white px-3 py-2 dark:bg-white/5"
+          >
+            <span className="text-sm font-semibold text-black/70 dark:text-white/70">
+              {p.installments} cuotas
+            </span>
+
+            <div className="text-right">
+              <div className="text-sm font-black text-black dark:text-white">
+                {formatPrice(p.per)}
               </div>
 
-              <div className="mt-3 text-sm font-semibold">
-                {stock > 0 ? (
-                  <span className="text-green-700">✔ EN STOCK</span>
-                ) : (
-                  <span className="text-red-700">✖ SIN STOCK</span>
-                )}
-                <span className="ml-2 text-black/60">{isWholesale ? "Mayorista" : "Minorista"}</span>
+              <div className="text-[10px] text-black/40 dark:text-white/40">
+                Total {formatPrice(p.total)}
               </div>
             </div>
+          </div>
+        ))}
 
-            <div className="mt-8">
-              <div className="flex items-center justify-between">
-                <div className="text-2xl font-extrabold text-zinc-900">Cuotas</div>
-
-                <div className="flex items-center gap-2 px-1">
-                  <span className="text-xs font-semibold text-black/70">Pagá con</span>
-                  <Image
-                    src="/brands/mercado-pago.png"
-                    alt="Mercado Pago"
-                    width={160}
-                    height={40}
-                    className="h-[85px] w-auto"
-                    priority
-                  />
-                </div>
-              </div>
-
-              <div className="mt-3 rounded-2xl bg-white p-4 shadow-[0_10px_22px_rgba(0,0,0,0.08)]">
-                <div className="text-sm font-semibold text-black/70">
-                  Contado: <span className="font-black text-black">{formatPrice(price)}</span>
-                  <span className="ml-2 text-xs text-black/50">(contado 0% interés)</span>
-                </div>
-
-                <div className="mt-4 space-y-2">
-                  {mpPlans.map((p: any) => (
-                    <div
-                      key={p.installments}
-                      className="flex items-center justify-between rounded-xl border border-black/10 bg-black/5 px-3 py-2"
-                    >
-                      <div className="text-sm font-black text-black">{p.installments} cuotas</div>
-
-                      <div className="text-right">
-                        <div className="text-sm font-black text-zinc-900">{formatPrice(p.per)}</div>
-                        <div className="text-xs text-black/60">Total: {formatPrice(p.total)}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="mt-3 text-xs text-black/60">
-                  Las cuotas son informativas. El valor final se confirma en Mercado Pago al momento de pagar.
-                </div>
-              </div>
-            </div>
-
-                        <div className="sticky bottom-[72px] z-40 mt-6">
+        <div className="pt-1 text-[10px] leading-relaxed text-black/40 dark:text-white/40">
+          Valores informativos. El importe final se confirma en Mercado Pago.
+        </div>
+      </div>
+    )}
+  </div>
+</div>
+<div className="sticky bottom-[72px] z-40 mt-6">
               <div className="rounded-[18px] border border-white/10 bg-black/95 p-4 shadow-[0_10px_22px_rgba(0,0,0,0.18)] backdrop-blur supports-[backdrop-filter]:bg-black/80">
                 <div className="flex items-center justify-between gap-3">
                   <div className="min-w-0">
@@ -690,28 +729,36 @@ export default function ProductPageClient({
             </div>
           </section>
 
-          {bestSellersFixed.length > 0 ? (
-            <section className="mt-10">
-              <div className="text-xl font-extrabold">Lo más vendido…</div>
+          
+    <div className="-mx-4 mt-4 flex gap-3 overflow-x-auto px-4 pb-3">
+ {bestSellersFixed.length > 0 ? (
+  <section className="mt-10">
+    <div className="text-xl font-extrabold text-black dark:text-white">
+      Lo más vendido
+    </div>
 
-              <div className="mt-4 -mx-4 flex gap-3 overflow-x-auto px-4 pb-3 snap-x snap-mandatory">
-                {bestSellersFixed.map((p) => (
-                  <a
-                    key={(p as any).id}
-                    href={`/p/${(p as any).id}`}
-                    className="block min-w-[220px] snap-start"
-                    onClickCapture={(e) => {
-                      const el = e.target as HTMLElement | null;
-                      if (!el) return;
-                      if (el.closest("[data-no-nav]")) e.preventDefault();
-                    }}
-                  >
-                    <ProductCard product={p as any} />
-                  </a>
-                ))}
-              </div>
-            </section>
-          ) : null}
+    <div className="-mx-4 mt-4 flex gap-3 overflow-x-auto px-4 pb-3">
+      {bestSellersFixed.slice(0, 6).map((p) => (
+        <a
+          key={(p as any).id}
+          href={`/p/${(p as any).id}`}
+          className="block min-w-[155px] max-w-[155px] shrink-0"
+          onClickCapture={(e) => {
+            const el = e.target as HTMLElement | null;
+            if (!el) return;
+
+            if (el.closest("[data-no-nav]")) {
+              e.preventDefault();
+            }
+          }}
+        >
+          <HomeProductCard product={p as any} />
+        </a>
+      ))}
+    </div>
+  </section>
+) : null}
+         </div>
         </div>
       </div>
     </div>

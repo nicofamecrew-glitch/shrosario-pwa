@@ -1,11 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import LoopRow from "@/components/LoopRow";
 import { useHomeBlocks } from "@/lib/lib/useHomeBlocks";
 import SearchBar from "@/components/SearchBar";
 import { useRouter } from "next/navigation";
-import ProductCard from "@/components/ProductCard";
 import { withVariantImages } from "@/lib/withVariantImages";
 import type { Product } from "@/lib/types";
 import HomeProductCard from "@/components/HomeProductCard";

@@ -15,11 +15,14 @@ function applyTheme(next: Theme) {
 
 export default function ThemeToggle() {
   const [theme, setTheme] = useState<Theme>("dark");
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     const saved = (localStorage.getItem("theme") as Theme) || "dark";
+
     setTheme(saved);
     applyTheme(saved);
+    setMounted(true);
   }, []);
 
   function toggle() {
@@ -27,6 +30,8 @@ export default function ThemeToggle() {
     setTheme(next);
     applyTheme(next);
   }
+
+  if (!mounted) return null;
 
   return (
     <button
