@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { withVariantImages } from "@/lib/withVariantImages";
 import type { Product } from "@/lib/types";
 import HomeProductCard from "@/components/HomeProductCard";
-
+import HeroStack from "@/components/HeroStack";
 
 function normalizeTags(tags?: string[] | string): string[] {
   if (!tags) return [];
@@ -305,49 +305,7 @@ export default function HomeSteamPage({
 </div>
       <SearchBar className="mt-3" />
 
-      {/* Título */}
- <section className="pt-2 pb-5">
-  <div className="relative overflow-hidden rounded-3xl h-[250px]">
-
-    {/* IMAGEN FULL */}
-    <img
-      src="/home/promo-hero.jpg"
-      alt="Compra desde el celular"
-      className="absolute inset-0 h-full w-full object-cover"
-    />
-
-    {/* DEGRADE */}
-    <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/65 to-transparent" />
-
-    {/* CONTENIDO */}
-    <div className="relative z-10 flex h-full flex-col justify-center p-5 text-white">
-     
-
-      <div className="mt-3 max-w-[16ch] text-2xl font-black leading-tight">
-        Comprá productos profesionales desde tu celular
-      </div>
-
-      <div className="mt-2 max-w-[24ch] text-sm text-white/80">
-        Armá tu pedido en minutos, sin perder tiempo en el salón
-      </div>
-
-      <Link
-        href="/catalog"
-        className="mt-4 inline-flex w-fit items-center justify-center rounded-full bg-white px-5 py-2.5 text-base font-bold text-black"
-      >
-        Ver productos →
-      </Link>
-
-      <div className="mt-4 flex flex-wrap gap-2 text-xs text-white/70">
-        <span>Envíos</span>
-        <span>•</span>
-        <span>Stock real</span>
-        <span>•</span>
-        <span>Compra simple</span>
-      </div>
-    </div>
-  </div>
-</section>
+      <HeroStack />
       {/* Tiles */}
       <section className="grid grid-cols-4 gap-2 pt-4">
         {actionTiles.map((t) => (
