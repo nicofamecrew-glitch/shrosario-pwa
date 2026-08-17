@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useCartStore } from "@/lib/store";
 import type { Product, Variant } from "@/lib/types";
 import products from "@/data/products.json";
+import { getVariantPrice } from "@/lib/pricing";
 
 const PROFILE_KEY = "sh_checkout_profile_v1";
 const DRAFT_KEY = "sh_draft_id_v1";
@@ -127,24 +128,30 @@ export default function ConfirmOrderPage() {
   }, [loaded, fullName, phone, city, address, notes]);
 
   const buildOrderItem = (
-    product: Product,
-    variant: Variant,
-    qty: number,
-    priceMode: "minorista" | "mayorista"
-  ): OrderItem => {
-    const unitPrice =
-      priceMode === "mayorista" ? variant.priceWholesale : variant.priceRetail;
+  product: Product,
+  variant: Variant,
+  qty: number,
+  priceMode: "minorista" | "mayorista",
+  flashDiscountPercent = 0
+): OrderItem => {
+  const isWholesale = priceMode === "mayorista";
 
-    return {
-      productId: product.id,
-      sku: variant?.sku ?? "",
-      qty,
-      unitPrice,
-      name: product.name,
-      brand: product.brand ?? "",
-      size: variant.size,
-    };
+  const unitPrice = getVariantPrice(
+    variant,
+    isWholesale,
+    flashDiscountPercent
+  );
+
+  return {
+    productId: product.id,
+    sku: variant?.sku ?? "",
+    qty,
+    unitPrice,
+    name: product.name,
+    brand: product.brand ?? "",
+    size: variant.size,
   };
+};
 
   const handleConfirm = async () => {
     // 🔒 anti doble click/tap rápido
@@ -177,7 +184,13 @@ export default function ConfirmOrderPage() {
       const orderItems: OrderItem[] = validItems.map((it: any) => {
         const product = (products as Product[]).find((p) => p.id === it.productId);
         if (!product) throw new Error(`Producto no encontrado: ${it.productId}`);
-        return buildOrderItem(product, it.variant as Variant, it.qty ?? 1, priceMode);
+        return buildOrderItem(
+  product,
+  it.variant as Variant,
+  it.qty ?? 1,
+  priceMode,
+  it.flashDiscountPercent ?? 0
+);
       });
 
       // ✅ Corte por lo sano: no permitas SKU vacío o precio 0

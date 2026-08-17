@@ -117,6 +117,11 @@ export default function ProductPageClient({
   const [showPlans, setShowPlans] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [activeImage, setActiveImage] = useState(0);
+  const [mounted, setMounted] = useState(false);
+
+useEffect(() => {
+  setMounted(true);
+}, []);
 
   const [zipCp, setZipCp] = useState("");
   const [zipLoading, setZipLoading] = useState(false);
@@ -752,7 +757,10 @@ export default function ProductPageClient({
             }
           }}
         >
-          <HomeProductCard product={p as any} />
+          <HomeProductCard
+  product={p as any}
+  flashDiscountPercent={15}
+/>
         </a>
       ))}
     </div>

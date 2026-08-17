@@ -10,11 +10,14 @@ import { useRouter } from "next/navigation";
 
 type Props = {
   product: Product;
+  flashDiscountPercent?: number;
 };
 
-export default function HomeProductCard({ product }: Props) {
-  const router = useRouter();
-
+export default function HomeProductCard({
+  product,
+  flashDiscountPercent = 0,
+}: Props) {
+    const router = useRouter();
   const {
     addItem,
     isWholesale,
@@ -58,10 +61,18 @@ export default function HomeProductCard({ product }: Props) {
 
   const sku = String(variant?.sku ?? "");
 
-  const price = variant
-    ? getVariantPrice(variant, isWholesale)
-    : 0;
+  
+  const normalPrice = variant
+  ? getVariantPrice(variant, isWholesale)
+  : 0;
 
+const price = variant
+  ? getVariantPrice(
+      variant,
+      isWholesale,
+      flashDiscountPercent
+    )
+  : 0;
   const stock = sku
     ? getStockBySku(sku)
     : null;
@@ -109,24 +120,27 @@ export default function HomeProductCard({ product }: Props) {
   );
 
   const handleAdd = (
-    e: React.MouseEvent<HTMLButtonElement>
-  ) => {
-    e.preventDefault();
-    e.stopPropagation();
+  e: React.MouseEvent<HTMLButtonElement>
+) => {
+  e.preventDefault();
+  e.stopPropagation();
 
-    if (!canAdd || !variant) return;
+  if (!canAdd || !variant) return;
 
-    if (navigator?.vibrate) {
-      navigator.vibrate(18);
-    }
+  if (navigator?.vibrate) {
+    navigator.vibrate(18);
+  }
 
-    addItem({
-      productId: product.id,
-      variant,
-      qty: 1,
-    });
-  };
-
+  addItem({
+    productId: product.id,
+    variant,
+    qty: 1,
+    flashDiscountPercent:
+      !isWholesale && flashDiscountPercent > 0
+        ? flashDiscountPercent
+        : undefined,
+  });
+};
   return (
     <article
       className="
@@ -137,18 +151,31 @@ export default function HomeProductCard({ product }: Props) {
         dark:border-white/10 dark:bg-[#121212]
       "
     >
-      {/* PRECIO */}
-      <div
-        className="
-          absolute right-2 top-2 z-20
-          rounded-full bg-black px-2.5 py-1
-          text-[13px] font-extrabold text-white
-          dark:bg-white dark:text-black
-        "
-      >
-        {formatPrice(price)}
-      </div>
+     {/* PRECIO */}
+<div className="absolute right-2 top-2 z-20 flex flex-col items-end gap-1">
+  {flashDiscountPercent > 0 && !isWholesale && (
+    <div className="flex items-center gap-1">
+      <span className="text-[10px] font-bold text-black/45 line-through dark:text-white/45">
+        {formatPrice(normalPrice)}
+      </span>
 
+      <span className="rounded-full bg-[#ee078e] px-1.5 py-0.5 text-[9px] font-black text-white">
+        -{flashDiscountPercent}%
+      </span>
+    </div>
+  )}
+
+  <div
+    className={[
+      "rounded-full px-2.5 py-1 text-[13px] font-extrabold",
+      flashDiscountPercent > 0 && !isWholesale
+        ? "bg-[#ee078e] text-white"
+        : "bg-black text-white dark:bg-white dark:text-black",
+    ].join(" ")}
+  >
+    {formatPrice(price)}
+  </div>
+</div>
       {/* IMAGEN */}
       <div
         className="

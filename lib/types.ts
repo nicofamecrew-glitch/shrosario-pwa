@@ -30,6 +30,7 @@ export type CartItem = {
   productId: string;
   variant: Variant;
   qty: number;
+  flashDiscountPercent?: number;
 };
 export type LeadFormData = {
   name: string;

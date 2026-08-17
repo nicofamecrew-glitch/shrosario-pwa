@@ -45,7 +45,7 @@ export default function CartDrawer() {
     const variant = item.variant; // ya lo tenés guardado en el CartItem
     if (!variant) return sum;
 
-    return sum + getVariantPrice(variant, isWholesale) * item.qty;
+    return sum + getVariantPrice(variant, isWholesale, item.flashDiscountPercent ?? 0) * item.qty; 
   }, 0);
 }, [items, byId, isWholesale]);
 
@@ -171,7 +171,7 @@ const ctaDisabled = !hasItems || !hasCatalog || blockWholesaleCheckout;
   if (!product) return null;
 
   const variant = item.variant!;
-  const price = getVariantPrice(variant, isWholesale);
+  const price = getVariantPrice(variant, isWholesale,  item.flashDiscountPercent ?? 0);
 
   return (
     <div

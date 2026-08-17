@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import BottomNav from "@/components/BottomNav";
 import CartDrawer from "@/components/CartDrawer";
 import { useCartStore } from "@/lib/store";
@@ -13,6 +13,12 @@ export default function ClientShell({ children }: { children: React.ReactNode })
   const cartCount = useCartStore((s) =>
   s.items.reduce((acc, it) => acc + it.qty, 0)
 );
+
+  const [mounted, setMounted] = useState(false);
+
+useEffect(() => {
+  setMounted(true);
+}, []);
   const setProducts = useCatalogStore((s) => s.setProducts);
 
   useEffect(() => {
@@ -76,7 +82,7 @@ if (!cancelled && Array.isArray(data)) {
 
       {/* Nav: siempre arriba, pero SOLO su propia area */}
       <div className="fixed inset-x-0 bottom-0 z-50">
-        <BottomNav cartCount={cartCount} />
+        <BottomNav cartCount={mounted ? cartCount : 0} />
       </div>
     </div>
   );

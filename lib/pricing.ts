@@ -2,15 +2,24 @@ import type { Product, ProductVariant } from "@/lib/types";
 
 export function getVariantPrice(
   variant: ProductVariant | null,
-  isWholesale: boolean
+  isWholesale: boolean,
+  flashDiscountPercent = 0
 ) {
   if (!variant) return 0;
 
   const retail = Number((variant as any).priceRetail ?? 0);
   const wholesale = Number((variant as any).priceWholesale ?? 0);
 
+  // Mayorista: nunca aplica Flash
   if (isWholesale && wholesale > 0) {
     return wholesale;
+  }
+
+  // Minorista con descuento Flash
+  if (flashDiscountPercent > 0) {
+    return Math.round(
+      retail * (1 - flashDiscountPercent / 100)
+    );
   }
 
   return retail;

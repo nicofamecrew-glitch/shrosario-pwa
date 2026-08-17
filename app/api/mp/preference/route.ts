@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { MercadoPagoConfig, Preference } from "mercadopago";
+import { getCatalog } from "@/lib/server/catalog";
+import { getFlashProducts } from "@/lib/flashSale";
 
 export const runtime = "nodejs";
 
@@ -11,6 +13,7 @@ type CartItem = {
   price?: number;
   title?: string;
   name?: string;
+  sku?: string;
 };
 
 function getBaseUrl(req: NextRequest) {
@@ -59,21 +62,77 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
+   
+   // Catálogo real del servidor
+const catalog = await getCatalog();
 
-    const items = body.items
-      .map((it: CartItem) => {
-        const unit = Number(it.unit_price ?? it.unitPrice ?? it.price ?? 0);
-        if (!Number.isFinite(unit) || unit <= 0) return null;
+// Productos que pertenecen a la tanda Flash actual
+const flashProducts = getFlashProducts(catalog);
 
-        return {
-          title: it.title || it.name || it.productId,
-          quantity: Math.max(1, Number(it.quantity ?? 1)),
-          unit_price: unit,
-          currency_id: "ARS",
-        };
-      })
-      .filter(Boolean) as any[];
+const flashIds = new Set(
+  flashProducts.map((p) => p.id)
+);
 
+   const items = body.items
+  .map((it: CartItem) => {
+    // ENVÍO: no existe en el catálogo
+    if (it.productId === "shipping") {
+      const shippingPrice = Number(
+        it.unit_price ?? it.unitPrice ?? it.price ?? 0
+      );
+
+      if (!Number.isFinite(shippingPrice) || shippingPrice <= 0) {
+        return null;
+      }
+
+      return {
+        title: it.title || "Envío",
+        quantity: 1,
+        unit_price: shippingPrice,
+        currency_id: "ARS",
+      };
+    }
+
+    // PRODUCTO: lo validamos contra el catálogo real
+    const product = catalog.find(
+      (p: any) => p.id === it.productId
+    );
+
+    if (!product) return null;
+
+    const variants = Array.isArray(product.variants)
+      ? product.variants
+      : [];
+
+    const variant = variants.find(
+      (v: any) => v.sku === it.sku
+    );
+
+    if (!variant) return null;
+
+    const retail = Number(variant.priceRetail ?? 0);
+
+    if (!Number.isFinite(retail) || retail <= 0) {
+      return null;
+    }
+
+    // El servidor decide si realmente está en Flash
+    const isFlash = flashIds.has(product.id);
+
+    const unitPrice = isFlash
+      ? Math.round(retail * 0.85)
+      : retail;
+
+    return {
+      title: `${product.brand ?? ""} ${
+        product.name ?? product.id
+      }`.trim(),
+      quantity: Math.max(1, Number(it.quantity ?? 1)),
+      unit_price: unitPrice,
+      currency_id: "ARS",
+    };
+  })
+  .filter(Boolean) as any[];
     if (!items.length) {
       return NextResponse.json(
         { ok: false, error: "No valid items (price <= 0)" },

@@ -61,7 +61,7 @@ const btnPrimary =
   return items.reduce((acc, item) => {
     if (!item.variant) return acc;
 
-    return acc + getVariantPrice(item.variant, isWholesale) * item.qty;
+    return acc + getVariantPrice(item.variant, isWholesale, item.flashDiscountPercent ?? 0) * item.qty;
   }, 0);
 }, [items, isWholesale]);
 
@@ -183,9 +183,10 @@ try {
 
     return {
       productId: item.productId,
+      sku: item.variant.sku,
       title: item.variant.name ?? item.productId,
       quantity: item.qty,
-      unit_price: getVariantPrice(item.variant, isWholesale),
+      unit_price: getVariantPrice(item.variant, isWholesale, item.flashDiscountPercent ?? 0),
     };
   })
   .filter(Boolean);
@@ -194,6 +195,7 @@ try {
       if (shippingCost > 0) {
         itemsMP.push({
           productId: "shipping",
+          sku: "SHIPPING",
           title: shipping.label || "Envío",
           quantity: 1,
           unit_price: Number(shippingCost),

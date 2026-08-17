@@ -90,14 +90,20 @@ getQtyBySku: (sku) => {
     if (existing) {
       toast("Agregado al carrito", "success");
       return {
-        items: state.items.map((entry) =>
-          entry.productId === item.productId &&
-          entry.variant &&
-          entry.variant.sku === item.variant.sku
-            ? { ...entry, qty: nextQty }
-            : entry
-        ),
-      };
+  items: state.items.map((entry) =>
+    entry.productId === item.productId &&
+    entry.variant &&
+    entry.variant.sku === item.variant.sku
+      ? {
+          ...entry,
+          qty: nextQty,
+          flashDiscountPercent:
+            item.flashDiscountPercent ??
+            entry.flashDiscountPercent,
+        }
+      : entry
+  ),
+};
     }
 
     toast("Agregado al carrito", "success");

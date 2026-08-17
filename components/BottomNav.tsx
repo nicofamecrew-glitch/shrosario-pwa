@@ -7,14 +7,12 @@ const ACCENT = "#ee078e";
 
 type BottomNavProps = {
   cartCount?: number;
-  agendaHref?: string; // default: "/agenda"
+  ticketHref?: string;
 };
-
 
 export default function BottomNav({
   cartCount = 0,
-  
-    agendaHref = "/agenda",
+  ticketHref = "/ticket",
 }: BottomNavProps) {
   const pathname = usePathname();
 
@@ -24,8 +22,8 @@ export default function BottomNav({
       ? "home"
       : pathname?.startsWith("/catalog")
       ? "catalog"
-      : pathname?.startsWith("/agenda")
-      ? "agenda"
+     : pathname?.startsWith("/ticket")
+? "ticket"
       : pathname?.startsWith("/account")
       ? "account"
       : "none";
@@ -116,10 +114,9 @@ export default function BottomNav({
               </button>
             </div>
 
-  <NavItem href={agendaHref} active={activeKey === "agenda"} label="Agenda">
-  <CalendarIcon />
+  <NavItem href={ticketHref} active={activeKey === "ticket"} label="Ticketera">
+  <TicketIcon />
 </NavItem>
-
 
 
             <NavItem href="/account" active={activeKey === "account"} label="Cuenta">
@@ -210,22 +207,23 @@ function CartIcon() {
   );
 }
 
-function CalendarIcon() {
+function TicketIcon() {
   return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <svg
+      width="22"
+      height="22"
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+    >
       <path
-        d="M7 3v3M17 3v3M4 8h16"
+        d="M6 3h12v18l-2-1.5L14 21l-2-1.5L10 21l-2-1.5L6 21V3Z"
         stroke="currentColor"
         strokeWidth="2"
-        strokeLinecap="round"
+        strokeLinejoin="round"
       />
       <path
-        d="M6 5h12a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"
-        stroke="currentColor"
-        strokeWidth="2"
-      />
-      <path
-        d="M8 12h2M12 12h2M16 12h0.01M8 16h2M12 16h2"
+        d="M9 8h6M9 12h6M9 16h4"
         stroke="currentColor"
         strokeWidth="2"
         strokeLinecap="round"
