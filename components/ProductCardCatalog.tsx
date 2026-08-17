@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -26,6 +26,11 @@ export default function ProductCardCatalog({ product }: Props) {
   const isWholesale = false;
 
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [mounted, setMounted] = useState(false);
+
+useEffect(() => {
+  setMounted(true);
+}, []);
 
   const variants = useMemo(() => {
     const raw = Array.isArray((product as any)?.variants)
@@ -301,9 +306,11 @@ export default function ProductCardCatalog({ product }: Props) {
               text-black/40 dark:text-white/40
             "
           >
-            {remaining !== null && canAdd
-              ? `${remaining} disponibles`
-              : selectedVariant?.size ?? ""}
+            {!mounted
+  ? selectedVariant?.size ?? ""
+  : remaining !== null && canAdd
+    ? `${remaining} disponibles`
+    : selectedVariant?.size ?? ""}
           </span>
 
           <button
