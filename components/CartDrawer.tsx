@@ -171,8 +171,26 @@ const ctaDisabled = !hasItems || !hasCatalog || blockWholesaleCheckout;
   if (!product) return null;
 
   const variant = item.variant!;
-  const price = getVariantPrice(variant, isWholesale,  item.flashDiscountPercent ?? 0);
 
+const flashPercent = item.flashDiscountPercent ?? 0;
+const isFlash = flashPercent > 0;
+
+const normalPrice = getVariantPrice(
+  variant,
+  isWholesale,
+  0
+);
+
+const price = getVariantPrice(
+  variant,
+  isWholesale,
+  flashPercent
+);
+
+const itemSavings = Math.max(
+  0,
+  (normalPrice - price) * item.qty
+);
   return (
     <div
       key={`${item.productId}-${variant.sku}`}
@@ -214,9 +232,29 @@ const ctaDisabled = !hasItems || !hasCatalog || blockWholesaleCheckout;
           </button>
         </div>
 
-        <div className="text-sm font-semibold">
-          {formatPrice(price * item.qty)}
-        </div>
+        <div className="text-right">
+  {isFlash && (
+    <div className="mb-1 flex items-center justify-end gap-2">
+      <span className="text-xs text-black/40 line-through dark:text-white/40">
+        {formatPrice(normalPrice * item.qty)}
+      </span>
+
+      <span className="rounded-full bg-[#ee078e]/10 px-2 py-0.5 text-[10px] font-black text-[#ee078e]">
+        {flashPercent}% OFF FLASH
+      </span>
+    </div>
+  )}
+
+  <div className="text-sm font-semibold">
+    {formatPrice(price * item.qty)}
+  </div>
+
+  {isFlash && (
+    <div className="mt-0.5 text-[10px] font-semibold text-[#ee078e]">
+      Ahorrás {formatPrice(itemSavings)}
+    </div>
+  )}
+</div>
       </div>
     </div>
   );

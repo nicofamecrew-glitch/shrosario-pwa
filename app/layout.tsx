@@ -34,7 +34,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   const isProd = process.env.NODE_ENV === "production";
 
   return (
-    <html lang="es" suppressHydrationWarning>
+    <html lang="es" className="dark" suppressHydrationWarning>
       <body
         className={`${inter.className} min-h-screen bg-[hsl(var(--app-bg))] text-[hsl(var(--app-fg))]`}
       >

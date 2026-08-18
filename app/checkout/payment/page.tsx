@@ -64,8 +64,25 @@ const btnPrimary =
     return acc + getVariantPrice(item.variant, isWholesale, item.flashDiscountPercent ?? 0) * item.qty;
   }, 0);
 }, [items, isWholesale]);
+ const normalProductsTotal = useMemo(() => {
+  return items.reduce((acc, item) => {
+    if (!item.variant) return acc;
 
-  const cartTotal = Number(shipping?.total ?? cartTotalFallback);
+    const normalUnit = getVariantPrice(
+      item.variant,
+      isWholesale,
+      0
+    );
+
+    return acc + normalUnit * item.qty;
+  }, 0);
+}, [items, isWholesale]);
+
+const flashSavings = Math.max(
+  0,
+  normalProductsTotal - cartTotalFallback
+);
+  const cartTotal = cartTotalFallback;
   const shippingCost = Number(shipping?.cost ?? 0);
   const grandTotal = cartTotal + shippingCost;
 
@@ -247,14 +264,40 @@ try {
       <div className={`mt-3 ${card}`}>
 
         <div className="flex items-center justify-between">
-          <span className={muted}>Productos</span>
-          <span className={label}>{formatARS(cartTotal)}</span>
-        </div>
+  <span className={muted}>Subtotal productos</span>
 
-        <div className="mt-2 flex items-center justify-between">
-          <span className={muted}>Envío</span>
-          <span className={label}>{formatARS(shippingCost)}</span>
-        </div>
+  <span className={flashSavings > 0 ? "text-black/50 line-through dark:text-white/40" : label}>
+    {formatARS(
+      flashSavings > 0
+        ? normalProductsTotal
+        : cartTotal
+    )}
+  </span>
+</div>
+
+{flashSavings > 0 && (
+  <div className="mt-2 flex items-center justify-between">
+    <span className="font-semibold text-[#ee078e]">
+      Descuento Flash
+    </span>
+
+    <span className="font-bold text-[#ee078e]">
+      -{formatARS(flashSavings)}
+    </span>
+  </div>
+)}
+
+{flashSavings > 0 && (
+  <div className="mt-2 flex items-center justify-between">
+    <span className={muted}>Productos con descuento</span>
+    <span className={label}>{formatARS(cartTotal)}</span>
+  </div>
+)}
+
+<div className="mt-2 flex items-center justify-between">
+  <span className={muted}>Envío</span>
+  <span className={label}>{formatARS(shippingCost)}</span>
+</div>
 
         <div className="mt-3 h-px bg-black/10 dark:bg-white/10" />
 

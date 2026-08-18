@@ -22,12 +22,30 @@ export default function FlashPageClient({
   );
 
   const [mounted, setMounted] = useState(false);
+  const [now, setNow] = useState(Date.now());
 
 useEffect(() => {
   setMounted(true);
+
+  const id = window.setInterval(() => {
+    setNow(Date.now());
+  }, 1000);
+
+  return () => window.clearInterval(id);
 }, []);
 
   const { endsAt } = getFlashWindow();
+ 
+  const remainingMs = Math.max(0, endsAt - now);
+
+const totalSeconds = Math.floor(remainingMs / 1000);
+const hours = Math.floor(totalSeconds / 3600);
+const minutes = Math.floor((totalSeconds % 3600) / 60);
+const seconds = totalSeconds % 60;
+
+const countdownText = [hours, minutes, seconds]
+  .map((n) => String(n).padStart(2, "0"))
+  .join(":");
 
   const endsText = new Intl.DateTimeFormat("es-AR", {
     day: "2-digit",
@@ -52,10 +70,20 @@ useEffect(() => {
             10 productos seleccionados por tiempo limitado.
           </p>
 
-          <div className="mt-4 text-xs text-white/40">
-  {mounted
-    ? `Esta tanda termina el ${endsText}`
-    : "Oferta válida por 72 horas"}
+         <div className="mt-4">
+  <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/45">
+    Tiempo restante
+  </div>
+
+  <div className="mt-1 text-3xl font-black tabular-nums tracking-tight text-white">
+    {mounted ? countdownText : "--:--:--"}
+  </div>
+
+  <div className="mt-1 text-xs text-white/40">
+    {mounted
+      ? `Esta tanda termina el ${endsText}`
+      : "Oferta válida por 72 horas"}
+  </div>
 </div>
         </section>
 

@@ -21,12 +21,12 @@ export default function PromoPopup({
   cooldownHours = 96,
   alwaysShow = false,
   imageUrl,
-  title = "Promo de la semana",
+  title = "¿Te quedaste con las ganas?",
   subtitle = "Aprovechá antes de que vuele el stock.",
-  ctaLabel = "Ver promo",
-  ctaHref = "/catalog",
+  ctaLabel = "Quiero el mío",
+  ctaHref = "/catalog?q=oro",
   waNumberE164,
-  waText = "Hola, vengo desde la app SH Rosario. Quiero info de la promo.",
+  waText = "Hola, vengo desde la app SH Rosario. Quiero el Oro Líquido.",
 }: PromoPopupProps) {
   const storageKey = useMemo(() => `promo_seen_${promoId}`, [promoId]);
 
@@ -110,7 +110,7 @@ export default function PromoPopup({
           <div className="flex items-start justify-between gap-3">
             <div>
               <div className="inline-flex items-center rounded-full bg-[#ee078e]/90 px-3 py-1 text-xs font-extrabold text-white">
-                NOS VEMOS EN ESTILO & COLOR
+                LO VISTE. AHORA PODÉS TENERLO.
               </div>
               <h3 className="mt-3 text-xl font-extrabold leading-tight text-white">
                 {title}
@@ -133,7 +133,7 @@ export default function PromoPopup({
             <a
               href={ctaHref}
               onClick={close}
-              className="w-full rounded-2xl bg-black px-4 py-3 text-center text-sm font-extrabold text-white shadow-sm active:scale-[0.99]"
+             className="w-full rounded-2xl bg-[#ee078e] px-4 py-3 text-center text-sm font-extrabold text-white shadow-sm active:scale-[0.99]"
             >
               {ctaLabel}
             </a>
@@ -146,7 +146,7 @@ export default function PromoPopup({
                 onClick={close}
                 className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-center text-sm font-extrabold text-black shadow-sm active:scale-[0.99]"
               >
-                Consultar por WhatsApp
+                Consultar disponibilidad
               </a>
             )}
 
