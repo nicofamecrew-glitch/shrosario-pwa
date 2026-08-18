@@ -27,12 +27,12 @@ export default async function Page() {
       />
 
       <PromoPopup
-        promoId="promo-2026-02-semana1"
+        promoId="oro-liquido-2026-08"
         cooldownHours={96}
-        title="🔥 Promo Vexa"
-        subtitle="Envío a todo el país. Descuentos por volumen."
-        ctaLabel="Ver Vexa"
-        ctaHref="/catalog?brand=vexa"
+        title="¿Te quedaste con las ganas?"
+        subtitle="Oro Líquido ya está disponible en SH Rosario."
+        ctaLabel="Quiero el mío"
+        ctaHref="/p/ossono-oro-liquido-30ml"
         waNumberE164="5493413389133"
         waText="Hola, vengo desde la app SH Rosario. Quiero la promo Vexa."
         imageUrl="/promo/promo-vexa.webp"
