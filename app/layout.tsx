@@ -8,6 +8,7 @@ import NextTopLoader from "nextjs-toploader";
 import AppTransitions from "@/components/AppTransitions";
 import NavDebug from "@/components/dev/NavDebug";
 import AppBootSplash from "@/components/AppBootSplash";
+import { Analytics } from "@vercel/analytics/next";
 
 import PwaInstallPrompt from "@/components/PwaInstallPrompt";
 import EnablePush from "@/components/EnablePush";
@@ -62,6 +63,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           src="https://accounts.google.com/gsi/client"
           strategy="afterInteractive"
         />
+        <Analytics />
       </body>
     </html>
   );

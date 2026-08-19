@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.99.1",
+    "@vercel/analytics": "^2.0.1",
     "dotenv": "^17.2.3",
     "firebase-admin": "^13.7.0",
     "framer-motion": "^12.34.0",
