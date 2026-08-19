@@ -61,6 +61,7 @@ export default function WholesalePage() {
 
   const [cuit, setCuit] = useState(request?.cuit ?? "");
   const [razonSocial, setRazonSocial] = useState(request?.razonSocial ?? "");
+  const [nombreContacto, setNombreContacto] = useState("");
   const [condicionFiscal, setCondicionFiscal] = useState(
     request?.condicionFiscal ?? conds[0]
   );
@@ -84,6 +85,7 @@ export default function WholesalePage() {
 
   const canSubmit =
     effectiveStatus === "none" &&
+    nombreContacto.trim().length >= 2 &&
     cuitDigits.length >= 11 &&
     razonSocial.trim().length >= 3 &&
     ciudad.trim().length >= 2 &&
@@ -119,11 +121,11 @@ const lookupPhone = storedPhone || phoneDigits;
 
 const hasStoredData = !!storedCuit || !!storedPhone;
 const hasValidCuit = lookupCuit.length >= 11;
-const hasValidPhone = lookupPhone.length >= 8;
+const hasValidPhone = lookupPhone.length >= 10;
 
 // No verificar mientras escribe datos incompletos.
 // Solo consultar si ya hay datos persistidos o si el CUIT está completo.
-if (!hasStoredData && !hasValidCuit) {
+if (!hasStoredData && !hasValidCuit && !hasValidPhone) {
   if (!alive) return;
   setCheckingStatus(false);
   setRemoteStatus(null);
@@ -178,11 +180,15 @@ if (!lookupCuit && !lookupPhone) {
       }
     }
 
-    checkWholesaleStatus();
+    const timer = setTimeout(() => {
+  checkWholesaleStatus();
+}, 600);
 
-    return () => {
-      alive = false;
-    };
+return () => {
+  alive = false;
+  clearTimeout(timer);
+};
+
   }, [storedCuit, storedPhone, cuitDigits, phoneDigits, setWholesale]);
 
   if (checkingStatus) {
@@ -318,6 +324,7 @@ if (!lookupCuit && !lookupPhone) {
       condicionFiscal,
       ciudad: ciudad.trim(),
       telefono: phoneDigits,
+      nombreContacto: nombreContacto.trim(),
       device_id,
     }),
   });
@@ -386,7 +393,15 @@ if (!lookupCuit && !lookupPhone) {
               placeholder="Ej: Peluquería X SRL"
             />
           </div>
-
+        <div>
+  <label className={label}>Nombre de contacto</label>
+  <input
+    value={nombreContacto}
+    onChange={(e) => setNombreContacto(e.target.value)}
+    className={input}
+    placeholder="Ej: Carolina"
+  />
+</div>
           <div>
             <label className={label}>Condición fiscal</label>
             <select
