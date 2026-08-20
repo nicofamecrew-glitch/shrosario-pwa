@@ -18,7 +18,7 @@ export async function POST(req: Request) {
 
     await sheets.spreadsheets.values.append({
       spreadsheetId: process.env.GOOGLE_SHEETS_SPREADSHEET_ID,
-      range: "'SH Rosario - Mayoristas'!A:H",
+      range: "'SH Rosario - Mayoristas'!A:I",
       valueInputOption: "USER_ENTERED",
       requestBody: {
         values: [[
@@ -30,6 +30,7 @@ export async function POST(req: Request) {
           body.ciudad,
           body.telefono,
           body.device_id || "",
+          body.nombreContacto || "",
         ]],
       },
     });
@@ -45,9 +46,9 @@ export async function POST(req: Request) {
       },
       body: JSON.stringify({
         title: "🏪 Nueva solicitud mayorista",
-        body: `${body.razonSocial || "Un cliente"} · ${
-          body.ciudad || "Sin ciudad"
-        }`,
+        body: `${body.nombreContacto || body.razonSocial || "Un cliente"} · ${
+  body.ciudad || "Sin ciudad"
+}`,
         url: "/admin/mayorista",
       }),
     }
