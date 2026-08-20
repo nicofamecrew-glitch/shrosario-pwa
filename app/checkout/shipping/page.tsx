@@ -74,7 +74,7 @@ export default function ShippingPage() {
     if (!item.variant) return acc;
 
     const qty = item.qty;
-    const unit = getVariantPrice(item.variant, isWholesale);
+    const unit = getVariantPrice(item.variant, isWholesale, item.flashDiscountPercent ?? 0);
 
     return acc + unit * qty;
   }, 0);
