@@ -127,7 +127,7 @@ const [draftId, setDraftId] = useState("");
 
       setFullName(profile.fullName ?? "");
       setPhone(profile.phone ?? "");
-      setAddress(profile.address ?? "");
+      setAddress("");
 
       if (profile.city) {
         setLocationQuery(profile.city);
