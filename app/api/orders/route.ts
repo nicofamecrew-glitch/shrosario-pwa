@@ -364,8 +364,35 @@ const shippingType = shipping?.type ?? null;
           .select("id")
           .single();
 
-      if (orderInsertError) throw orderInsertError;
-      dbOrderId = insertedOrder.id;
+      console.log("ORDER INSERT RESULT:", {
+  orderId,
+  insertedOrder,
+  orderInsertError,
+  shippingProvider,
+  shippingOptionId,
+  shippingOptionName,
+  shippingCost,
+  shippingEta,
+  shippingType,
+});
+
+if (orderInsertError) {
+  console.error("SUPABASE ORDER INSERT ERROR:", orderInsertError);
+
+  return NextResponse.json(
+    {
+      ok: false,
+      step: "insert_order",
+      error: orderInsertError.message,
+      details: orderInsertError.details,
+      hint: orderInsertError.hint,
+      code: orderInsertError.code,
+    },
+    { status: 500 }
+  );
+}
+
+dbOrderId = insertedOrder.id;
     } else {
       duplicated = true;
       dbOrderId = existingOrder.id;
@@ -526,7 +553,7 @@ const shippingType = shipping?.type ?? null;
       sheet: true,
     });
   } catch (e: any) {
-  console.error("GET ADMIN ORDERS ERROR:", e);
+  console.error("API ORDERS ERROR:", e);
 
   return NextResponse.json(
     {
