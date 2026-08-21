@@ -193,7 +193,21 @@ export async function POST(req: Request) {
     const address = customer?.address ?? order?.address ?? "";
     const cuit = customer?.cuit ?? order?.cuit ?? "";
     const businessType = customer?.businessType ?? order?.businessType ?? "";
+    const shipping = order?.shipping ?? null;
 
+const shippingCost = Number(shipping?.cost ?? 0);
+
+const shippingProvider =
+  shipping?.method === "pickup_local"
+    ? "Retiro en local"
+    : shipping
+    ? "zipnova"
+    : "";
+
+const shippingOptionId = shipping?.method ?? "";
+const shippingOptionName = shipping?.label ?? "";
+const shippingEta = shipping?.eta ?? null;
+const shippingType = shipping?.type ?? null;
     const items: OrderItem[] = Array.isArray(order?.items) ? order.items : [];
 
     if (!items.length) {
@@ -331,15 +345,22 @@ export async function POST(req: Request) {
         await supabaseAdmin
           .from("orders")
           .insert({
-            order_code: orderId,
-            external_ref: externalRef || null,
-            status,
-            price_mode: priceMode || null,
-            total,
-            customer_id: customerId,
-            device_id: deviceId || null,
-            created_at: createdAt,
-          })
+  order_code: orderId,
+  external_ref: externalRef || null,
+  status,
+  price_mode: priceMode || null,
+  total,
+  customer_id: customerId,
+  device_id: deviceId || null,
+ shipping_provider: shippingProvider || null,
+  shipping_option_id: shippingOptionId || null,
+  shipping_option_name: shippingOptionName || null,
+  shipping_cost: shippingCost,
+  shipping_eta: shippingEta,
+  shipping_type: shippingType,
+
+  created_at: createdAt,
+})
           .select("id")
           .single();
 
@@ -352,13 +373,19 @@ export async function POST(req: Request) {
       const { error: orderUpdateError } = await supabaseAdmin
         .from("orders")
         .update({
-          external_ref: externalRef || null,
-          status,
-          price_mode: priceMode || null,
-          total,
-          customer_id: customerId,
-          device_id: deviceId || null,
-        })
+  external_ref: externalRef || null,
+  status,
+  price_mode: priceMode || null,
+  total,
+  customer_id: customerId,
+  device_id: deviceId || null,
+ shipping_provider: shippingProvider || null,
+  shipping_option_id: shippingOptionId || null,
+  shipping_option_name: shippingOptionName || null,
+  shipping_cost: shippingCost,
+  shipping_eta: shippingEta,
+  shipping_type: shippingType,
+})
         .eq("id", dbOrderId);
 
       if (orderUpdateError) throw orderUpdateError;
@@ -499,14 +526,14 @@ export async function POST(req: Request) {
       sheet: true,
     });
   } catch (e: any) {
-    console.error("API /api/orders ERROR:", e);
-    return NextResponse.json(
-      {
-        ok: false,
-        error: e?.message || "Error",
-        details: e?.response?.data || null,
-      },
-      { status: 500 }
-    );
-  }
+  console.error("GET ADMIN ORDERS ERROR:", e);
+
+  return NextResponse.json(
+    {
+      ok: false,
+      error: e?.message || "Error cargando orders desde Supabase",
+    },
+    { status: 500 }
+  );
+}
 }

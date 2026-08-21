@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-
+import { signIn, useSession } from "next-auth/react";
 import { useCartStore } from "@/lib/store";
 import { useCatalogStore } from "@/lib/lib/catalogStore";
 
@@ -10,7 +10,7 @@ import { formatPrice, getVariantPrice } from "@/lib/pricing";
 
 export default function CartDrawer() {
   const router = useRouter();
-
+  const { data: session, status } = useSession();
   const { items, updateQuantity, removeItem, clearCart, isWholesale } = useCartStore();
   const products = useCatalogStore((s) => s.products);
   const byId = useCatalogStore((s) => s.byId);
@@ -70,45 +70,64 @@ const ctaDisabled = !hasItems || !hasCatalog || blockWholesaleCheckout;
   ? 'Cargando catálogo… (abrí "Categorías" una vez)'
   : blockWholesaleCheckout
   ? "Mínimo mayorista no alcanzado"
-  : "Confirmar pedido";
+  : "Continuar";
 
-  const onGoConfirm = () => {
-    if (!hasItems) {
-      window.dispatchEvent(
-        new CustomEvent("toast", {
-          detail: { message: "El carrito está vacío.", type: "warn" },
-        })
-      );
-      return;
-    }
+  const onGoConfirm = async () => {
+  if (!hasItems) {
+    window.dispatchEvent(
+      new CustomEvent("toast", {
+        detail: { message: "El carrito está vacío.", type: "warn" },
+      })
+    );
+    return;
+  }
 
-    if (!hasCatalog) {
-      window.dispatchEvent(
-        new CustomEvent("toast", {
-          detail: {
-            message: 'Todavía no cargó el catálogo. Abrí "Categorías" una vez y volvé.',
-            type: "warn",
-          },
-        })
-      );
-      return;
-    }
-       if (blockWholesaleCheckout) {
-      window.dispatchEvent(
-        new CustomEvent("toast", {
-          detail: {
-            message: `Pedido mayorista mínimo: ${formatPrice(
-              WHOLESALE_MIN_TOTAL
-            )}. Te faltan ${formatPrice(missingWholesale)}.`,
-            type: "warn",
-          },
-        })
-      );
-      return;
-    }
-    close();
-    router.push("/checkout/confirm");
-  };
+  if (!hasCatalog) {
+    window.dispatchEvent(
+      new CustomEvent("toast", {
+        detail: {
+          message: 'Todavía no cargó el catálogo. Abrí "Categorías" una vez y volvé.',
+          type: "warn",
+        },
+      })
+    );
+    return;
+  }
+
+  if (blockWholesaleCheckout) {
+    window.dispatchEvent(
+      new CustomEvent("toast", {
+        detail: {
+          message: `Pedido mayorista mínimo: ${formatPrice(
+            WHOLESALE_MIN_TOTAL
+          )}. Te faltan ${formatPrice(missingWholesale)}.`,
+          type: "warn",
+        },
+      })
+    );
+    return;
+  }
+
+  if (status === "loading") return;
+
+try {
+  localStorage.removeItem("sh_draft_id_v1");
+} catch {}
+
+close();
+
+if (!session?.user?.email) {
+    await signIn(
+      "google",
+      { callbackUrl: "/checkout/shipping" },
+      { prompt: "select_account" }
+    );
+
+    return;
+  }
+
+  router.push("/checkout/shipping");
+};
 
   if (!open) return null;
 
@@ -351,7 +370,7 @@ Total estimado</span>
 
             <div className="text-xs text-black/50 dark:text-white/40">
 
-              El pedido se confirma en el siguiente paso (datos de entrega).
+             Completá tus datos de entrega y elegí el envío en el siguiente paso.
             </div>
           </div>
         </div>

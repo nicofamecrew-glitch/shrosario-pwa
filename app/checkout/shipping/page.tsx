@@ -1,12 +1,14 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useCartStore } from "@/lib/store";
 import { useCatalogStore } from "@/lib/lib/catalogStore";
-import { findVariant, getVariantPrice } from "@/lib/pricing";
 import LocationAutocomplete, { type ZipRow } from "@/components/shipping/LocationAutocomplete";
+import { getVariantPrice } from "@/lib/pricing";
 
+const PROFILE_KEY = "sh_checkout_profile_v1";
 const STORAGE_KEY = "sh_shipping_v1";
 const DRAFT_KEY = "sh_draft_id_v1";
 
@@ -33,7 +35,12 @@ function formatARS(n: number) {
 
 export default function ShippingPage() {
   const router = useRouter();
+  const { data: session } = useSession();
 
+const [fullName, setFullName] = useState("");
+const [phone, setPhone] = useState("");
+const [address, setAddress] = useState("");
+const [draftId, setDraftId] = useState("");
   const items = useCartStore((s) => s.items);
   const isWholesale = useCartStore((s) => s.isWholesale);
   const byId = useCatalogStore((s) => s.byId);
@@ -80,11 +87,26 @@ export default function ShippingPage() {
   }, 0);
 }, [items, isWholesale]);
 
-  const draftId = useMemo(() => {
-    if (typeof window === "undefined") return "";
-    const v = localStorage.getItem(DRAFT_KEY) || "";
-    return v.startsWith("DRAFT-") ? v : "";
-  }, []);
+   function ensureDraftId() {
+  try {
+    const existing = localStorage.getItem(DRAFT_KEY);
+
+    if (existing && existing.startsWith("DRAFT-")) {
+      return existing;
+    }
+
+    const created = `DRAFT-${Date.now()}-${Math.random()
+      .toString(36)
+      .slice(2, 6)}`;
+
+    localStorage.setItem(DRAFT_KEY, created);
+
+    return created;
+  } catch {
+    return "";
+  }
+}
+
 
   const [zipcode, setZipcode] = useState("");
   const [options, setOptions] = useState<ShippingOption[]>([]);
@@ -92,6 +114,38 @@ export default function ShippingPage() {
   const [notes, setNotes] = useState("");
   const [locationQuery, setLocationQuery] = useState("");
   const [picked, setPicked] = useState<ZipRow | null>(null);
+
+  useEffect(() => {
+  const id = ensureDraftId();
+  setDraftId(id);
+
+  try {
+    const raw = localStorage.getItem(PROFILE_KEY);
+
+    if (raw) {
+      const profile = JSON.parse(raw);
+
+      setFullName(profile.fullName ?? "");
+      setPhone(profile.phone ?? "");
+      setAddress(profile.address ?? "");
+
+      if (profile.city) {
+        setLocationQuery(profile.city);
+      }
+    }
+  } catch {}
+}, []);
+
+
+
+useEffect(() => {
+  if (!session?.user) return;
+
+  setFullName((current) => {
+    if (current.trim()) return current;
+    return session.user?.name ?? "";
+  });
+}, [session]);
 
   const finalCost = useMemo(() => {
     if (!selected) return 0;
@@ -140,30 +194,152 @@ export default function ShippingPage() {
       setOptions([]);
     }
   }
+ 
+ 
+ async function saveAndContinue() {
+  if (!draftId) {
+    alert("No se pudo generar el número de pedido.");
+    return;
+  }
 
-  function saveAndContinue() {
-    if (!draftId) {
-      alert("Falta el número de orden (DRAFT). Volvé a Confirmar pedido.");
-      router.push("/checkout/confirm");
-      return;
+  if (!fullName.trim() || !phone.trim() || !address.trim()) {
+    window.dispatchEvent(
+      new CustomEvent("toast", {
+        detail: {
+          message: "Completá nombre, teléfono y dirección.",
+          type: "warn",
+        },
+      })
+    );
+    return;
+  }
+
+  if (selected?.id !== pickupOption.id && !picked) {
+  window.dispatchEvent(
+    new CustomEvent("toast", {
+      detail: {
+        message: "Seleccioná tu localidad.",
+        type: "warn",
+      },
+    })
+  );
+  return;
+}
+
+  if (!selected) {
+    window.dispatchEvent(
+      new CustomEvent("toast", {
+        detail: {
+          message: "Elegí una forma de entrega.",
+          type: "warn",
+        },
+      })
+    );
+    return;
+  }
+
+  try {
+    const priceMode: "minorista" | "mayorista" = isWholesale
+      ? "mayorista"
+      : "minorista";
+
+    const orderItems = items
+      .filter((item) => item.variant && byId[item.productId])
+      .map((item) => {
+        const product = byId[item.productId];
+        const variant = item.variant!;
+
+        return {
+          productId: item.productId,
+          sku: variant.sku,
+          qty: item.qty,
+          unitPrice: getVariantPrice(
+            variant,
+            isWholesale,
+            item.flashDiscountPercent ?? 0
+          ),
+          name: product.name,
+          brand: product.brand ?? "",
+          size: variant.size ?? "",
+        };
+      });
+
+    if (!orderItems.length) {
+      throw new Error("No hay productos válidos.");
     }
 
-    if (!selected) return;
-
-    const payload: ShippingSelection = {
+    const shippingPayload: ShippingSelection = {
       orderId: draftId,
       method: selected.id,
       label: selected.label,
       cost: finalCost,
-      notes: notes?.trim() ? notes.trim() : undefined,
+      notes: notes?.trim() || undefined,
       updatedAt: new Date().toISOString(),
       total: cartTotal,
       zipcode: selected.id === pickupOption.id ? "" : zipcode,
     };
 
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    const profile = {
+  fullName: fullName.trim(),
+  phone: phone.trim(),
+  city: picked?.city ?? "",
+  province: picked?.state ?? "",
+  zipcode: picked?.zipcode ?? "",
+  address: address.trim(),
+  email: session?.user?.email ?? "",
+};
+
+    localStorage.setItem(
+      PROFILE_KEY,
+      JSON.stringify(profile)
+    );
+
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify(shippingPayload)
+    );
+
+    const res = await fetch("/api/orders", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        orderId: draftId,
+        external_reference: draftId,
+        createdAt: new Date().toISOString(),
+        priceMode,
+        status: "Pendiente",
+        customer: profile,
+        shipping: shippingPayload,
+        items: orderItems,
+      }),
+    });
+
+    const data = await res.json().catch(() => null);
+
+    if (!res.ok || !data?.ok) {
+      throw new Error(
+        data?.error || "No se pudo guardar el pedido."
+      );
+    }
+
     router.push("/checkout/payment");
+  } catch (error: any) {
+    console.error("Error creando pedido:", error);
+
+    window.dispatchEvent(
+      new CustomEvent("toast", {
+        detail: {
+          message:
+            error?.message ??
+            "No se pudo continuar con el pedido.",
+          type: "error",
+        },
+      })
+    );
   }
+}
 
   const optionBtn = (active: boolean) =>
     [
@@ -202,6 +378,56 @@ export default function ShippingPage() {
 
         <div className={`mt-1 ${muted}`}>Retiro en local: gratis.</div>
       </div>
+     
+     {/* DATOS DE ENTREGA */}
+<div className={`mt-4 ${card}`}>
+  <div className={label}>Datos de entrega</div>
+
+  <div className="mt-4 space-y-3">
+    <div>
+      <label className="text-xs text-black/60 dark:text-white/60">
+        Nombre y apellido *
+      </label>
+
+      <input
+        value={fullName}
+        onChange={(e) => setFullName(e.target.value)}
+        autoComplete="name"
+        placeholder="Juan Pérez"
+        className="mt-1 w-full rounded-xl border p-3 text-sm border-black/10 bg-white text-black placeholder:text-black/40 outline-none focus:ring-2 focus:ring-[#ee078e]/30 dark:border-white/10 dark:bg-black dark:text-white"
+      />
+    </div>
+
+    <div>
+      <label className="text-xs text-black/60 dark:text-white/60">
+        WhatsApp / teléfono *
+      </label>
+
+      <input
+        value={phone}
+        onChange={(e) => setPhone(e.target.value)}
+        inputMode="tel"
+        autoComplete="tel"
+        placeholder="341 555 1234"
+        className="mt-1 w-full rounded-xl border p-3 text-sm border-black/10 bg-white text-black placeholder:text-black/40 outline-none focus:ring-2 focus:ring-[#ee078e]/30 dark:border-white/10 dark:bg-black dark:text-white"
+      />
+    </div>
+
+    <div>
+      <label className="text-xs text-black/60 dark:text-white/60">
+        Dirección *
+      </label>
+
+      <input
+        value={address}
+        onChange={(e) => setAddress(e.target.value)}
+        autoComplete="street-address"
+        placeholder="San Martín 1234"
+        className="mt-1 w-full rounded-xl border p-3 text-sm border-black/10 bg-white text-black placeholder:text-black/40 outline-none focus:ring-2 focus:ring-[#ee078e]/30 dark:border-white/10 dark:bg-black dark:text-white"
+      />
+    </div>
+  </div>
+</div>
 
       {/* DESTINO */}
       <div className={`mt-4 ${card}`}>
