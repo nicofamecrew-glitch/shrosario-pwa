@@ -147,6 +147,15 @@ useEffect(() => {
   });
 }, [session]);
 
+useEffect(() => {
+  if (!session?.user?.email) return;
+
+  console.log("USUARIO GOOGLE:", {
+    name: session.user.name,
+    email: session.user.email,
+  });
+}, [session]);
+
   const finalCost = useMemo(() => {
     if (!selected) return 0;
     if (selected.id === pickupOption.id) return 0;
