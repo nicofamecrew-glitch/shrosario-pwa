@@ -390,14 +390,7 @@ useEffect(() => {
     }
   }
 
-  @keyframes shippingTruck {
-    from {
-      left: 0%;
-    }
-    to {
-      left: calc(100% - 46px);
-    }
-  }
+  
 `}</style>
       <h1 className="text-xl font-bold">Envío</h1>
 
@@ -494,66 +487,57 @@ useEffect(() => {
           </div>
         )}
 
-        <button
+<button
   onClick={() => fetchZipnovaOptions()}
   disabled={!zipcode.trim()}
-  className={`mt-3 ${btn} relative overflow-hidden`}
+  className={`mt-3 w-full relative overflow-hidden rounded-xl h-14 ${
+    quoting
+      ? "bg-black border-2 border-[#ff008c]"
+      : btn
+  }`}
 >
   {quoting ? (
-  <div className="relative h-12 w-full overflow-hidden rounded-full border-2 border-[#ee078e]
-bg-black">
-
-    {/* Relleno fucsia */}
-    <div
-      className="absolute inset-y-0 left-0 rounded-full bg-[#ee078e]"
-      style={{
-        animation: "shippingProgress 8s linear forwards",
-      }}
-    />
-
-    {/* Camión */}
-    <div
-      className="absolute top-1/2 z-10 flex h-10 w-12 -translate-y-1/2 items-center justify-center"
-      style={{
-        animation: "shippingTruck 8s linear forwards",
-      }}
-    >
-      <svg
-  viewBox="0 0 64 40"
-  className="h-9 w-12"
-  fill="white"
-  stroke="white"
-  strokeWidth="2.5"
-  strokeLinecap="round"
-  strokeLinejoin="round"
+    <>
+      {/* PROGRESO FUCSIA */}
+      <div
+  className="absolute inset-y-0 left-0 overflow-hidden rounded-r-full bg-[#ff008c]"
+  style={{
+    animation: "shippingProgress 8s linear forwards",
+  }}
 >
-  {/* Caja */}
-  <rect x="4" y="8" width="32" height="22" rx="2" />
+  {/* Texto */}
+  <span className="absolute left-5 top-1/2 -translate-y-1/2 whitespace-nowrap text-sm font-bold text-black">
+    COTIZANDO...
+  </span>
 
-  {/* Cabina */}
-  <path d="M36 14h11l11 10v6H36z" />
+  {/* Camión siempre pegado al final del fucsia */}
+  <div className="absolute right-2 top-1/2 flex h-10 w-14 -translate-y-1/2 items-center justify-center">
+    <svg
+      viewBox="0 0 80 46"
+      className="h-9 w-12"
+      fill="none"
+      stroke="white"
+      strokeWidth="4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M2 12h15" />
+      <path d="M2 21h20" />
+      <path d="M2 30h13" />
 
-  {/* Ventana */}
-  <path
-    d="M42 17h5l7 7h-12z"
-    fill="black"
-    stroke="none"
-  />
+      <path d="M22 7h32v27H22" />
+      <path d="M54 16h10l12 11v7H54" />
+      <path d="M59 19h5l7 7H59z" />
 
-  {/* Ruedas */}
-  <circle cx="16" cy="32" r="5" fill="black" stroke="white" />
-  <circle cx="48" cy="32" r="5" fill="black" stroke="white" />
-
-  {/* Centro de ruedas */}
-  <circle cx="16" cy="32" r="2" fill="white" stroke="none" />
-  <circle cx="48" cy="32" r="2" fill="white" stroke="none" />
-</svg>
-    </div>
-
+      <circle cx="34" cy="35" r="6" fill="black" />
+      <circle cx="65" cy="35" r="6" fill="black" />
+    </svg>
   </div>
-) : (
-  "Cotizar envíos"
-)}
+</div>
+    </>
+  ) : (
+    "Cotizar envíos"
+  )}
 </button>
         {options.length === 0 && (
           <div className={muted}>
