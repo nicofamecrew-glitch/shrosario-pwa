@@ -114,6 +114,7 @@ const [draftId, setDraftId] = useState("");
   const [notes, setNotes] = useState("");
   const [locationQuery, setLocationQuery] = useState("");
   const [picked, setPicked] = useState<ZipRow | null>(null);
+  const [quoting, setQuoting] = useState(false);
 
   useEffect(() => {
   const id = ensureDraftId();
@@ -163,9 +164,12 @@ useEffect(() => {
   }, [selected, cartTotal]);
 
   async function fetchZipnovaOptions(explicitZipcode?: string) {
-    try {
-      const cp = (explicitZipcode ?? zipcode).trim();
-      if (!cp) return;
+  const cp = (explicitZipcode ?? zipcode).trim();
+  if (!cp) return;
+
+  setQuoting(true);
+
+  try {
 
       const res = await fetch("/api/zipnova/quote", {
         method: "POST",
@@ -198,9 +202,11 @@ useEffect(() => {
         const stillExists = opts.find((o) => o.id === prev.id);
         return stillExists ?? opts[0] ?? null;
       });
-    } catch (err) {
+        } catch (err) {
       console.error("Error cotizando Zipnova:", err);
       setOptions([]);
+    } finally {
+      setQuoting(false);
     }
   }
  
@@ -359,19 +365,40 @@ useEffect(() => {
     ].join(" ");
 
   if (!items?.length) {
-    return (
-      <main className={`p-4 ${pageBg}`}>
-        <h1 className="text-xl font-bold">Envío</h1>
-        <p className="mt-2 text-black/60 dark:text-white/60">Tu carrito está vacío.</p>
-        <button onClick={() => router.push("/")} className={`mt-4 ${btn}`}>
-          Volver al catálogo
-        </button>
-      </main>
-    );
-  }
+  return (
+    <main className={`p-4 ${pageBg}`}>
+      <h1 className="text-xl font-bold">Envío</h1>
+      <p className="mt-2 text-black/60 dark:text-white/60">
+        Tu carrito está vacío.
+      </p>
+      <button onClick={() => router.push("/")} className={`mt-4 ${btn}`}>
+        Volver al catálogo
+      </button>
+    </main>
+  );
+}
 
   return (
     <main className={`p-4 ${pageBg}`}>
+    <style jsx>{`
+  @keyframes shippingProgress {
+    from {
+      width: 0%;
+    }
+    to {
+      width: 100%;
+    }
+  }
+
+  @keyframes shippingTruck {
+    from {
+      left: 0%;
+    }
+    to {
+      left: calc(100% - 46px);
+    }
+  }
+`}</style>
       <h1 className="text-xl font-bold">Envío</h1>
 
       {/* TOTAL */}
@@ -468,25 +495,66 @@ useEffect(() => {
         )}
 
         <button
-          onClick={() => fetchZipnovaOptions()}
-          disabled={!zipcode.trim()}
-          className={`mt-3 ${btn}`}
-        >
-          Cotizar envíos
-        </button>
-      </div>
+  onClick={() => fetchZipnovaOptions()}
+  disabled={!zipcode.trim()}
+  className={`mt-3 ${btn} relative overflow-hidden`}
+>
+  {quoting ? (
+  <div className="relative h-12 w-full overflow-hidden rounded-full border-2 border-[#ee078e]
+bg-black">
 
-      {/* OPCIONES */}
-      <div className="mt-4 space-y-3">
-        <button
-          type="button"
-          onClick={() => setSelected(pickupOption)}
-          className={optionBtn(selected?.id === pickupOption.id)}
-        >
-          <div className="font-bold text-black dark:text-white">Retiro en local</div>
-          <div className="text-sm text-black/60 dark:text-white/70">{formatARS(0)}</div>
-        </button>
+    {/* Relleno fucsia */}
+    <div
+      className="absolute inset-y-0 left-0 rounded-full bg-[#ee078e]"
+      style={{
+        animation: "shippingProgress 8s linear forwards",
+      }}
+    />
 
+    {/* Camión */}
+    <div
+      className="absolute top-1/2 z-10 flex h-10 w-12 -translate-y-1/2 items-center justify-center"
+      style={{
+        animation: "shippingTruck 8s linear forwards",
+      }}
+    >
+      <svg
+  viewBox="0 0 64 40"
+  className="h-9 w-12"
+  fill="white"
+  stroke="white"
+  strokeWidth="2.5"
+  strokeLinecap="round"
+  strokeLinejoin="round"
+>
+  {/* Caja */}
+  <rect x="4" y="8" width="32" height="22" rx="2" />
+
+  {/* Cabina */}
+  <path d="M36 14h11l11 10v6H36z" />
+
+  {/* Ventana */}
+  <path
+    d="M42 17h5l7 7h-12z"
+    fill="black"
+    stroke="none"
+  />
+
+  {/* Ruedas */}
+  <circle cx="16" cy="32" r="5" fill="black" stroke="white" />
+  <circle cx="48" cy="32" r="5" fill="black" stroke="white" />
+
+  {/* Centro de ruedas */}
+  <circle cx="16" cy="32" r="2" fill="white" stroke="none" />
+  <circle cx="48" cy="32" r="2" fill="white" stroke="none" />
+</svg>
+    </div>
+
+  </div>
+) : (
+  "Cotizar envíos"
+)}
+</button>
         {options.length === 0 && (
           <div className={muted}>
             No hay envíos cotizados todavía. Podés ingresar un código postal o elegir retiro en local.
