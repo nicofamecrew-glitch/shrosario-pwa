@@ -5,7 +5,16 @@ export const runtime = "nodejs";
 
 export async function POST(req: Request) {
   try {
-    const { subscription, phone, deviceId } = await req.json();
+    const {
+  subscription,
+  phone,
+  deviceId,
+  name,
+  email,
+  deviceName,
+  browser,
+  platform,
+} = await req.json();
 
     if (!subscription?.endpoint) {
       return NextResponse.json(
@@ -24,18 +33,32 @@ export async function POST(req: Request) {
     const endpoint = String(subscription.endpoint).trim();
     const cleanPhone = String(phone ?? "").trim() || null;
     const cleanDeviceId = String(deviceId).trim();
+    const cleanName = String(name ?? "").trim() || null;
+const cleanEmail = String(email ?? "").trim() || null;
+const cleanDeviceName = String(deviceName ?? "").trim() || null;
+const cleanBrowser = String(browser ?? "").trim() || null;
+const cleanPlatform = String(platform ?? "").trim() || null;
 
     const { error } = await supabaseAdmin
       .from("push_subscriptions")
       .upsert(
-        {
-          role: "public",
-          endpoint,
-          subscription,
-          phone: cleanPhone,
-          device_id: cleanDeviceId,
-          is_active: true,
-        },
+       {
+  role: "public",
+  endpoint,
+  subscription,
+
+  phone: cleanPhone,
+  device_id: cleanDeviceId,
+
+  name: cleanName,
+  email: cleanEmail,
+  device_name: cleanDeviceName,
+  browser: cleanBrowser,
+  platform: cleanPlatform,
+
+  last_seen_at: new Date().toISOString(),
+  is_active: true,
+},
         {
           onConflict: "endpoint",
         }

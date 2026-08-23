@@ -2,6 +2,58 @@
 
 import { Bell, X } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+
+function getDeviceId() {
+  const KEY = "sh_device_id_v1";
+  let id = localStorage.getItem(KEY);
+
+  if (!id) {
+    id = crypto.randomUUID();
+    localStorage.setItem(KEY, id);
+  }
+
+  return id;
+}
+
+function getDeviceInfo() {
+  const ua = navigator.userAgent;
+
+  let platform = "Desconocido";
+  let browser = "Desconocido";
+
+  if (/iPhone/i.test(ua)) {
+    platform = "iPhone";
+  } else if (/iPad/i.test(ua)) {
+    platform = "iPad";
+  } else if (/Android/i.test(ua)) {
+    platform = "Android";
+  } else if (/Windows/i.test(ua)) {
+    platform = "Windows";
+  } else if (/Macintosh|Mac OS X/i.test(ua)) {
+    platform = "Mac";
+  } else if (/Linux/i.test(ua)) {
+    platform = "Linux";
+  }
+
+  if (/Edg\//i.test(ua)) {
+    browser = "Edge";
+  } else if (/CriOS/i.test(ua)) {
+    browser = "Chrome";
+  } else if (/Chrome/i.test(ua)) {
+    browser = "Chrome";
+  } else if (/FxiOS|Firefox/i.test(ua)) {
+    browser = "Firefox";
+  } else if (/Safari/i.test(ua)) {
+    browser = "Safari";
+  }
+
+  return {
+    platform,
+    browser,
+    deviceName: `${platform} · ${browser}`,
+  };
+}
 
 function urlBase64ToUint8Array(base64String: string) {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
@@ -16,6 +68,7 @@ export default function EnablePush() {
   const [enabled, setEnabled] = useState(false);
   const [dismissed, setDismissed] = useState(false);
   const [ready, setReady] = useState(false);
+  const { data: session } = useSession();
 
   useEffect(() => {
     setSupported(
@@ -79,10 +132,19 @@ export default function EnablePush() {
         localStorage.getItem("sh_checkout_profile_v1") || "{}"
       );
 
-      const payload = {
-        subscription: sub,
-        phone: profile.phone || "",
-      };
+      const deviceId = getDeviceId();
+const deviceInfo = getDeviceInfo();
+
+const payload = {
+  subscription: sub,
+  phone: profile.phone || "",
+  deviceId,
+  name: session?.user?.name || "",
+  email: session?.user?.email || "",
+  deviceName: deviceInfo.deviceName,
+  browser: deviceInfo.browser,
+  platform: deviceInfo.platform,
+};
 
       console.log("[push payload]", payload);
 
