@@ -75,11 +75,18 @@ useEffect(() => {
     return preparedProducts.filter((product) => {
       if (!isWholesale && norm((product as any).category) === "mayoristas") return false;
 
+      const productId = norm((product as any).id);
+      const variantSkus = Array.isArray((product as any).variants)
+        ? (product as any).variants.map((variant: any) => norm(variant?.sku))
+        : [];
+
       const matchesSearch =
         !s ||
         norm((product as any).name).includes(s) ||
         norm((product as any).line).includes(s) ||
-        norm((product as any).brand).includes(s);
+        norm((product as any).brand).includes(s) ||
+        productId.includes(s) ||
+        variantSkus.some((sku: string) => sku.includes(s));
 
       const matchesBrand = brand === "all" || norm((product as any).brand) === norm(brand);
 
@@ -115,6 +122,8 @@ const matchesType =
             (product as any).brand,
             (product as any).line,
             (product as any).category,
+            (product as any).id,
+            ...(product as any).variants?.map((variant: any) => variant?.sku) ?? [],
             ...tags,
           ]
             .filter(Boolean)
