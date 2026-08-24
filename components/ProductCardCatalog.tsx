@@ -18,12 +18,10 @@ export default function ProductCardCatalog({ product }: Props) {
 
   const {
     addItem,
+    isWholesale,
     getStockBySku,
     getQtyBySku,
   } = useCartStore();
-
-  // Por ahora mantenemos catálogo minorista.
-  const isWholesale = false;
 
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [mounted, setMounted] = useState(false);
