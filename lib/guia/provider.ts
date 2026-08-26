@@ -1,10 +1,6 @@
 import OpenAI from "openai";
 import type { GuiaResponse } from "@/lib/guia/types";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
 export type GuiaMessage = {
   role: "user" | "assistant";
   content: string;
@@ -17,9 +13,17 @@ type GenerateGuiaResponseParams = {
 export async function generateGuiaResponse({
   messages,
 }: GenerateGuiaResponseParams): Promise<GuiaResponse> {
-  if (!process.env.OPENAI_API_KEY) {
+  const apiKey = process.env.OPENAI_API_KEY;
+
+  if (!apiKey) {
     throw new Error("Falta OPENAI_API_KEY");
   }
+
+  // El cliente se crea recién cuando realmente
+  // necesitamos llamar a OpenAI.
+  const openai = new OpenAI({
+    apiKey,
+  });
 
   const response = await openai.responses.create({
     model: "gpt-5.6-luna",
