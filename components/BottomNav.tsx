@@ -17,17 +17,16 @@ export default function BottomNav({
   const pathname = usePathname();
 
   // Nota: pathname NO incluye query, así que /catalog?q=combo sigue siendo "/catalog"
-    const activeKey =
-    pathname === "/"
-      ? "home"
-      : pathname?.startsWith("/catalog")
-      ? "catalog"
-     : pathname?.startsWith("/ticket")
-? "ticket"
-      : pathname?.startsWith("/account")
-      ? "account"
-      : "none";
-
+   const activeKey =
+  pathname === "/"
+    ? "home"
+    : pathname?.startsWith("/catalog")
+    ? "catalog"
+    : pathname?.startsWith("/guia")
+    ? "guia"
+    : pathname?.startsWith("/account")
+    ? "account"
+    : "none";
 
 
   const openCart = () => {
@@ -39,12 +38,14 @@ export default function BottomNav({
 
   return (
     <nav
-      className="
-        fixed bottom-0 left-0 right-0 z-50
-        bg-black/40 backdrop-blur-md
-        border-t border-white/10
-        pb-[env(safe-area-inset-bottom)]
-      "
+     className="
+  fixed left-3 right-3 bottom-4 z-50
+  rounded-[24px]
+  bg-black/70 backdrop-blur-xl
+  border border-white/10
+  shadow-[0_16px_40px_rgba(0,0,0,0.45)]
+  pb-[env(safe-area-inset-bottom)]
+"
       aria-label="Bottom Navigation"
     >
       <div className="mx-auto max-w-md">
@@ -83,7 +84,7 @@ export default function BottomNav({
   }}
   className="
     relative z-10
-    -translate-y-[38px]
+    -translate-y-[44px]
     h-14 w-14 rounded-full
     bg-black text-white
     border-2 border-[#ee078e]
@@ -114,10 +115,18 @@ export default function BottomNav({
               </button>
             </div>
 
-  <NavItem href={ticketHref} active={activeKey === "ticket"} label="Ticketera">
-  <TicketIcon />
+  <NavItem href="/guia" active={activeKey === "guia"} label="Guía">
+  <div
+    className={[
+      "transition-all duration-200",
+      activeKey === "guia"
+        ? "scale-110 drop-shadow-[0_0_8px_rgba(168,85,247,0.55)]"
+        : "opacity-75",
+    ].join(" ")}
+  >
+    <GuideIcon />
+  </div>
 </NavItem>
-
 
             <NavItem href="/account" active={activeKey === "account"} label="Cuenta">
               <UserIcon />
@@ -243,4 +252,15 @@ function UserIcon() {
       />
     </svg>
   );
+}
+function GuideIcon() {
+  return (
+    <img
+      src="/guia/guia-icon.png"
+      alt=""
+      aria-hidden="true"
+     className="h-[28px] w-[28px] object-contain"
+    />
+  );
+
 }
