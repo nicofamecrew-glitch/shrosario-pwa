@@ -23,6 +23,7 @@ type ShippingSelection = {
   method: string;
   label: string;
   cost: number;
+  costPending?: boolean;
   notes?: string;
   updatedAt: string;
   total?: number;
@@ -74,6 +75,13 @@ const [draftId, setDraftId] = useState("");
     cost: 0,
   };
 
+  const rosarioMotoOption: ShippingOption = {
+  id: "rosario_moto",
+  label: "Envío por moto en Rosario",
+  cost: 0,
+};
+  
+
   const freeShippingThreshold = 80000;
 
   
@@ -117,8 +125,7 @@ const [draftId, setDraftId] = useState("");
   const [locationQuery, setLocationQuery] = useState("");
   const [picked, setPicked] = useState<ZipRow | null>(null);
   const [quoting, setQuoting] = useState(false);
-  const isRosario =
-  picked?.city?.trim().toLowerCase() === "rosario";
+  const isRosario =picked?.city?.trim().toLowerCase() === "rosario" ||locationQuery.trim().toLowerCase().startsWith("rosario") ||zipcode.trim() === "2000";
 
   useEffect(() => {
   const id = ensureDraftId();
@@ -305,6 +312,7 @@ if (selected?.id !== pickupOption.id && !address.trim()) {
       method: selected.id,
       label: selected.label,
       cost: finalCost,
+      costPending: selected.id === rosarioMotoOption.id,
       notes: notes?.trim() || undefined,
       updatedAt: new Date().toISOString(),
       total: cartTotal,
@@ -503,6 +511,8 @@ if (selected?.id !== pickupOption.id && !address.trim()) {
             <span className="font-semibold text-black dark:text-white">{picked.zipcode}</span>
           </div>
         )}
+    
+        
 
 {/* RETIRO EN LOCAL */}
 <div className="mt-4">
@@ -518,7 +528,7 @@ if (selected?.id !== pickupOption.id && !address.trim()) {
         </div>
 
         <div className="mt-1 text-sm text-black/60 dark:text-white/70">
-          Coordinamos día y horario para retirar tu pedido.
+          Cuando tu pedido esté listo, nos comunicamos con vos para coordinar el retiro.
         </div>
       </div>
 
@@ -530,19 +540,30 @@ if (selected?.id !== pickupOption.id && !address.trim()) {
 </div>
 
 {/* ENVÍO EN MOTO ROSARIO */}
-{isRosario && (
-  <div className="mt-3 rounded-2xl border border-[#ee078e]/30 bg-[#ee078e]/5 p-4">
-    <div className="font-bold text-black dark:text-white">
-      🏍️ ¿Estás en Rosario?
-    </div>
 
-    <div className="mt-1 text-sm text-black/70 dark:text-white/70">
-      También podemos enviarte el pedido por moto.
-      Elegí <strong>Retiro en local</strong> y después de realizar
-      tu pedido nos contactamos para coordinar la entrega y confirmar
-      el costo según tu dirección.
+
+{isRosario && (
+  <button
+    type="button"
+    onClick={() => setSelected(rosarioMotoOption)}
+    className={optionBtn(selected?.id === rosarioMotoOption.id)}
+  >
+    <div className="flex items-center justify-between gap-3">
+      <div>
+        <div className="font-bold text-black dark:text-white">
+          🏍️ Envío por moto en Rosario
+        </div>
+
+        <div className="mt-1 text-sm text-black/60 dark:text-white/70">
+          Si elegís esta opción, nos comunicamos con vos por WhatsApp para coordinar el costo y la entrega.
+        </div>
+      </div>
+
+      <div className="shrink-0 text-right font-bold text-[#ee078e]">
+        A COORDINAR
+      </div>
     </div>
-  </div>
+  </button>
 )}
 
 <button
@@ -612,7 +633,7 @@ if (selected?.id !== pickupOption.id && !address.trim()) {
           >
             <div className="font-bold text-black dark:text-white">{opt.label}</div>
             <div className="text-sm text-black/60 dark:text-white/70">
-              {cartTotal >= freeShippingThreshold ? formatARS(0) : formatARS(opt.cost)}
+            {cartTotal >= freeShippingThreshold? formatARS(0): formatARS(opt.cost)}
             </div>
           </button>
         ))}
@@ -634,8 +655,14 @@ if (selected?.id !== pickupOption.id && !address.trim()) {
       <div className={`mt-4 ${card}`}>
         <div className="flex items-center justify-between">
           <div className={muted2}>Envío</div>
-          <div className="font-bold">{selected ? formatARS(finalCost) : "-"}</div>
-        </div>
+          <div className="font-bold">
+  {selected?.id === rosarioMotoOption.id
+    ? "A coordinar"
+    : selected
+      ? formatARS(finalCost)
+      : "-"}
+</div>
+</div>
 
         <div className="mt-4 grid grid-cols-2 gap-3">
           <button onClick={() => router.push("/cart")} className={btn}>
