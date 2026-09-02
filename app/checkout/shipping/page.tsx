@@ -76,6 +76,8 @@ const [draftId, setDraftId] = useState("");
 
   const freeShippingThreshold = 80000;
 
+  
+
   const cartTotal = useMemo(() => {
   return items.reduce((acc, item) => {
     if (!item.variant) return acc;
@@ -115,6 +117,8 @@ const [draftId, setDraftId] = useState("");
   const [locationQuery, setLocationQuery] = useState("");
   const [picked, setPicked] = useState<ZipRow | null>(null);
   const [quoting, setQuoting] = useState(false);
+  const isRosario =
+  picked?.city?.trim().toLowerCase() === "rosario";
 
   useEffect(() => {
   const id = ensureDraftId();
@@ -217,17 +221,30 @@ useEffect(() => {
     return;
   }
 
-  if (!fullName.trim() || !phone.trim() || !address.trim()) {
-    window.dispatchEvent(
-      new CustomEvent("toast", {
-        detail: {
-          message: "Completá nombre, teléfono y dirección.",
-          type: "warn",
-        },
-      })
-    );
-    return;
-  }
+  if (!fullName.trim() || !phone.trim()) {
+  window.dispatchEvent(
+    new CustomEvent("toast", {
+      detail: {
+        message: "Completá nombre y teléfono.",
+        type: "warn",
+      },
+    })
+  );
+  return;
+}
+
+if (selected?.id !== pickupOption.id && !address.trim()) {
+  window.dispatchEvent(
+    new CustomEvent("toast", {
+      detail: {
+        message: "Completá la dirección de entrega.",
+        type: "warn",
+      },
+    })
+  );
+  return;
+}
+   
 
   if (selected?.id !== pickupOption.id && !picked) {
   window.dispatchEvent(
@@ -486,6 +503,47 @@ useEffect(() => {
             <span className="font-semibold text-black dark:text-white">{picked.zipcode}</span>
           </div>
         )}
+
+{/* RETIRO EN LOCAL */}
+<div className="mt-4">
+  <button
+    type="button"
+    onClick={() => setSelected(pickupOption)}
+    className={optionBtn(selected?.id === pickupOption.id)}
+  >
+    <div className="flex items-center justify-between gap-3">
+      <div>
+        <div className="font-bold text-black dark:text-white">
+          Retiro en local
+        </div>
+
+        <div className="mt-1 text-sm text-black/60 dark:text-white/70">
+          Coordinamos día y horario para retirar tu pedido.
+        </div>
+      </div>
+
+      <div className="shrink-0 font-bold text-[#ee078e]">
+        GRATIS
+      </div>
+    </div>
+  </button>
+</div>
+
+{/* ENVÍO EN MOTO ROSARIO */}
+{isRosario && (
+  <div className="mt-3 rounded-2xl border border-[#ee078e]/30 bg-[#ee078e]/5 p-4">
+    <div className="font-bold text-black dark:text-white">
+      🏍️ ¿Estás en Rosario?
+    </div>
+
+    <div className="mt-1 text-sm text-black/70 dark:text-white/70">
+      También podemos enviarte el pedido por moto.
+      Elegí <strong>Retiro en local</strong> y después de realizar
+      tu pedido nos contactamos para coordinar la entrega y confirmar
+      el costo según tu dirección.
+    </div>
+  </div>
+)}
 
 <button
   onClick={() => fetchZipnovaOptions()}
