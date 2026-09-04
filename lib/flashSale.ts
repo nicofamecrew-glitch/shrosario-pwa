@@ -60,8 +60,15 @@ export function getFlashProducts(
     ? products.filter((p) => p?.id)
     : [];
 
-  if (safeProducts.length <= FLASH_COUNT) {
-    return safeProducts;
+  const filteredProducts = safeProducts.filter((p) => {
+    const name = String(p.name ?? "").toLowerCase();
+
+    // Nunca mostrar cartas en Flash
+    return !name.includes("carta");
+  });
+
+  if (filteredProducts.length <= FLASH_COUNT) {
+    return filteredProducts;
   }
 
   const { windowIndex } = getFlashWindow(now);
@@ -72,7 +79,7 @@ export function getFlashProducts(
   );
 
   const previous = shuffleWithSeed(
-    safeProducts,
+    filteredProducts,
     previousSeed
   ).slice(0, FLASH_COUNT);
 
@@ -81,7 +88,7 @@ export function getFlashProducts(
   );
 
   // Excluimos los 10 anteriores
-  const eligible = safeProducts.filter(
+  const eligible = filteredProducts.filter(
     (p) => !previousIds.has(p.id)
   );
 
@@ -89,8 +96,27 @@ export function getFlashProducts(
     `flash-${windowIndex}`
   );
 
-  return shuffleWithSeed(
+  const shuffled = shuffleWithSeed(
     eligible,
     currentSeed
+  );
+
+  const fidelite = shuffled.filter((p) =>
+    String(p.brand ?? "").toLowerCase().includes("fidel")
+  );
+
+  const others = shuffled.filter(
+    (p) =>
+      !String(p.brand ?? "").toLowerCase().includes("fidel")
+  );
+
+  const selected = [
+    ...others.slice(0, 8),
+    ...fidelite.slice(0, 2),
+  ];
+
+  return shuffleWithSeed(
+    selected,
+    currentSeed + 1
   ).slice(0, FLASH_COUNT);
 }

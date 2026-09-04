@@ -63,7 +63,7 @@ const countdownText = [hours, minutes, seconds]
           </div>
 
           <h1 className="mt-2 text-3xl font-black">
-            15% OFF
+            10% OFF
           </h1>
 
           <p className="mt-2 text-sm text-white/60">
@@ -103,7 +103,7 @@ const countdownText = [hours, minutes, seconds]
             >
               <HomeProductCard
   product={product}
-  flashDiscountPercent={15}
+  flashDiscountPercent={10}
 />
             </div>
           ))}
