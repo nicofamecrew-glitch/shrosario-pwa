@@ -39,7 +39,7 @@ const cards: HeroCard[] = [
     href: "/flash",
     image: "/home/hero-flash.webp",
     eyebrow: "Oferta Relámpago",
-    title: "15% OFF en 10 productos",
+    title: "10% OFF en 10 productos",
     subtitle: "Una selección especial que cambia cada 72 horas.",
     cta: "Ver ofertas",
     flash: true,
