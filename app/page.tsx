@@ -27,16 +27,16 @@ export default async function Page() {
       />
 
       <PromoPopup
-        promoId="oro-liquido-2026-08"
-        cooldownHours={96}
-        title="¿Te quedaste con las ganas?"
-        subtitle="Oro Líquido ya está disponible en SH Rosario."
-        ctaLabel="Quiero el mío"
-        ctaHref="/p/ossono-oro-liquido-30ml"
-        waNumberE164="5493413389133"
-        waText="Hola, vengo desde la app SH Rosario. Quiero la promo Vexa."
-        imageUrl="/promo/promo-vexa.webp"
-      />
+  promoId="vexa-biotina-therapy-2026-09"
+  cooldownHours={96}
+  title="Protegé tu cabello del calor"
+  subtitle="Nuevo Protector Térmico Vexa con biotina y pantenol. Protección hasta 230 °C, sin enjuague."
+  ctaLabel="Ver producto"
+  ctaHref="/p/vexa-protector-termico-therapy"
+  waNumberE164="5493413389133"
+  waText="Hola, vengo desde la app SH Rosario. Quiero consultar por el nuevo Protector Térmico Vexa Biotina Therapy."
+  imageUrl="/promo/promo-vexa.webp"
+/>
     </div>
   );
 }
