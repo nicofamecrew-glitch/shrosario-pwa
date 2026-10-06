@@ -1,3 +1,4 @@
+import {sellerTokenAllowed} from '@/lib/server/sellerAccessPolicy';
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/lib/supabase-server';
 import { sellerCatalog } from '@/lib/server/sellerCatalog';
@@ -14,10 +15,11 @@ async function owner(req: Request) {
   const token=value.slice(7); const {data,error}=await supabaseAdmin.auth.getUser(token);
   if (error || !data.user) throw new SellerOrderError('Sesión inválida',401);
   let claims; try { claims=JSON.parse(Buffer.from(token.split('.')[1],'base64url').toString()); } catch { throw new SellerOrderError('Sesión inválida',401); }
-  if (claims.sub !== data.user.id || claims.aal !== 'aal2' || !Number.isFinite(claims.exp) || claims.exp*1000<=Date.now()) throw new SellerOrderError('Completá la verificación en dos pasos',403);
-  const {data:member,error:memberError}=await supabaseAdmin.from('seller_members').select('active').eq('user_id',data.user.id).maybeSingle();
+  if(!sellerTokenAllowed(claims,data.user,process.env.SELLERS_EMAIL_OTP_ENABLED==='true'))throw new SellerOrderError('Verificá tu ingreso',403);
+  const {data:member,error:memberError}=await supabaseAdmin.from('seller_members').select('active,role').eq('user_id',data.user.id).maybeSingle();
   const {data:seller,error:sellerError}=await supabaseAdmin.from('seller_accounts').select('id,status').eq('user_id',data.user.id).maybeSingle();
   if(memberError||sellerError) throw new SellerOrderError('Servicio no disponible',503);
+  if(member?.role==='sh_admin'&&claims.aal!=='aal2')throw new SellerOrderError('Las acciones de admin requieren la autenticadora',403);
   if (member?.active===false || seller?.status !== 'active') throw new SellerOrderError('Cuenta no habilitada',403);
   const now=Date.now();for(const [id,v] of requests)if(v.until<now)requests.delete(id);const current=requests.get(data.user.id)||{count:0,until:now+60000};if(++current.count>60||requests.size>10000)throw new SellerOrderError('Esperá un minuto y volvé a intentar',429);requests.set(data.user.id,current);
   return {user:data.user.id,seller:seller.id};
