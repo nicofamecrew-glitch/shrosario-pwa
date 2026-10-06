@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { getCatalog } from "@/lib/server/catalog";
 
 export const runtime = "nodejs";
+// Sheets is read through googleapis, so Next.js cannot detect a dynamic fetch.
+// Prevent a build-time snapshot from freezing the catalog until the next deploy.
+export const dynamic = "force-dynamic";
 
 // Cache en CDN (Vercel) por 60s, y sirve stale mientras revalida
 const CACHE_CONTROL = "public, s-maxage=60, stale-while-revalidate=300";
