@@ -11,9 +11,10 @@ import { getProductImage } from "@/lib/productImage";
 
 type Props = {
   product: Product;
+  onOpen?: (product: Product, variantSku: string | null) => void;
 };
 
-export default function ProductCardCatalog({ product }: Props) {
+export default function ProductCardCatalog({ product, onOpen }: Props) {
   const router = useRouter();
 
   const {
@@ -145,6 +146,20 @@ useEffect(() => {
 
   return (
     <article
+      role={onOpen ? "button" : undefined}
+      tabIndex={onOpen ? 0 : undefined}
+      aria-label={onOpen ? `Abrir ${product.name}` : undefined}
+      onClick={(event) => {
+        const target = event.target as HTMLElement | null;
+        if (target?.closest("[data-no-nav]")) return;
+        if (onOpen) onOpen(product, sku || null); else router.push(`/p/${encodeURIComponent(product.id)}`);
+      }}
+      onKeyDown={(event) => {
+        if (event.target !== event.currentTarget) return;
+        if (!onOpen || (event.key !== "Enter" && event.key !== " ")) return;
+        event.preventDefault();
+        onOpen(product, sku || null);
+      }}
       className="
         relative flex h-[310px] flex-col overflow-hidden
         rounded-[22px]
@@ -281,7 +296,7 @@ useEffect(() => {
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  router.push(`/p/${product.id}`);
+                  if (onOpen) onOpen(product, sku || null); else router.push(`/p/${encodeURIComponent(product.id)}`);
                 }}
                 className="
                   shrink-0 rounded-full
@@ -332,3 +347,4 @@ useEffect(() => {
     </article>
   );
 }
+

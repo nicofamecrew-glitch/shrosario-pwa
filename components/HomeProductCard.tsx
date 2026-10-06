@@ -11,11 +11,13 @@ import { useRouter } from "next/navigation";
 type Props = {
   product: Product;
   flashDiscountPercent?: number;
+  onOpen?: (product: Product, variantSku: string | null, flashDiscountPercent: number) => void;
 };
 
 export default function HomeProductCard({
   product,
   flashDiscountPercent = 0,
+  onOpen,
 }: Props) {
     const router = useRouter();
   const {
@@ -143,6 +145,20 @@ const price = variant
 };
   return (
     <article
+      role={onOpen ? "button" : undefined}
+      tabIndex={onOpen ? 0 : undefined}
+      aria-label={onOpen ? `Abrir ${product.name}` : undefined}
+      onClick={(event) => {
+        const target = event.target as HTMLElement | null;
+        if (target?.closest("[data-no-nav]")) return;
+        if (onOpen) onOpen(product, sku || null, flashDiscountPercent); else router.push(`/p/${encodeURIComponent(product.id)}`);
+      }}
+      onKeyDown={(event) => {
+        if (event.target !== event.currentTarget) return;
+        if (!onOpen || (event.key !== "Enter" && event.key !== " ")) return;
+        event.preventDefault();
+        onOpen(product, sku || null, flashDiscountPercent);
+      }}
       className="
         relative flex h-[250px] flex-col overflow-hidden
         rounded-[20px]
@@ -250,7 +266,7 @@ const price = variant
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  router.push(`/p/${product.id}`);
+                  if (onOpen) onOpen(product, sku || null, flashDiscountPercent); else router.push(`/p/${encodeURIComponent(product.id)}`);
                 }}
                 className="
                   shrink-0 rounded-full
@@ -288,3 +304,4 @@ const price = variant
     </article>
   );
 }
+

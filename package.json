@@ -6,7 +6,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "sync:products": "node scripts/syncProducts.js"
+    "sync:products": "node scripts/syncProducts.js",
+    "release:check": "node scripts/check-sellers-release.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.99.1",
@@ -38,3 +39,4 @@
     "typescript": "5.5.4"
   }
 }
+

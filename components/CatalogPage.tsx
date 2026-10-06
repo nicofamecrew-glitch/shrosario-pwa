@@ -3,12 +3,12 @@
 import { useMemo, useState,  useEffect } from "react";
 import type { Product } from "@/lib/types";
 import { useCartStore } from "@/lib/store";
-import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import Filters from "@/components/Filters";
 import ProductCardCatalog from "@/components/ProductCardCatalog";
 import WholesaleGate from "@/components/WholesaleGate";
+import ProductQuickView from "@/components/catalog/ProductQuickView";
 
 
 
@@ -17,6 +17,7 @@ import WholesaleGate from "@/components/WholesaleGate";
    
 
 export default function CatalogPage({ products }: { products: Product[] }) {
+  const router = useRouter();
   const sp = useSearchParams();
   const brandFromUrl = sp.get("brand") || "all";
   const tagFromUrl = sp.get("tag") || "all";
@@ -37,6 +38,7 @@ export default function CatalogPage({ products }: { products: Product[] }) {
   const [category, setCategory] = useState("all");
   const [size, setSize] = useState("all");
   const [type, setType] = useState(tagFromUrl);
+  const [quickView, setQuickView] = useState<{ product: Product; variantSku: string | null } | null>(null);
 
   const { isWholesale } = useCartStore();
 
@@ -204,18 +206,12 @@ className="mt-4 inline-flex items-center justify-center rounded-full border bord
                   const sku0 = (product as any)?.variants?.[0]?.sku ?? "nosku";
 
                   return (
-                    <Link
+                    <div
                       key={`${(product as any).id}::${sku0}`}
-                      href={`/p/${(product as any).id}`}
                       className="block"
-                      onClickCapture={(e) => {
-                        const el = e.target as HTMLElement | null;
-                        if (!el) return;
-                        if (el.closest("[data-no-nav]")) e.preventDefault();
-                      }}
                     >
-                      <ProductCardCatalog product={product} />
-                    </Link>
+                      <ProductCardCatalog product={product} onOpen={(activeProduct, variantSku) => setQuickView({ product: activeProduct, variantSku })} />
+                    </div>
                   );
                 })}
               </div>
@@ -239,6 +235,12 @@ className="mt-4 inline-flex items-center justify-center rounded-full border bord
       </main>
 
       <WholesaleGate />
+      <ProductQuickView
+        product={quickView?.product ?? null}
+        initialVariantSku={quickView?.variantSku}
+        onClose={() => setQuickView(null)}
+      />
     </div>
   );
 }
+

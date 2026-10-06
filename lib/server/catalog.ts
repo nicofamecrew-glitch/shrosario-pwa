@@ -184,7 +184,7 @@ let _catalogInFlight: Promise<any[]> | null = null;
 // Ajustá si querés: 60s es buen balance.
 const CATALOG_TTL_MS = 60_000;
 
-async function loadCatalogFromSheets(): Promise<any[]> {
+async function loadCatalogFromSheets(includeUnavailable = false): Promise<any[]> {
   const sheetId = process.env.GOOGLE_SHEETS_SHEET_ID;
   if (!sheetId) throw new Error("Falta GOOGLE_SHEETS_SHEET_ID");
 
@@ -248,6 +248,7 @@ async function loadCatalogFromSheets(): Promise<any[]> {
         priceRetailFrom,
         priceWholesaleFrom,
         variants: active.map((v: any) => ({
+          image: v.image || v.imageUrl || null,
           size: String(v.size ?? ""),
           sku: String(v.sku ?? ""),
           priceRetail: toNum(v.priceRetail),
@@ -258,16 +259,16 @@ async function loadCatalogFromSheets(): Promise<any[]> {
         })),
       };
     })
-    .filter((p: any) => Array.isArray(p.variants) && p.variants.length > 0);
+    .filter((p: any) => includeUnavailable || (Array.isArray(p.variants) && p.variants.length > 0));
 
   return catalog;
 }
 
-export async function getCatalog() {
+export async function getCatalog(options: { fresh?: boolean } = {}) {
   const now = Date.now();
 
   // HIT de cache
-  if (_catalogCache && now - _catalogCacheAt < CATALOG_TTL_MS) {
+  if (!options.fresh && _catalogCache && now - _catalogCacheAt < CATALOG_TTL_MS) {
     return _catalogCache;
   }
 
@@ -290,3 +291,6 @@ export async function getCatalog() {
     _catalogInFlight = null;
   }
 }
+
+// Sellers needs unavailable rows too, so a paused product cannot reappear from its replica.
+export async function sellerSheetCatalog() { return prepareCatalogProducts(await loadCatalogFromSheets(true)); }

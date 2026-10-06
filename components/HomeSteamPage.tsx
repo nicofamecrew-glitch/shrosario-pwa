@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useHomeBlocks } from "@/lib/lib/useHomeBlocks";
 import SearchBar from "@/components/SearchBar";
@@ -8,6 +9,7 @@ import { withVariantImages } from "@/lib/withVariantImages";
 import type { Product } from "@/lib/types";
 import HomeProductCard from "@/components/HomeProductCard";
 import HeroStack from "@/components/HeroStack";
+import ProductQuickView from "@/components/catalog/ProductQuickView";
 
 function normalizeTags(tags?: string[] | string): string[] {
   if (!tags) return [];
@@ -166,7 +168,7 @@ function BrandCarousel({
   title: string;
   href: string;
   items: Product[];
-  onOpen: (productId: string) => void;
+  onOpen: (product: Product, variantSku: string | null, flashDiscountPercent: number) => void;
 }) {
   if (!items.length) return null;
 
@@ -195,13 +197,8 @@ function BrandCarousel({
     <div
       key={p.id}
       className="min-w-[155px] max-w-[155px] shrink-0"
-      onClick={(e) => {
-        const target = e.target as HTMLElement | null;
-        if (target?.closest("[data-no-nav]")) return;
-        onOpen(p.id);
-      }}
     >
-      <HomeProductCard product={p as any} />
+      <HomeProductCard product={p as any} onOpen={onOpen} />
     </div>
   ))}
 </div>
@@ -218,6 +215,8 @@ export default function HomeSteamPage({
 }) {
   const router = useRouter();
   const { items: blocks, loading } = useHomeBlocks();
+  const [quickView, setQuickView] = useState<{ product: Product; variantSku: string | null; flashDiscountPercent: number } | null>(null);
+  const openQuickView = (product: Product, variantSku: string | null, flashDiscountPercent = 0) => setQuickView({ product, variantSku, flashDiscountPercent });
 
   const safeProducts = withVariantImages(
     Array.isArray(products) ? (products as any) : []
@@ -327,7 +326,7 @@ export default function HomeSteamPage({
         title="Gangas"
         href="/catalog?tag=oferta"
         items={deals}
-        onOpen={(id) => router.push(`/p/${id}`)}
+        onOpen={openQuickView}
       />
 
       {/* Carrouseles por marca */}
@@ -335,25 +334,25 @@ export default function HomeSteamPage({
         title="Vexa"
         href="/catalog?brand=vexa"
         items={byBrand("vexa", 10)}
-        onOpen={(id) => router.push(`/p/${id}`)}
+        onOpen={openQuickView}
       />
       <BrandCarousel
         title="Ossono"
         href="/catalog?brand=ossono"
         items={byBrand("ossono", 10)}
-        onOpen={(id) => router.push(`/p/${id}`)}
+        onOpen={openQuickView}
       />
       <BrandCarousel
         title="Fidelité"
         href="/catalog?brand=fidelite"
         items={byBrand("fidelite", 10)}
-        onOpen={(id) => router.push(`/p/${id}`)}
+        onOpen={openQuickView}
       />
       <BrandCarousel
         title="Coalix"
         href="/catalog?brand=coalix"
         items={byBrand("coalix", 10)}
-        onOpen={(id) => router.push(`/p/${id}`)}
+        onOpen={openQuickView}
       />
 
       {/* Home blocks (sheet) */}
@@ -396,13 +395,8 @@ export default function HomeSteamPage({
     <div
       key={p.id}
       className="min-w-[155px] max-w-[155px] shrink-0"
-      onClick={(e) => {
-        const target = e.target as HTMLElement | null;
-        if (target?.closest("[data-no-nav]")) return;
-        router.push(`/p/${p.id}`);
-      }}
     >
-      <HomeProductCard product={p as any} />
+      <HomeProductCard product={p as any} onOpen={openQuickView} />
     </div>
   ))}
 </div>
@@ -421,6 +415,13 @@ export default function HomeSteamPage({
           Ver todo el catálogo →
         </Link>
       </div>
+      <ProductQuickView
+        product={quickView?.product ?? null}
+        initialVariantSku={quickView?.variantSku}
+        flashDiscountPercent={quickView?.flashDiscountPercent}
+        onClose={() => setQuickView(null)}
+      />
     </main>
   );
 }
+
