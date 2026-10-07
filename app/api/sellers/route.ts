@@ -2,7 +2,7 @@ import {sellerTokenAllowed} from '@/lib/server/sellerAccessPolicy';
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/lib/supabase-server';
 import { sellerCatalog } from '@/lib/server/sellerCatalog';
-import { pricedSellerOrder, sellerUuid, SellerOrderError } from '@/lib/server/sellerOrderContract';
+import { pricedSellerOrder, sellerCatalogPricing, sellerUuid, SellerOrderError } from '@/lib/server/sellerOrderContract';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -29,7 +29,7 @@ function failure(e: unknown) { return NextResponse.json({error:e instanceof Sell
 export async function GET(req: Request) {
   try {
     await owner(req);
-    const catalog=await sellerCatalog();
+    const catalog=sellerCatalogPricing(await sellerCatalog());
     const origin=new URL(req.url).origin;
     const image=(p:any,v:any={})=>{const raw=v.image||v.imageUrl||v.images?.[0]||p.image||p.defaultImage||p.images?.[0]||'';try{const url=new URL(raw,origin);return !raw?'':url.origin===origin?url.pathname+url.search:url.origin===new URL(process.env.SUPABASE_URL!).origin?url.href:'';}catch{return '';}};
     const products=catalog.map((p:any)=>({id:p.id,name:p.name,brand:p.brand,line:p.line,category:p.category,image:image(p),variants:p.variants.map((v:any)=>({sku:v.sku,size:v.size,priceRetail:v.priceRetail,priceWholesale:v.priceWholesale,stock:v.stock===''||v.stock==null?null:Number(v.stock),status:v.status,image:image(p,v)}))}));
@@ -48,12 +48,13 @@ export async function POST(req: Request) {
     // Reintentos del mismo pedido recuperan el precio pactado, sin volver a cotizar.
     const {data:existing,error:existingError}=await supabaseAdmin.from('seller_orders').select('*').eq('seller_id',actor.seller).eq('client_ref',body.client_ref).maybeSingle();
     if(existingError)throw new SellerOrderError('Servicio no disponible',503);
-    const savedCatalog=existing ? Object.values(existing.items.reduce((groups:any,i:any)=>{groups[i.product_id] ||= {id:i.product_id,name:i.name,brand:'',variants:[]};groups[i.product_id].variants.push({sku:i.sku,size:'',priceRetail:i.unit_price,priceWholesale:i.cost_price});return groups;},{})) as any[] : null;
-    const catalog=savedCatalog || await sellerCatalog();
+    const savedCatalog=existing ? Object.values(existing.items.reduce((groups:any,i:any)=>{groups[i.product_id] ||= {id:i.product_id,name:i.name,brand:'',variants:[]};groups[i.product_id].variants.push({sku:i.sku,size:'',priceRetail:i.suggested_price??i.unit_price,priceWholesale:i.cost_price});return groups;},{})) as any[] : null;
+    const catalog=savedCatalog || sellerCatalogPricing(await sellerCatalog());
     const order=pricedSellerOrder(body,catalog);
-    if(existing)order.items=order.items.map((i:any)=>({...i,name:existing.items.find((v:any)=>v.product_id===i.product_id&&v.sku===i.sku).name}));
+    if(existing)order.items=order.items.map((i:any)=>{const saved=existing.items.find((v:any)=>v.product_id===i.product_id&&v.sku===i.sku);const item={...i,name:saved.name};if(saved.suggested_price===undefined)delete item.suggested_price;return item;});
     const {data,error}=await supabaseAdmin.rpc('submit_priced_seller_order',{p_user_id:actor.user,p_customer_id:order.customer_id,p_items:order.items,p_client_ref:order.client_ref,p_notes:order.notes,p_payment:order.payment,p_method:order.method});
     if(error)throw new SellerOrderError(error.code==='23505'?'Este pedido ya fue guardado con otros datos':'No se pudo guardar el pedido',error.code==='23505'?409:503);
     return NextResponse.json({data},{status:existing?200:201,headers});
   } catch(e) { return failure(e); }
 }
+
