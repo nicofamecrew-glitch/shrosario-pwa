@@ -4,7 +4,10 @@ export const sellerUuid = (v: unknown): v is string => typeof v === 'string' && 
 const money = (v: unknown) => typeof v === 'number' && Number.isFinite(v) && v >= 0 && v <= 999999999 && Math.abs(v * 100 - Math.round(v * 100)) < 0.0001;
 // This pricing is exclusive to Sellers; the wholesale store keeps its catalog prices.
 export function sellerCatalogPricing(catalog: Product[]): Product[] {
-  return catalog.map(p=>({...p,variants:p.variants.map(v=>({...v,priceWholesale:Math.round(Math.round(v.priceRetail*100)*82/100)/100}))}));
+  return catalog.map(p=>({...p,variants:p.variants.map(v=>{
+    const originalCents=Math.round(v.priceRetail*100);
+    return {...v,priceWholesale:Math.round(originalCents*82/100)/100,priceRetail:Math.round(originalCents*120/100)/100};
+  })}));
 }
 export function pricedSellerOrder(body: unknown, catalog: Product[]) {
   if (!body || typeof body !== 'object' || Array.isArray(body)) throw new SellerOrderError('Pedido inválido');
