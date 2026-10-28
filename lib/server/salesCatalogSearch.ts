@@ -1,75 +1,60 @@
-// Motor determinista: no permite que una IA invente productos, SKUs o presentaciones.
-// Los datos de producto siempre llegan del catálogo activo de SH.
-export type SalesProduct = {
-  id?: string; name?: string; brand?: string; line?: string; category?: string;
-  tags?: string[] | string;
-  variants?: Array<{ sku?: string; size?: string; status?: string; stock?: number | string }>;
+// Identificación conservadora: una coincidencia solo es válida con SKU real.
+export type SalesProduct = { id?: string; name?: string; brand?: string; line?: string; category?: string; tags?: string[] | string; variants?: Array<{ sku?: string; size?: string; status?: string; stock?: number | string }> };
+const norm = (v: unknown) => String(v ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9.,]+/g, " ").trim();
+const words = (v: unknown) => norm(v).split(/\s+/).filter(Boolean);
+const types: Record<string,string[]> = {
+ shampoo:["shampoo","shampoos","shampu","champu","shampues"],
+ acondicionador:["acondicionador","acondicionadores","enjuague"],
+ mascara:["mascara","mascaras","mascarilla","mascarillas"],
+ ampolla:["ampolla","ampollas"],
+ coloracion:["coloracion","tintura","tinturas"]
 };
-
-const normalize = (value: unknown) =>
-  String(value ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
-
-const tokens = (value: unknown) => normalize(value).split(" ").filter(Boolean);
-const TYPES: Record<string, string[]> = {
-  shampoo: ["shampoo", "shampoos", "shampu", "champu"],
-  acondicionador: ["acondicionador", "acondicionadores", "enjuague"],
-  mascara: ["mascara", "mascaras", "mascarilla", "mascarillas", "bano de crema"],
-  ampolla: ["ampolla", "ampollas"],
-  tintura: ["tintura", "tinturas", "coloracion"],
-};
-const BRANDS = ["ossono", "vexa", "coalix", "fidelite", "kleno", "lisse extreme"];
-const STOP = new Set(["necesito", "quiero", "dame", "mandame", "pasame", "tenes", "tienen", "de", "del", "la", "el", "los", "las", "un", "una", "por", "favor", "para", "que", "me", "y", "con", "x"]);
-
-function getSizeQuery(text: string) {
-  const match = text.match(/\b(\d+(?:[.,]\d+)?)\s*(litros?|lts?|l|ml|cc|gr|gramos?|kg|kilos?)\b/i);
-  if (!match) return null;
-  const amount = Number(match[1].replace(",", "."));
-  const unit = normalize(match[2]);
-  const normalizedMl = ["l", "lt", "lts", "litro", "litros"].includes(unit) ? amount * 1000 :
-    ["kg", "kilo", "kilos"].includes(unit) ? amount * 1000 : amount;
-  const kind = ["kg", "kilo", "kilos", "gr", "gramo", "gramos"].includes(unit) ? "g" : "ml";
-  return { amount: normalizedMl, kind };
+const brands = ["lisse extreme","ossono","vexa","coalix","fidelite","kleno"];
+const filler = new Set(["necesito","quiero","dame","mandame","pasame","tenes","tienen","de","del","la","el","los","las","un","una","por","favor","para","que","me","y","con","x","unas","unos","al","en","botellas","botella","frascos","frasco","unidad","unidades"]);
+type Size = { amount: number; kind: "ml"|"g" };
+function parseSize(source: string): Size | null {
+ const m=norm(source).match(/\b(\d+(?:[.,]\d+)?)\s*(litros?|lts?|lt|l|ml|cc|gr|gramos?|g|kg|kilos?)\b/);
+ if(!m) return null;
+ const n=Number(m[1].replace(",",".")), u=m[2];
+ if(!Number.isFinite(n)||n<=0) return null;
+ const mass=["g","gr","gramo","gramos","kg","kilo","kilos"].includes(u);
+ const factor=["l","lt","lts","litro","litros","kg","kilo","kilos"].includes(u)?1000:1;
+ return {amount:n*factor,kind:mass?"g":"ml"};
 }
-function variantMatchesSize(value: string, expected: ReturnType<typeof getSizeQuery>) {
-  if (!expected) return true;
-  const found = getSizeQuery(value);
-  return !!found && found.kind === expected.kind && found.amount === expected.amount;
+function identifyType(source: string) {
+ const s=words(source);
+ return Object.entries(types).find(([,aliases])=>aliases.some(a=>s.includes(a)))?.[0]??null;
 }
-function typeOf(text: string) {
-  const n = normalize(text);
-  return Object.entries(TYPES).find(([, aliases]) => aliases.some(a => n.split(" ").includes(normalize(a))))?.[0] ?? null;
+function parseQuantity(source:string) {
+ const s=norm(source);
+ const m=s.match(/\b(\d{1,3})\s*(?:unidades?|u|x)?\s*(?=(?:shampoo|shampu|champu|acondicionador|mascara|mascarilla|ampolla|tintura|coloracion|ossono|vexa|coalix|fidelite|kleno)\b)/);
+ return m ? Number(m[1]) : null;
 }
-function catalogType(p: SalesProduct) {
-  return typeOf([p.name, p.category, p.line].join(" "));
-}
-
-export function searchSalesCatalog(query: string, catalog: SalesProduct[]) {
-  const q = normalize(query);
-  if (!q || q.length > 180) return { status: "invalid" as const, quantity: null, matches: [], question: "Indicame qué producto buscás." };
-  const qtyMatch = q.match(/\b(\d{1,3})\s*(?:unidades|unidad|u|x)?\s*(?=shampoo|shampoos|shampu|champu|acondicionador|mascara|ampolla|tintura)/);
-  const quantity = qtyMatch ? Number(qtyMatch[1]) : null;
-  const brand = BRANDS.find(b => q.includes(b)) ?? null;
-  const kind = typeOf(q);
-  const size = getSizeQuery(q);
-  const terms = tokens(q).filter(t => !STOP.has(t) && !/^\d+$/.test(t) &&
-    !Object.values(TYPES).flat().includes(t) && !BRANDS.flatMap(tokens).includes(t) &&
-    !["ml", "cc", "gr", "kg", "litro", "litros", "lts", "lt", "l", "unidad", "unidades"].includes(t));
-  if (!brand && !kind && !terms.length) return { status: "invalid" as const, quantity, matches: [], question: "¿Qué producto y marca necesitás?" };
-  const matches = catalog.flatMap(p => {
-    if (brand && normalize(p.brand) !== brand) return [];
-    if (kind && catalogType(p) !== kind) return [];
-    const searchable = normalize([p.name, p.brand, p.line, p.category, ...(Array.isArray(p.tags) ? p.tags : String(p.tags ?? "").split(","))].join(" "));
-    if (terms.some(t => !searchable.split(" ").includes(t))) return [];
-    return (p.variants ?? []).filter(v => v.sku && normalize(v.status ?? "active") !== "paused" &&
-        variantMatchesSize(String(v.size ?? ""), size)).map(v => ({
-      productId: String(p.id ?? ""), name: String(p.name ?? ""),
-      brand: String(p.brand ?? ""), sku: String(v.sku),
-      size: String(v.size ?? ""), stock: v.stock ?? null,
-    }));
-  }).filter(m => m.productId);
-  const status = matches.length === 0 ? "not_found" : matches.length === 1 ? "exact" : "ambiguous";
-  const question = status === "ambiguous" ? "Encontré varias opciones. ¿Cuál línea o presentación querés?" :
-    status === "not_found" ? "No encontré una variante que coincida exactamente. ¿Podés confirmar marca, línea y tamaño?" : null;
-  return { status, quantity, filters: { brand, kind, size }, matches: matches.slice(0, 15), question, totalMatches: matches.length };
+export function searchSalesCatalog(query:string,catalog:SalesProduct[]) {
+ const q=norm(query);
+ if(!q||q.length>180) return {status:"invalid" as const,quantity:null,matches:[],question:"Decime qué producto buscás.",totalMatches:0};
+ const quantity=parseQuantity(query), kind=identifyType(query), size=parseSize(query);
+ const brand=brands.find(b=>q.split(" ").join(" ").includes(b))??null;
+ const sizeTokens=size ? (norm(query).match(/\b\d+(?:[.,]\d+)?\s*(?:litros?|lts?|lt|l|ml|cc|gr|gramos?|g|kg|kilos?)\b/)?.[0]??"") : "";
+ let remaining=q.replace(sizeTokens," ");
+ if(quantity) remaining=remaining.replace(new RegExp("\\b"+quantity+"\\s*(?:unidades?|u|x)?\\s*(?=(?:shampoo|shampu|champu|acondicionador|mascara|mascarilla|ampolla|tintura|coloracion|ossono|vexa|coalix|fidelite|kleno)\\b)")," ")," ");
+ if(brand) remaining=remaining.replace(brand," ");
+ const typeWords=new Set(Object.values(types).flat());
+ const terms=words(remaining).filter(t=>!filler.has(t)&&!typeWords.has(t)&&!/^\d+$/.test(t));
+ if(!brand&&!kind&&!terms.length) return {status:"invalid" as const,quantity,matches:[],question:"¿Qué producto y marca necesitás?",totalMatches:0};
+ const matches=catalog.flatMap(p=>{
+  if(brand&&norm(p.brand)!==brand) return [];
+  if(kind&&identifyType([p.name,p.category,p.line].join(" "))!==kind) return [];
+  const productWords=new Set(words([p.name,p.brand,p.line,p.category,...(Array.isArray(p.tags)?p.tags:String(p.tags??"").split(","))].join(" ")));
+  if(terms.some(t=>!productWords.has(t)))return [];
+  return (p.variants??[]).filter(v=>{
+   if(!v.sku || norm(v.status??"active")==="paused")return false;
+   if(!size)return true;
+   const vs=parseSize(String(v.size??""));
+   return !!vs&&vs.kind===size.kind&&vs.amount===size.amount;
+  }).map(v=>({productId:String(p.id??""),name:String(p.name??""),brand:String(p.brand??""),sku:String(v.sku),size:String(v.size??""),stock:v.stock??null}));
+ }).filter(m=>m.productId);
+ const status=matches.length===0?"not_found":matches.length===1?"exact":"ambiguous";
+ return {status,quantity,filters:{brand,kind,size},matches:matches.slice(0,15),totalMatches:matches.length,
+  question:status==="ambiguous"?"Encontré varias opciones. ¿Qué línea o presentación querés?":status==="not_found"?"No encontré esa variante exacta. ¿Confirmás marca, línea y tamaño?":null};
 }
