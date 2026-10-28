@@ -27,7 +27,7 @@ function identifyType(source: string) {
 }
 function parseQuantity(source:string) {
  const s=norm(source);
- const m=s.match(/\b(\d{1,3})\s*(?:unidades?|u|x)?\s*(?=(?:shampoo|shampu|champu|acondicionador|mascara|mascarilla|ampolla|tintura|coloracion|ossono|vexa|coalix|fidelite|kleno)\b)/);
+ const m=s.match(/\b(\d{1,3})\s*(?:unidades?|u|x)?\s*(?=(?:shampoos?|shampu|champu|acondicionadores?|mascaras?|mascarillas?|ampollas?|tinturas?|coloracion|ossono|vexa|coalix|fidelite|kleno)\b)/);
  return m ? Number(m[1]) : null;
 }
 export function searchSalesCatalog(query:string,catalog:SalesProduct[]) {
@@ -37,11 +37,11 @@ export function searchSalesCatalog(query:string,catalog:SalesProduct[]) {
  const brand=brands.find(b=>q.split(" ").join(" ").includes(b))??null;
  const sizeTokens=size ? (norm(query).match(/\b\d+(?:[.,]\d+)?\s*(?:litros?|lts?|lt|l|ml|cc|gr|gramos?|g|kg|kilos?)\b/)?.[0]??"") : "";
  let remaining=q.replace(sizeTokens," ");
- if(quantity) remaining=remaining.replace(new RegExp("\\b"+quantity+"\\s*(?:unidades?|u|x)?\\s*(?=(?:shampoo|shampu|champu|acondicionador|mascara|mascarilla|ampolla|tintura|coloracion|ossono|vexa|coalix|fidelite|kleno)\\b)")," ")," ");
+ if(quantity) remaining=remaining.replace(new RegExp("\\b"+quantity+"\\s*(?:unidades?|u|x)?\\s*(?=(?:shampoos?|shampu|champu|acondicionadores?|mascaras?|mascarillas?|ampollas?|tinturas?|coloracion|ossono|vexa|coalix|fidelite|kleno)\\b)")," ")," ");
  if(brand) remaining=remaining.replace(brand," ");
  const typeWords=new Set(Object.values(types).flat());
  const terms=words(remaining).filter(t=>!filler.has(t)&&!typeWords.has(t)&&!/^\d+$/.test(t));
- if(!brand&&!kind&&!terms.length) return {status:"invalid" as const,quantity,matches:[],question:"¿Qué producto y marca necesitás?",totalMatches:0};
+ if(!brand&&!kind&&(!terms.length || ["hola","buenas","buen","dia","gracias"].includes(q))) return {status:"invalid" as const,quantity,matches:[],question:"¿Qué producto y marca necesitás?",totalMatches:0};
  const matches=catalog.flatMap(p=>{
   if(brand&&norm(p.brand)!==brand) return [];
   if(kind&&identifyType([p.name,p.category,p.line].join(" "))!==kind) return [];
